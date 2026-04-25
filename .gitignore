@@ -8,8 +8,10 @@ dist/
 build/
 *.tsbuildinfo
 
-# env
+# env (catch any nesting and any variant — never ship real secrets)
 .env
+.env.*
+!.env.example
 .env.local
 .env.*.local
 

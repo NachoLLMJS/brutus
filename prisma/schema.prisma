@@ -1,0 +1,81 @@
+// Brutus v3 — Prisma schema
+// SQLite local; switch `provider` to "postgresql" + run `prisma migrate dev`
+// when promoting to a hosted DB. JSON-shaped fields (skills/weapons/pets/
+// appearance, combat log, tournament rounds) are stored as TEXT and
+// (de)serialised in `server/src/lib/serialization.ts`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  walletAddress String?  @unique // placeholder web3
+  createdAt     DateTime @default(now())
+  brutes        Brute[]
+}
+
+model Brute {
+  id                      String   @id @default(cuid())
+  userId                  String?
+  user                    User?    @relation(fields: [userId], references: [id])
+  name                    String   @unique
+  seed                    Int
+  level                   Int      @default(1)
+  xp                      Int      @default(0)
+  rank                    Int      @default(0)
+  hp                      Int
+  strength                Int
+  agility                 Int
+  speed                   Int
+  skills                  String   // JSON array
+  weapons                 String   // JSON array
+  pets                    String   // JSON array
+  appearance              String   // JSON object
+  victories               Int      @default(0)
+  defeats                 Int      @default(0)
+  fightsRemaining         Int      @default(5)
+  trainingFightsRemaining Int      @default(10)
+  defeatsToday            Int      @default(0)
+  lastFightReset          DateTime @default(now())
+  masterId                String?
+  master                  Brute?   @relation("Pupils", fields: [masterId], references: [id])
+  pupils                  Brute[]  @relation("Pupils")
+  combatsAsA              Combat[] @relation("CombatA")
+  combatsAsB              Combat[] @relation("CombatB")
+  createdAt               DateTime @default(now())
+
+  @@index([userId])
+  @@index([masterId])
+}
+
+model Combat {
+  id        String   @id @default(cuid())
+  bruteAId  String
+  bruteA    Brute    @relation("CombatA", fields: [bruteAId], references: [id])
+  bruteBId  String
+  bruteB    Brute    @relation("CombatB", fields: [bruteBId], references: [id])
+  winner    String   // 'A' | 'B'
+  log       String   // JSON
+  fightType String   @default("normal") // 'normal' | 'training' | 'tournament'
+  createdAt DateTime @default(now())
+
+  @@index([bruteAId])
+  @@index([bruteBId])
+}
+
+model Tournament {
+  id        String   @id @default(cuid())
+  playerId  String
+  rounds    String   // JSON array of rounds
+  champion  String   // bruteId
+  ascended  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([playerId])
+}

@@ -1,0 +1,21 @@
+/* Brutus v3 — Dark Fantasy Tokens
+ * Paleta curada para la temática oscura/rúnica.
+ * Consumida tanto por Tailwind (via tailwind.config.ts) como por CSS plano.
+ */
+:root {
+  --bg-deep: #0b0610;
+  --bg-panel: #1a0f22;
+  --bg-elevated: #2a1838;
+  --accent-blood: #8b1a2b;
+  --accent-gold: #c9a449;
+  --accent-rune: #6e3aaa;
+  --text-primary: #e8e0d2;
+  --text-muted: #8a7e90;
+  --border-arcane: #3d2659;
+  --hp-full: #4a8c3a;
+  --hp-low: #c44a2c;
+
+  /* Tipografías */
+  --font-serif: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}

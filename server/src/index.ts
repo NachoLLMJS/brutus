@@ -1,0 +1,54 @@
+// Entry point. Loads env, configures middleware, mounts routes, binds to
+// 127.0.0.1 by default (configurable via HOST). NEVER bind to 0.0.0.0
+// without explicit operator intent — local-first auth model assumes loopback.
+
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import { env } from './env.js';
+import { logger, httpLogger } from './logger.js';
+import { apiRouter } from './routes/index.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+
+const app = express();
+
+app.disable('x-powered-by');
+app.use(helmet());
+app.use(
+  cors({
+    origin: env.CLIENT_ORIGIN,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    credentials: false,
+    maxAge: 600,
+  }),
+);
+app.use(express.json({ limit: '32kb' }));
+app.use(httpLogger);
+
+app.use('/api', apiRouter);
+
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+const server = app.listen(env.PORT, env.HOST, () => {
+  logger.info(
+    { host: env.HOST, port: env.PORT, env: env.NODE_ENV, clientOrigin: env.CLIENT_ORIGIN },
+    'brutus_server_listening',
+  );
+});
+
+function shutdown(signal: string): void {
+  logger.info({ signal }, 'shutting_down');
+  server.close((err) => {
+    if (err) {
+      logger.error({ err }, 'shutdown_error');
+      process.exit(1);
+    }
+    process.exit(0);
+  });
+  // Force-exit if close hangs (e.g., open SQLite handle).
+  setTimeout(() => process.exit(1), 5000).unref();
+}
+
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
