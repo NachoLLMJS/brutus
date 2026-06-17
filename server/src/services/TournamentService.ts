@@ -6,15 +6,27 @@
 import { prisma } from '../db.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { bruteSnapshotToCore, mulberry32, simulate } from '../lib/coreBridge.js';
+import { toFightLog, type FightLog } from 'core';
 import { deserializeBrute, type BruteSnapshot } from '../lib/serialization.js';
+
+interface TournamentBrute {
+  id: string;
+  name: string;
+  gender: 'male' | 'female';
+  body: string;
+  bodyColors: string;
+  maxHp: number;
+}
 
 export interface TournamentRound {
   round: number;
   matches: {
-    a: { id: string; name: string };
-    b: { id: string; name: string };
+    a: TournamentBrute;
+    b: TournamentBrute;
     winner: 'A' | 'B';
     duration: number;
+    /** Log animable consumido por FightStage en el cliente. */
+    fightLog: FightLog;
   }[];
 }
 
@@ -50,11 +62,13 @@ export async function runTournament(playerId: string): Promise<TournamentRunResu
       const aCore = bruteSnapshotToCore(deserializeBrute(a));
       const bCore = bruteSnapshotToCore(deserializeBrute(b));
       const result = simulate(aCore, bCore, mulberry32(matchSeed));
+      const fightLog = toFightLog(aCore, bCore, result);
       matches.push({
-        a: { id: a.id, name: a.name },
-        b: { id: b.id, name: b.name },
+        a: bruteToTournament(a),
+        b: bruteToTournament(b),
         winner: result.winner,
         duration: result.duration,
+        fightLog,
       });
       next.push(result.winner === 'A' ? a : b);
     }
@@ -76,9 +90,15 @@ export async function runTournament(playerId: string): Promise<TournamentRunResu
   });
 
   if (ascended) {
+    // Ascenso suave: rank+1, level/xp resetean, pero stats/skills/weapons/pets
+    // y todo lo demás se conservan (a diferencia del v2 que re-rolleaba todo).
     await prisma.brute.update({
       where: { id: player.id },
-      data: { rank: { increment: 1 } },
+      data: {
+        rank: { increment: 1 },
+        level: 1,
+        xp: 0,
+      },
     });
   }
 
@@ -94,4 +114,23 @@ export async function getPlayerSnapshot(playerId: string): Promise<BruteSnapshot
   const row = await prisma.brute.findUnique({ where: { id: playerId } });
   if (!row) throw new HttpError(404, 'brute_not_found');
   return deserializeBrute(row);
+}
+
+/** Reduce un row de Prisma al subset que el cliente necesita para renderizar. */
+function bruteToTournament(row: {
+  id: string;
+  name: string;
+  gender: string;
+  body: string;
+  bodyColors: string;
+  hp: number;
+}): TournamentBrute {
+  return {
+    id: row.id,
+    name: row.name,
+    gender: row.gender === 'female' ? 'female' : 'male',
+    body: row.body,
+    bodyColors: row.bodyColors,
+    maxHp: row.hp,
+  };
 }

@@ -23,6 +23,9 @@ export interface CreateBruteInput {
   name: string;
   masterId?: string;
   appearance?: Appearance;
+  gender?: 'male' | 'female';
+  body?: string;
+  bodyColors?: string;
 }
 
 export async function createBrute(input: CreateBruteInput): Promise<BruteSnapshot> {
@@ -36,7 +39,11 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
     if (!master) throw new HttpError(404, 'master_not_found');
   }
 
-  const stats = generateInitialStats(input.name);
+  const stats = generateInitialStats(input.name, {
+    gender: input.gender,
+    body: input.body,
+    bodyColors: input.bodyColors,
+  });
   const appearance = input.appearance ?? DEFAULT_APPEARANCE;
   const serialized = serializeForPrisma({
     skills: stats.skills,
@@ -57,6 +64,9 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
       weapons: serialized.weapons!,
       pets: serialized.pets!,
       appearance: serialized.appearance!,
+      gender: stats.gender,
+      body: stats.body,
+      bodyColors: stats.bodyColors,
       masterId: input.masterId ?? null,
     },
   });

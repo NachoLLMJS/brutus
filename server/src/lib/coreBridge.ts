@@ -15,7 +15,10 @@ import {
   pickWeighted,
   SKILLS,
   WEAPONS,
+  getRandomBody,
+  getRandomColors,
   type Brute as CoreBrute,
+  type BruteGender,
   type Rng,
 } from 'core';
 import type { BruteSnapshot } from './serialization.js';
@@ -78,13 +81,23 @@ export interface InitialStats {
   skills: string[];
   weapons: string[];
   pets: string[];
+  gender: BruteGender;
+  body: string;
+  bodyColors: string;
 }
 
 /**
- * Roll starting stats for a freshly-created brute.
- * Determined by `name` so creating "Foo" twice yields the same starter.
+ * Roll starting stats + visual identity (gender/body/colors) for a freshly-
+ * created brute. Determined by `name` so creating "Foo" twice yields the same
+ * starter, including appearance.
+ *
+ * Optional `overrides` allows the CharacterCreator to pin gender or
+ * gender+colors while still rolling the rest deterministically.
  */
-export function generateInitialStats(name: string): InitialStats {
+export function generateInitialStats(
+  name: string,
+  overrides: Partial<{ gender: BruteGender; body: string; bodyColors: string }> = {},
+): InitialStats {
   // Mask to 31 bits so the value fits Prisma's signed Int32 column.
   // mulberry32 only consumes the low 32 bits, so dropping the sign bit is
   // a no-op for determinism.
@@ -100,7 +113,25 @@ export function generateInitialStats(name: string): InitialStats {
   const weaponPool = starterWeapons.length > 0 ? starterWeapons : WEAPONS;
   const weapon = pickWeighted(rng, weaponPool).id;
 
-  return { seed, hp, strength, agility, speed, skills: [skill], weapons: [weapon], pets: [] };
+  // Visual identity. Gender 50/50 desde la seed; body+colors aleatorios
+  // (la seed avanza por el rng compartido, así son determinísticos).
+  const gender: BruteGender = overrides.gender ?? (rng() < 0.5 ? 'male' : 'female');
+  const body = overrides.body ?? getRandomBody(gender, rng);
+  const bodyColors = overrides.bodyColors ?? getRandomColors(gender, rng);
+
+  return {
+    seed,
+    hp,
+    strength,
+    agility,
+    speed,
+    skills: [skill],
+    weapons: [weapon],
+    pets: [],
+    gender,
+    body,
+    bodyColors,
+  };
 }
 
 /**
@@ -120,6 +151,9 @@ export function bruteSnapshotToCore(snap: BruteSnapshot): CoreBrute {
     weapons: snap.weapons.slice(),
     pets: snap.pets.slice(),
     appearance: snap.appearance,
+    gender: snap.gender,
+    body: snap.body,
+    bodyColors: snap.bodyColors,
     victories: snap.victories,
     defeats: snap.defeats,
     fightsRemaining: snap.fightsRemaining,

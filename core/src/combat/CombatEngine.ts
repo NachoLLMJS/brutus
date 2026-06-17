@@ -12,12 +12,16 @@ import type {
   PetState,
   StepAttack,
   StepCounter,
+  StepEquip,
   StepHeal,
   StepPetAttack,
   StepPetDeath,
   StepPetJoin,
   StepRevive,
   StepSkill,
+  StepSteal,
+  StepThrow,
+  StepTrash,
 } from '../types.js';
 import type { Rng } from '../random.js';
 import { getPet } from '../data/pets.js';
@@ -246,6 +250,115 @@ function maybeRegen(log: CombatStep[], turn: number, f: FighterRuntime): void {
 }
 
 /**
+ * Skill thief: roba el arma equipada del oponente. Porteado de
+ * `labrute/server/src/utils/fight/fightMethods.ts:836-895`.
+ *
+ * Reglas:
+ *   - El defensor debe tener un arma equipada (no se puede robar puños).
+ *   - El defensor no puede estar trapeado/stunned (mi motor no modela trap así
+ *     que lo simplifico: si está stunned, igual se le puede robar).
+ *   - Si el ladrón YA tiene arma equipada, sólo 20% chance (1/5).
+ *   - Si el ladrón no tiene arma, 100% chance.
+ *
+ * Retorna true si robó.
+ */
+function maybeStealWeapon(
+  log: CombatStep[],
+  turn: number,
+  rng: Rng,
+  attacker: FighterRuntime,
+  defender: FighterRuntime,
+): boolean {
+  if (!attacker.effects.thief) return false;
+  if (!defender.weaponId) return false;
+
+  // Si el ladrón ya tiene arma, solo 20% chance.
+  if (attacker.weaponId && rng() >= 0.2) return false;
+
+  // Si tenía arma propia, la tira (Trash, sin animación de "throw" porque la
+  // descarta sin esfuerzo para tomar la del oponente).
+  if (attacker.weaponId) {
+    const trashed = attacker.weaponId;
+    const idx = attacker.weaponPool.indexOf(trashed);
+    if (idx >= 0) attacker.weaponPool.splice(idx, 1);
+    const trashStep: StepTrash = {
+      type: 'trash', turn, side: attacker.side, weaponId: trashed,
+    };
+    log.push(trashStep);
+    attacker.weaponId = null;
+  }
+
+  // Robar.
+  const stolen = defender.weaponId;
+  defender.weaponId = null;
+  // Saca el arma del pool del defensor (la pierde para esta pelea).
+  const defIdx = defender.weaponPool.indexOf(stolen);
+  if (defIdx >= 0) defender.weaponPool.splice(defIdx, 1);
+  // Agregar al pool del ladrón y equiparla.
+  attacker.weaponPool.push(stolen);
+  attacker.weaponId = stolen;
+
+  const stealStep: StepSteal = {
+    type: 'steal', turn,
+    side: attacker.side, target: defender.side,
+    weaponId: stolen,
+  };
+  log.push(stealStep);
+  return true;
+}
+
+/**
+ * Lógica turn-by-turn de swap de arma — fiel al original El Bruto:
+ *   - Sin arma equipada (puños) y con armas en el pool: 50% chance de equipar
+ *     una random.
+ *   - Con arma equipada: 12% chance de tirarla (vuelve a puños).
+ *   - El skill `weaponsMaster` aumenta la chance de equipar (75%) y reduce la
+ *     de tirar (5%) — mantiene el arma más tiempo.
+ *
+ * El skill `thief` no se modela acá (eso roba arma del oponente). El skill
+ * `weapons_master` sí afecta como en el original.
+ */
+function maybeSwapWeapon(
+  log: CombatStep[],
+  turn: number,
+  rng: Rng,
+  f: FighterRuntime,
+): void {
+  const isWeaponsMaster = f.effects.weaponsMaster ?? false;
+
+  if (f.weaponId === null) {
+    // Sin arma: chance de equipar.
+    if (f.weaponPool.length === 0) return;
+    const equipChance = isWeaponsMaster ? 0.75 : 0.5;
+    if (rng() >= equipChance) return;
+    // Elegir un arma del pool aleatoriamente. NO la quitamos del pool — el
+    // bruto puede equipar la misma arma de nuevo si la tira.
+    const idx = Math.floor(rng() * f.weaponPool.length);
+    const weaponId = f.weaponPool[idx]!;
+    f.weaponId = weaponId;
+    const step: StepEquip = {
+      type: 'equip', turn, side: f.side, weaponId,
+    };
+    log.push(step);
+    return;
+  }
+
+  // Con arma equipada: chance de tirarla.
+  const throwChance = isWeaponsMaster ? 0.05 : 0.12;
+  if (rng() >= throwChance) return;
+  const thrown = f.weaponId;
+  f.weaponId = null;
+  // Removerla del pool: una arma tirada se pierde para esta pelea, fiel al
+  // original (el bruto no puede volver a equipar la misma).
+  const idx = f.weaponPool.indexOf(thrown);
+  if (idx >= 0) f.weaponPool.splice(idx, 1);
+  const step: StepThrow = {
+    type: 'throw', turn, side: f.side, weaponId: thrown,
+  };
+  log.push(step);
+}
+
+/**
  * Simula una pelea entre dos brutos. Función pura: no muta los inputs.
  * Recibe `rng` — usar la misma seed produce el mismo log + winner.
  */
@@ -301,6 +414,15 @@ export function simulate(a: Brute, b: Brute, rng: Rng): CombatResult {
       if (attacker.hp <= 0 || defender.hp <= 0) break;
 
       log.push({ type: 'turn', turn, side: attacker.side });
+
+      // Skill thief: chance de robar el arma del rival antes de actuar.
+      // Si tiene éxito, NO hace swap normal este turno.
+      const stole = maybeStealWeapon(log, turn, rng, attacker, defender);
+      if (!stole) {
+        // Decidir si saca/tira un arma (fiel a El Bruto: pelea con puños y
+        // aleatoriamente saca un arma del inventario, la usa, y la tira).
+        maybeSwapWeapon(log, turn, rng, attacker);
+      }
 
       // regen al inicio del turno propio
       maybeRegen(log, turn, attacker);

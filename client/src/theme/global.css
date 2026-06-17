@@ -1,4 +1,10 @@
 @import './tokens.css';
+@import './lobby.css';
+@import './profile.css';
+@import './combat.css';
+@import './landing.css';
+@import './creator.css';
+@import './levelup.css';
 
 @tailwind base;
 @tailwind components;
@@ -13,13 +19,15 @@
 
   body {
     margin: 0;
-    background-color: var(--bg-deep);
+    background-color: var(--bg-default);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-    background-image:
-      radial-gradient(1200px 600px at 10% -10%, rgba(110, 58, 170, 0.18), transparent 60%),
-      radial-gradient(900px 500px at 110% 110%, rgba(139, 26, 43, 0.15), transparent 60%);
+    /* Gradiente abismal vertical: negro abismal → púrpura profundo */
+    background-image: linear-gradient(
+      180deg,
+      var(--bg-default) 0%,
+      var(--bg-light) 100%
+    );
     background-attachment: fixed;
   }
 
@@ -27,46 +35,316 @@
   h2,
   h3,
   h4 {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
+    color: var(--text-strong);
     letter-spacing: 0.02em;
+    margin: 0;
   }
 
   ::selection {
-    background: var(--accent-rune);
-    color: var(--text-primary);
+    background: var(--accent-blood);
+    color: var(--text-strong);
   }
 }
 
 @layer components {
+  /* Panel estilo cuero/forja oscura sobre fondo abismal */
   .panel {
-    @apply bg-panel border border-arcane rounded-lg shadow-rune;
+    background: var(--paper);
+    border: 2px solid var(--border-inner);
+    border-radius: 4px;
+    /* Sobre fondo oscuro: glow sutil + ridge inset, sin drop-shadow marcado */
+    box-shadow:
+      0 0 0 1px var(--border-outer) inset,
+      0 0 12px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(230, 180, 80, 0.08);
+    padding: 12px;
   }
 
+  /* Variante de panel con título tipo cinta */
+  .panel-titled {
+    @apply panel;
+    position: relative;
+    padding-top: 28px;
+  }
+
+  /* Botón base estilo forja oscura */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md font-serif tracking-wide
-      border border-arcane bg-elevated text-ink
-      transition-all duration-150
-      hover:border-rune hover:shadow-rune-strong
-      focus:outline-none focus:ring-2 focus:ring-rune
-      disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 18px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--text-strong);
+    background: var(--paper);
+    border: 2px solid var(--border-inner);
+    border-radius: 4px;
+    box-shadow:
+      0 0 0 1px var(--border-outer) inset,
+      0 2px 0 var(--border-outer);
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease;
+    text-transform: uppercase;
+  }
+  .btn:hover:not(:disabled) {
+    filter: brightness(1.2);
+    transform: translateY(-1px);
+    box-shadow:
+      0 0 0 1px var(--border-outer) inset,
+      0 2px 0 var(--border-outer),
+      0 0 12px rgba(230, 180, 80, 0.25);
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
+  /* Botón rojo demoníaco para acción primaria */
   .btn-primary {
-    @apply btn bg-blood border-blood text-ink hover:shadow-blood;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    border-color: var(--btn-primary-shadow);
+    box-shadow:
+      0 0 0 1px var(--btn-primary-shadow) inset,
+      0 2px 0 var(--btn-primary-shadow),
+      0 0 14px rgba(196, 26, 26, 0.4);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--btn-primary-hover);
+    box-shadow:
+      0 0 0 1px var(--btn-primary-shadow) inset,
+      0 2px 0 var(--btn-primary-shadow),
+      0 0 22px rgba(196, 26, 26, 0.6);
   }
 
+  /* Botón dorado/cuero — variante secundaria */
   .btn-gold {
-    @apply btn bg-elevated border-gold text-gold hover:shadow-rune-strong;
+    background: var(--paper-accent);
+    color: var(--accent-gold);
+    border-color: var(--accent-gold);
+  }
+  .btn-gold:hover:not(:disabled) {
+    box-shadow:
+      0 0 0 1px var(--border-outer) inset,
+      0 2px 0 var(--border-outer),
+      0 0 14px rgba(230, 180, 80, 0.4);
   }
 
+  /* CTA grande estilo "ARENA" — bronce con borde dorado */
+  .btn-arena {
+    display: inline-block;
+    padding: 14px 64px;
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 0.08em;
+    color: var(--btn-arena-text);
+    background: var(--btn-arena-bg);
+    border: 3px solid var(--btn-arena-border);
+    border-radius: 6px;
+    box-shadow:
+      0 0 0 2px var(--btn-arena-bg-edge) inset,
+      0 4px 0 var(--btn-arena-bg-edge),
+      0 0 22px rgba(230, 180, 80, 0.35);
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+  .btn-arena:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow:
+      0 0 0 2px var(--btn-arena-bg-edge) inset,
+      0 4px 0 var(--btn-arena-bg-edge),
+      0 0 32px rgba(230, 180, 80, 0.6);
+  }
+  .btn-arena:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow:
+      0 0 0 2px var(--btn-arena-bg-edge) inset,
+      0 1px 0 var(--btn-arena-bg-edge),
+      0 0 18px rgba(230, 180, 80, 0.5);
+  }
+
+  /* Inputs forjados */
   .input {
-    @apply w-full px-3 py-2 rounded-md bg-deep border border-arcane text-ink
-      placeholder:text-muted
-      focus:outline-none focus:ring-2 focus:ring-rune focus:border-rune;
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: var(--paper-dark);
+    border: 2px solid var(--border-inner);
+    color: var(--text-strong);
+    font-family: var(--font-sans);
+    box-shadow: 0 0 0 1px var(--border-outer) inset;
+  }
+  .input::placeholder {
+    color: var(--text-secondary);
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow:
+      0 0 0 1px var(--border-outer) inset,
+      0 0 10px rgba(230, 180, 80, 0.3);
   }
 
+  /* Badge / etiqueta cuadrada */
   .badge {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium
-      border border-arcane bg-elevated text-ink;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--paper-dark);
+    border: 1px solid var(--border-shadow);
+    border-radius: 3px;
+    color: var(--text-strong);
+    font-size: 12px;
+    font-family: var(--font-sans);
   }
+
+  /* Sticker (icono de skill/weapon en grid del inventory) */
+  .sticker {
+    position: relative; /* anchor para el tooltip absolute */
+    width: 32px;
+    height: 32px;
+    background: var(--paper-accent);
+    border: 1px solid var(--border-shadow);
+    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 0 var(--border-outer);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    cursor: help;
+  }
+  .sticker:hover {
+    transform: scale(1.08);
+    background: var(--paper);
+    box-shadow:
+      0 1px 0 var(--border-outer),
+      0 0 12px rgba(230, 180, 80, 0.35);
+    z-index: 5;
+  }
+  .sticker:focus,
+  .sticker:focus-within {
+    z-index: 5;
+    outline: none;
+  }
+  /* Muted: opacity más alta sobre fondo oscuro para que se siga viendo. */
+  .sticker.muted img,
+  .sticker.muted svg {
+    opacity: 0.5;
+    filter: grayscale(0.6);
+  }
+  .sticker img,
+  .sticker svg {
+    max-width: 26px;
+    max-height: 26px;
+  }
+
+  /* Tooltip global — fondo aún más oscuro que el body para destacar */
+  .tt {
+    pointer-events: none;
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 6px);
+    transform: translateX(-50%);
+    z-index: 100;
+    width: max-content;
+    max-width: 220px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    background: var(--surface-tooltip);
+    color: var(--text-strong);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    line-height: 1.35;
+    text-align: center;
+    border: 1px solid var(--accent-gold);
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.65),
+      0 0 8px rgba(230, 180, 80, 0.2);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    white-space: normal;
+  }
+  .tt strong {
+    display: block;
+    color: var(--accent-gold);
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+  }
+  /* Flecha decorativa apuntando al sticker */
+  .tt::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--surface-tooltip);
+  }
+  .sticker:hover .tt,
+  .sticker:focus .tt,
+  .sticker:focus-within .tt {
+    opacity: 1;
+  }
+
+  /* Cell del bruto: contenedor principal del Profile */
+  .cell {
+    background: var(--paper-accent);
+    border: 2px solid var(--border-inner);
+    border-radius: 6px;
+    box-shadow:
+      0 0 0 1px var(--border-outer) inset,
+      0 0 18px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(230, 180, 80, 0.1);
+    padding: 16px;
+  }
+}
+
+/* Animaciones de entrada */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.anim-fade-up {
+  animation: fade-up 0.35s ease-out both;
+}
+
+@keyframes vs-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-20deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.18) rotate(-3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-3deg);
+  }
+}
+
+@keyframes shake-x {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
 }

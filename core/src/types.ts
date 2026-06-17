@@ -31,6 +31,11 @@ export interface Brute {
   weapons: string[];
   pets: string[];
   appearance: Appearance;
+  // Renderer Pixi (porteado de LaBrute). El gender duplica appearance.gender a
+  // nivel top porque el renderer lo necesita explícito.
+  gender: 'male' | 'female';
+  body: string;       // 11 chars hex: codifica las 11 partes del cuerpo
+  bodyColors: string; // 32 chars hex: codifica los 16 colores del bruto
   victories: number;
   defeats: number;
   fightsRemaining: number;
@@ -274,6 +279,45 @@ export interface StepEnd {
   reason: 'death' | 'timeout';
 }
 
+/** El bruto saca un arma del inventario y la equipa para los próximos turnos. */
+export interface StepEquip {
+  type: 'equip';
+  turn: number;
+  side: FighterSide;
+  weaponId: string;
+}
+
+/**
+ * El bruto tira el arma equipada (la pierde permanente o solo este combate).
+ * Vuelve a pelear con puños hasta que equipe otra.
+ */
+export interface StepThrow {
+  type: 'throw';
+  turn: number;
+  side: FighterSide;
+  weaponId: string;
+}
+
+/**
+ * El bruto con skill `thief` roba el arma del oponente. Si tenía un arma
+ * propia, primero la tira (`trash` separado anterior).
+ */
+export interface StepSteal {
+  type: 'steal';
+  turn: number;
+  side: FighterSide;     // el ladrón
+  target: FighterSide;   // víctima
+  weaponId: string;      // arma robada
+}
+
+/** El bruto descarta su arma actual (sin animación de tirar). */
+export interface StepTrash {
+  type: 'trash';
+  turn: number;
+  side: FighterSide;
+  weaponId: string;
+}
+
 export type CombatStep =
   | StepStart
   | StepTurn
@@ -283,6 +327,10 @@ export type CombatStep =
   | StepCounter
   | StepSkill
   | StepHeal
+  | StepEquip
+  | StepThrow
+  | StepSteal
+  | StepTrash
   | StepPetJoin
   | StepPetAttack
   | StepPetDeath

@@ -18,6 +18,10 @@ export const CreateBruteBody = z.object({
       pants: z.string().regex(HEX_COLOR),
     })
     .optional(),
+  // Renderer Pixi (opcional; si vienen, sobrescriben los random del seed)
+  gender: z.enum(['male', 'female']).optional(),
+  body: z.string().regex(/^[0-9a-f]{1,11}$/).optional(),
+  bodyColors: z.string().regex(/^[0-9a-f]{0,32}$/).optional(),
 });
 
 export const BruteIdParams = z.object({

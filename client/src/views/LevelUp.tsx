@@ -1,18 +1,25 @@
+// LevelUp — Bendición tras subir de nivel.
+// Visual treatment dark fantasy estilo Slay-the-Spire/Hades 2: 2 cards de
+// elección con border-top color por tipo (stat=sangre, skill=oro,
+// weapon=bronce, pet=verde). Lógica preservada: pendingLevelUp del store +
+// api.brutes.levelup + navegación post-click.
+
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import clsx from 'clsx';
 import { api, ApiError } from '@/api/apiClient';
 import type { LevelUpChoice } from 'core';
 import { getPet, getSkill, getWeapon } from 'core';
 import { useToastStore } from '@/store/useToastStore';
 import { useGameStore } from '@/store/useGameStore';
+import { CombatGlyph } from '@/components/combat/CombatGlyph';
 
 export function LevelUp() {
   const { id = '' } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const pushToast = useToastStore((s) => s.push);
-  const offer = useGameStore((s) => s.lastLevelUpOffer);
-  const setLastLevelUpOffer = useGameStore((s) => s.setLastLevelUpOffer);
+  const pending = useGameStore((s) => s.pendingLevelUp);
+  const setPendingLevelUp = useGameStore((s) => s.setPendingLevelUp);
+  const offer = pending && pending.bruteId === id ? pending.offer : null;
 
   const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -21,8 +28,8 @@ export function LevelUp() {
     setSubmitting(true);
     try {
       await api.brutes.levelup(id, { choice });
-      setLastLevelUpOffer(null);
-      pushToast('success', '¡Nivel ganado!');
+      setPendingLevelUp(null);
+      pushToast('success', '¡Bendición forjada!');
       navigate(`/brute/${id}`);
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'NETWORK_ERROR';
@@ -33,19 +40,42 @@ export function LevelUp() {
 
   if (!offer) {
     return (
-      <div className="p-6 text-blood">
-        No hay subida de nivel pendiente.
-        <button className="btn ml-3" onClick={() => navigate(`/brute/${id}`)}>Volver</button>
+      <div className="levelup-shell">
+        <header className="levelup-hero">
+          <div className="eyebrow">
+            <span>Forja interrumpida</span>
+          </div>
+          <h1>
+            Sin <em>bendición</em>
+          </h1>
+        </header>
+        <div className="levelup-empty">
+          <div className="empty-mark">No hay subida de nivel pendiente</div>
+          <div className="empty-sub">Volvé a la fosa y forjate la próxima victoria.</div>
+          <button className="btn" onClick={() => navigate(`/brute/${id}`)}>
+            Volver al templo
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-6 max-w-3xl mx-auto">
-      <h1 className="font-serif text-3xl text-gold mb-2">Has subido de nivel</h1>
-      <p className="text-muted mb-6">Elige una bendición. Sólo una.</p>
+    <div className="levelup-shell anim-fade-up">
+      <header className="levelup-hero">
+        <div className="eyebrow">
+          <span>Has subido de nivel</span>
+        </div>
+        <h1>
+          Forja tu <em>bendición</em>
+        </h1>
+        <div className="sub">Una sola elección. Para siempre.</div>
+        <div className="instruction">
+          Las dos sendas se abren ante vos. Elegí la que dará forma a tu próximo combate.
+        </div>
+      </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="levelup-choices">
         <ChoiceCard choice={offer.first} onSelect={choose} disabled={submitting} />
         <ChoiceCard choice={offer.second} onSelect={choose} disabled={submitting} />
       </div>
@@ -60,37 +90,65 @@ interface ChoiceCardProps {
 }
 
 function ChoiceCard({ choice, onSelect, disabled }: ChoiceCardProps) {
-  const { title, description } = describeChoice(choice);
+  const { title, description, kindLabel, glyph } = describeChoice(choice);
   return (
     <button
       type="button"
       onClick={() => onSelect(choice)}
       disabled={disabled}
-      className={clsx(
-        'panel p-4 text-left transition-all duration-200',
-        'hover:border-gold hover:shadow-rune-strong hover:-translate-y-0.5',
-        'focus:outline-none focus:border-gold focus:shadow-rune-strong',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
-      )}
+      className="levelup-card"
+      data-kind={choice.kind}
     >
-      <div className="text-xs uppercase tracking-wider text-muted">{choice.kind}</div>
-      <div className="font-serif text-xl text-ink mt-1">{title}</div>
-      <p className="text-sm text-muted mt-2">{description}</p>
+      <span className="corner tl" />
+      <span className="corner tr" />
+      <span className="corner bl" />
+      <span className="corner br" />
+
+      <span className="levelup-kind">{kindLabel}</span>
+      <div className="levelup-icon">
+        <CombatGlyph kind={glyph} color={glyphColor(choice.kind)} />
+      </div>
+      <h3 className="levelup-title">{title}</h3>
+      <p className="levelup-desc">{description}</p>
+      <div className="levelup-pick">
+        <span>Forjar esta senda</span>
+        <span className="arrow" aria-hidden>
+          ›
+        </span>
+      </div>
     </button>
   );
 }
 
-function describeChoice(c: LevelUpChoice): { title: string; description: string } {
+function glyphColor(kind: LevelUpChoice['kind']): string {
+  switch (kind) {
+    case 'stat': return '#c41a1a';
+    case 'skill': return '#e6b450';
+    case 'weapon': return '#8a6038';
+    case 'pet': return '#5fb04a';
+  }
+}
+
+interface ChoiceDescription {
+  title: string;
+  description: string;
+  kindLabel: string;
+  glyph: string;
+}
+
+function describeChoice(c: LevelUpChoice): ChoiceDescription {
   switch (c.kind) {
     case 'stat': {
-      const main = `+${c.amount} ${c.stat}`;
+      const main = `+${c.amount} ${labelStat(c.stat)}`;
       const second =
         c.secondStat !== undefined && c.secondAmount !== undefined
-          ? ` y +${c.secondAmount} ${c.secondStat}`
+          ? ` · +${c.secondAmount} ${labelStat(c.secondStat)}`
           : '';
       return {
         title: `${main}${second}`,
-        description: 'Mejora permanente de atributos.',
+        description: 'Tus atributos se templan. Mejora permanente al nacer del fuego.',
+        kindLabel: 'Atributo',
+        glyph: 'rage',
       };
     }
     case 'skill': {
@@ -98,6 +156,8 @@ function describeChoice(c: LevelUpChoice): { title: string; description: string 
       return {
         title: e?.name ?? c.skillId,
         description: e?.description ?? 'Habilidad desconocida.',
+        kindLabel: 'Habilidad',
+        glyph: mapSkillGlyph(c.skillId),
       };
     }
     case 'weapon': {
@@ -105,14 +165,73 @@ function describeChoice(c: LevelUpChoice): { title: string; description: string 
       return {
         title: e?.name ?? c.weaponId,
         description: e?.description ?? 'Arma desconocida.',
+        kindLabel: 'Arma',
+        glyph: mapWeaponGlyph(c.weaponId),
       };
     }
     case 'pet': {
       const e = getPet(c.petId);
       return {
         title: e?.name ?? c.petId,
-        description: e?.description ?? 'Mascota desconocida.',
+        description: e?.description ?? 'Bestia desconocida.',
+        kindLabel: 'Bestia',
+        glyph: 'fury',
       };
     }
   }
+}
+
+function labelStat(stat: string): string {
+  switch (stat) {
+    case 'hp': return 'Vitalidad';
+    case 'strength': return 'Fuerza';
+    case 'agility': return 'Agilidad';
+    case 'speed': return 'Velocidad';
+    default: return stat;
+  }
+}
+
+function mapSkillGlyph(id: string): string {
+  const map: Record<string, string> = {
+    iron_skin: 'shield',
+    block: 'shield',
+    counter: 'counter',
+    poison: 'poison',
+    regeneration: 'heal',
+    survival: 'heal',
+    vampirism: 'poison',
+    fierce_brute: 'rage',
+    herculean_strength: 'rage',
+    cry_of_the_damned: 'flame',
+    hammer: 'hammer',
+    bomb: 'bomb',
+    thief: 'dagger',
+    martial_arts: 'counter',
+    feline_agility: 'fury',
+    lightning_bolt: 'flame',
+    swift_wind: 'fury',
+    haste: 'fury',
+    weapons_master: 'sword',
+  };
+  return map[id] ?? 'shield';
+}
+
+function mapWeaponGlyph(id: string): string {
+  const blunt = ['mug', 'mighty_hammer', 'frying_pan', 'morning_star', 'flail', 'wrench', 'bo_staff', 'noodle_bowl', 'nunchaku', 'chain_whip'];
+  const blade = ['knife', 'dagger', 'axe', 'hatchet', 'scimitar', 'broadsword', 'katana', 'claymore', 'rapier', 'sai', 'shuriken', 'fan'];
+  const spear = ['lance', 'halberd', 'trident'];
+  if (blade.includes(id)) {
+    if (id === 'knife' || id === 'dagger' || id === 'sai') return 'dagger';
+    if (id === 'axe' || id === 'hatchet') return 'axe';
+    return 'sword';
+  }
+  if (spear.includes(id)) return 'spear';
+  if (blunt.includes(id)) {
+    if (id === 'flail' || id === 'morning_star' || id === 'chain_whip' || id === 'nunchaku') return 'flail';
+    if (id === 'mighty_hammer') return 'hammer';
+    return 'mace';
+  }
+  if (id === 'whip') return 'flail';
+  if (id === 'crossbow') return 'bow';
+  return 'sword';
 }

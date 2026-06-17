@@ -125,7 +125,9 @@ export interface PetRuntime {
 export function buildFighter(brute: Brute, side: 'A' | 'B'): FighterRuntime {
   const stats = applySkillStatBonuses(brute.stats, brute.skills);
   const effects = aggregateEffects(brute.skills);
-  const weaponId = brute.weapons[0] ?? null;
+  // Brutus arranca con PUÑOS (weaponId=null). El motor decide turn-by-turn si
+  // saca un arma del pool o si tira la equipada — fiel al original El Bruto.
+  const weaponId = null;
   // import lazy de pets para evitar ciclos
   const pets: PetRuntime[] = [];
   // se cargan en CombatEngine para acceder al catálogo

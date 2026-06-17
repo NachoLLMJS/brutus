@@ -36,7 +36,11 @@ model Brute {
   skills                  String   // JSON array
   weapons                 String   // JSON array
   pets                    String   // JSON array
-  appearance              String   // JSON object
+  appearance              String   // JSON object (legacy: gender/skin/hair/shirt/pants)
+  // Renderer Pixi (porteado de LaBrute):
+  gender                  String   @default("male") // "male" | "female"
+  body                    String   @default("") // 11 hex chars
+  bodyColors              String   @default("") // 32 hex chars
   victories               Int      @default(0)
   defeats                 Int      @default(0)
   fightsRemaining         Int      @default(5)

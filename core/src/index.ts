@@ -33,3 +33,48 @@ export {
   runNextRound as runTournamentNextRound,
   run as runTournament,
 } from './tournament.js';
+
+// Sistema de combate animado: Steps tipo LaBrute para FightViewer Pixi.
+export {
+  StepType,
+  toFightLog,
+} from './fight/index.js';
+export type {
+  FightStep,
+  FightLog,
+  FightFighter,
+  FightPet,
+  PetModel,
+  WeaponId,
+  SkillId,
+  ArriveStep,
+  MoveStep,
+  AttemptHitStep,
+  HitStep,
+  EvadeStep,
+  BlockStep,
+  CounterStep,
+  DeathStep,
+  EndStep,
+  SurviveStep,
+  HealStep,
+  VampirismStep,
+  SkillActivateStep,
+  EquipStep,
+  AnimationModel,
+} from './fight/index.js';
+
+// Apariencia visual (body/colors/gender, porteado de LaBrute).
+export type { BruteGender, BruteBodyPart, BruteColor } from './brute/index.js';
+export {
+  availableBodyParts,
+  colors as appearancePalettes,
+  getPalette,
+  readBodyString,
+  generateBodyString,
+  readColorString,
+  generateColorString,
+  getColor,
+  getRandomBody,
+  getRandomColors,
+} from './brute/index.js';

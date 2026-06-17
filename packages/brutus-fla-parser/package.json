@@ -1,0 +1,15 @@
+{
+  "name": "brutus-fla-parser",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fork local de labrute-fla-parser. Permite editar SVGs de los Symbols para reskinear partes del bruto/pet (cascos, armaduras, etc.) sin perder las animaciones originales.",
+  "main": "Symbols.js",
+  "module": "Symbols.js",
+  "types": "Symbols.d.ts",
+  "license": "MIT",
+  "_origin": {
+    "package": "labrute-fla-parser",
+    "version": "1.0.13",
+    "url": "https://github.com/Zenoo/labrute-fla-parser"
+  }
+}

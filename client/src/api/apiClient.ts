@@ -14,7 +14,7 @@ import type {
   CombatStep,
   LevelUpChoice,
   LevelUpOffer,
-  Tournament,
+  FightLog,
 } from 'core';
 
 const API_BASE = '/api';
@@ -63,8 +63,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export interface CreateBruteBody {
   name: string;
-  appearance: Appearance;
+  appearance?: Appearance;
   masterId?: string;
+  // Renderer Pixi (opcional)
+  gender?: 'male' | 'female';
+  body?: string;
+  bodyColors?: string;
 }
 
 export interface FightBody {
@@ -81,6 +85,7 @@ export interface FightResponse {
     duration: number;
     fightType: 'normal' | 'training';
     opponent: { id: string; name: string };
+    fightLog: FightLog;
   };
   brute: Brute;
   leveledUp: boolean;
@@ -97,9 +102,37 @@ export interface LevelUpBody {
   choice: LevelUpChoice;
 }
 
+/**
+ * Shape devuelto por POST /tournaments. Matchea `TournamentRunResult` del
+ * server (`server/src/services/TournamentService.ts`).
+ */
+export interface TournamentBrute {
+  id: string;
+  name: string;
+  gender: 'male' | 'female';
+  body: string;
+  bodyColors: string;
+  maxHp: number;
+}
+
+export interface TournamentMatch {
+  a: TournamentBrute;
+  b: TournamentBrute;
+  winner: 'A' | 'B';
+  duration: number;
+  fightLog: FightLog;
+}
+
+export interface TournamentRound {
+  round: number;
+  matches: TournamentMatch[];
+}
+
 export interface TournamentResponse {
-  tournament: Tournament;
-  bruteAfter: Brute;
+  id: string;
+  rounds: TournamentRound[];
+  champion: { id: string; name: string };
+  ascended: boolean;
 }
 
 // ---------- API surface ----------
@@ -113,8 +146,12 @@ export const api = {
 
     get: (id: string): Promise<Brute> => request(`/brutes/${encodeURIComponent(id)}`),
 
-    pupils: (id: string): Promise<Brute[]> =>
-      request(`/brutes/${encodeURIComponent(id)}/pupils`),
+    pupils: async (id: string): Promise<Brute[]> => {
+      const res = await request<{ pupils: Brute[] }>(
+        `/brutes/${encodeURIComponent(id)}/pupils`,
+      );
+      return res.pupils;
+    },
 
     /** Pide 3 oponentes sugeridos (POST a /fights sin opponentId). */
     opponents: async (id: string, training = false): Promise<Brute[]> => {

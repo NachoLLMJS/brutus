@@ -9,17 +9,27 @@ export interface RecentBrute {
   level: number;
 }
 
+/**
+ * Offer pendiente atado a un bruto específico — persistido en localStorage
+ * para sobrevivir a refresh / cierre de pestaña entre la pelea y el Profile.
+ */
+export interface PendingLevelUp {
+  bruteId: string;
+  offer: LevelUpOffer;
+}
+
 interface GameState {
   currentBruteId: string | null;
   recentBrutes: RecentBrute[];
-  // Ephemeral (no persistence) — handed off between Arena → FightViewer → LevelUp.
+  /** Estado ephemeral del último combate (no persistido). */
   lastFight: FightResponse | null;
-  lastLevelUpOffer: LevelUpOffer | null;
+  /** Level-up pendiente — persiste hasta que el usuario aplique un choice. */
+  pendingLevelUp: PendingLevelUp | null;
   setCurrentBrute: (id: string | null) => void;
   rememberBrute: (b: RecentBrute) => void;
   forgetBrute: (id: string) => void;
   setLastFight: (f: FightResponse | null) => void;
-  setLastLevelUpOffer: (o: LevelUpOffer | null) => void;
+  setPendingLevelUp: (p: PendingLevelUp | null) => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -28,7 +38,7 @@ export const useGameStore = create<GameState>()(
       currentBruteId: null,
       recentBrutes: [],
       lastFight: null,
-      lastLevelUpOffer: null,
+      pendingLevelUp: null,
       setCurrentBrute: (id) => set({ currentBruteId: id }),
       rememberBrute: (b) =>
         set((state) => {
@@ -39,17 +49,21 @@ export const useGameStore = create<GameState>()(
         set((state) => ({
           recentBrutes: state.recentBrutes.filter((r) => r.id !== id),
           currentBruteId: state.currentBruteId === id ? null : state.currentBruteId,
+          // Si olvidamos un bruto que tenía level-up pendiente, lo limpiamos.
+          pendingLevelUp:
+            state.pendingLevelUp?.bruteId === id ? null : state.pendingLevelUp,
         })),
       setLastFight: (f) => set({ lastFight: f }),
-      setLastLevelUpOffer: (o) => set({ lastLevelUpOffer: o }),
+      setPendingLevelUp: (p) => set({ pendingLevelUp: p }),
     }),
     {
       name: 'brutus.recent',
       storage: createJSONStorage(() => localStorage),
-      // sólo guardamos id+name+level (no datos sensibles, no datos efímeros)
+      // Persistimos pendingLevelUp para no perder el modal entre refreshes.
       partialize: (s) => ({
         currentBruteId: s.currentBruteId,
         recentBrutes: s.recentBrutes,
+        pendingLevelUp: s.pendingLevelUp,
       }),
     },
   ),

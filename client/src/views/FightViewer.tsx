@@ -1,311 +1,351 @@
-import { useEffect, useMemo, useState } from 'react';
+// FightViewer · Combate.
+// Visual treatment del bundle Claude Design (combat-stage fullscreen, top
+// FighterCards, canvas frame con corners ornamentales, log live aside,
+// turn pips, action banners DOM, VS overlay dramático, end overlay).
+// Lógica preservada: Pixi FightStage mount, fightLog steps, HP state via
+// onHpChange, skip handler, navigation post-combate.
+
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getPet, getSkill } from 'core';
-import { api } from '@/api/apiClient';
-import { BruteAvatar } from '@/components/BruteAvatar';
-import { HPBar } from '@/components/HPBar';
-import { useFight } from '@/hooks/useFight';
-import type {
-  Appearance,
-  Brute,
-  CombatStep,
-  FighterSide,
-  FighterSnapshot,
-} from 'core';
+import { StepType, type FightLog, type FightStep } from 'core';
+import type { Brute } from 'core';
 import { useToastStore } from '@/store/useToastStore';
 import { useGameStore } from '@/store/useGameStore';
+import { FightStage } from '@/lib/fight/Stage';
+import { FighterCard } from '@/components/combat/FighterCard';
+import { CombatLog } from '@/components/combat/CombatLog';
+import { TurnPips } from '@/components/combat/TurnPips';
+import { ActionBanner } from '@/components/combat/ActionBanner';
+import { VSOverlayV2 } from '@/components/combat/VSOverlayV2';
+import { EndOverlay } from '@/components/combat/EndOverlay';
+import { TweaksPanel, TweakSection, TweakToggle, TweakSlider } from '@/components/TweaksPanel';
+import { useCombatSettings } from '@/store/useCombatSettings';
+import { useBrute } from '@/hooks/useBrute';
+import { api } from '@/api/apiClient';
 
-interface FighterRuntime {
-  snapshot: FighterSnapshot;
-  hp: number;
-  swing: number;
-  hitFlash: number;
-}
-
-interface FightData {
-  log: CombatStep[];
-  bruteAfter: Brute;
-  xpGained: number;
-  appearances: Record<FighterSide, Appearance | null>;
-}
-
-const DEFAULT_APPEARANCE: Appearance = {
-  gender: 'M',
-  skin: '#d8a87a',
-  hair: '#1a0f0a',
-  shirt: '#2a1838',
-  pants: '#1a1410',
-};
+const VS_DURATION_MS = 1900;
 
 export function FightViewer() {
   const { id = '' } = useParams<{ id: string; fid: string }>();
   const navigate = useNavigate();
   const pushToast = useToastStore((s) => s.push);
   const lastFight = useGameStore((s) => s.lastFight);
+  const { brute: playerBrute } = useBrute(id);
 
-  const [data, setData] = useState<FightData | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const stageInstance = useRef<FightStage | null>(null);
 
+  const [progress, setProgress] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
+  const [winnerId, setWinnerId] = useState<number | null>(null);
+  const [phase, setPhase] = useState<'versus' | 'fighting'>('versus');
+  const [hpById, setHpById] = useState<Record<number, number>>({});
+  const [bannerKey, setBannerKey] = useState<{ text: string; epoch: number } | null>(null);
+  const [opponentBrute, setOpponentBrute] = useState<Brute | null>(null);
+
+  const showActionBanner = useCombatSettings((s) => s.showActionBanner);
+  const setShowActionBanner = useCombatSettings((s) => s.setShowActionBanner);
+  const logLength = useCombatSettings((s) => s.logLength);
+  const setLogLength = useCombatSettings((s) => s.setLogLength);
+
+  const fightLog: FightLog | undefined = lastFight?.combat.fightLog;
+  const opponentBruteId = lastFight?.combat.opponent?.id;
+
+  // Auto-arrancar el combate después del VS overlay.
   useEffect(() => {
-    if (!lastFight) return;
+    if (!fightLog) return;
+    const t = window.setTimeout(() => setPhase('fighting'), VS_DURATION_MS);
+    return () => window.clearTimeout(t);
+  }, [fightLog]);
+
+  // Inicializar HP full al cargar el log.
+  useEffect(() => {
+    if (!fightLog) return;
+    const initial: Record<number, number> = {};
+    for (const f of fightLog.fighters) initial[f.id] = f.maxHp;
+    setHpById(initial);
+  }, [fightLog]);
+
+  // Fetch opponent brute para metadata (level, rank, weapons, skills).
+  useEffect(() => {
+    if (!opponentBruteId) return;
     let cancelled = false;
     void (async () => {
-      const start = lastFight.combat.log.find(
-        (s): s is Extract<CombatStep, { type: 'start' }> => s.type === 'start',
-      );
-      const appearances: Record<FighterSide, Appearance | null> = { A: null, B: null };
-      if (start) {
-        const ids: Array<{ side: FighterSide; bruteId: string }> = [
-          { side: 'A', bruteId: start.fighters.A.bruteId },
-          { side: 'B', bruteId: start.fighters.B.bruteId },
-        ];
-        await Promise.all(
-          ids.map(async ({ side, bruteId }) => {
-            try {
-              const b = await api.brutes.get(bruteId);
-              appearances[side] = b.appearance;
-            } catch {
-              appearances[side] = null;
-            }
-          }),
-        );
-      }
-      if (!cancelled) {
-        setData({
-          log: lastFight.combat.log,
-          bruteAfter: lastFight.brute,
-          // El server ya aplicó el XP; calculamos lo ganado por delta vs nivel/xp previos.
-          // Para la UI alcanza con un valor estable: 1 si ganó, 0 si perdió (XP=1 por victoria).
-          xpGained: lastFight.combat.winner === 'A' ? 1 : 0,
-          appearances,
-        });
+      try {
+        const b = await api.brutes.get(opponentBruteId);
+        if (!cancelled) setOpponentBrute(b);
+      } catch {
+        // metadata es secundaria; si falla, FighterCard usa fallbacks
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [lastFight]);
+  }, [opponentBruteId]);
+
+  // Mount Pixi stage cuando entramos en fase 'fighting'.
+  useEffect(() => {
+    if (phase !== 'fighting' || !fightLog || !stageRef.current) return;
+    const stage = new FightStage({
+      view: stageRef.current,
+      log: fightLog,
+      speed: 0.7, // 70% — más lento que default, decisión del usuario
+      onProgress: (i, t) => setProgress({ done: i + 1, total: t }),
+      onComplete: (w) => setWinnerId(w),
+      onHpChange: (fid, hp) => {
+        setHpById((prev) => ({ ...prev, [fid]: hp }));
+      },
+    });
+    stageInstance.current = stage;
+    void stage.play();
+    return () => {
+      stage.destroy();
+      stageInstance.current = null;
+    };
+  }, [phase, fightLog]);
+
+  // Detectar steps recientes para disparar action banners DOM.
+  useEffect(() => {
+    if (!fightLog || !showActionBanner) return;
+    if (progress.done <= 0) return;
+    const lastStep = fightLog.steps[progress.done - 1];
+    if (!lastStep) return;
+    const banner = stepToBanner(lastStep);
+    if (banner) {
+      setBannerKey({ text: banner, epoch: progress.done });
+      const t = window.setTimeout(() => setBannerKey(null), 1200);
+      return () => window.clearTimeout(t);
+    }
+  }, [progress.done, fightLog, showActionBanner]);
+
+  const skip = () => stageInstance.current?.skip();
+
+  const exit = () => {
+    navigate(`/brute/${id}`);
+  };
+  const retry = () => {
+    navigate(`/brute/${id}/arena`);
+  };
+  const goLevelUp = () => {
+    navigate(`/brute/${id}/levelup`);
+  };
+
+  // Streak determinístico: simple wins-losses del player brute, sign con clamp.
+  const streak = useMemo(() => {
+    if (!playerBrute) return 0;
+    const diff = playerBrute.victories - playerBrute.defeats;
+    return Math.max(-12, Math.min(12, diff));
+  }, [playerBrute]);
 
   if (!lastFight) {
     return (
-      <div className="p-6 text-blood">
-        No hay combate activo.
-        <button className="btn ml-3" onClick={() => navigate(`/brute/${id}`)}>Volver al perfil</button>
+      <div className="combat-stage">
+        <div className="m-auto text-blood font-display text-xl uppercase tracking-widest p-6">
+          No hay combate activo.
+          <button className="cb-btn ml-3" onClick={() => navigate(`/brute/${id}`)}>
+            Volver al perfil
+          </button>
+        </div>
       </div>
     );
   }
-  if (!data) {
-    return <div className="p-6 text-muted">Convocando el combate…</div>;
+  if (!fightLog) {
+    return (
+      <div className="combat-stage">
+        <div className="m-auto text-muted font-display p-6 uppercase tracking-widest">
+          Convocando el combate…
+        </div>
+      </div>
+    );
   }
 
-  return (
-    <FightStage
-      log={data.log}
-      appearances={data.appearances}
-      onContinue={() => {
-        const offer = lastFight.leveledUp ? lastFight.levelUpChoices : undefined;
-        if (offer) {
-          navigate(`/brute/${id}/levelup`);
-        } else {
-          navigate(`/brute/${id}`);
-        }
-        pushToast('info', `+${data.xpGained} XP`);
-      }}
-    />
-  );
-}
-
-interface FightStageProps {
-  log: CombatStep[];
-  appearances: Record<FighterSide, Appearance | null>;
-  onContinue: () => void;
-}
-
-function FightStage({ log, appearances, onContinue }: FightStageProps) {
-  const start = useMemo(
-    () =>
-      log.find((s): s is Extract<CombatStep, { type: 'start' }> => s.type === 'start'),
-    [log],
-  );
-  const { current, recent, finished, skip } = useFight({ log });
-
-  const [a, setA] = useState<FighterRuntime | null>(null);
-  const [b, setB] = useState<FighterRuntime | null>(null);
-
-  useEffect(() => {
-    if (!start) return;
-    setA({ snapshot: start.fighters.A, hp: start.fighters.A.hp, swing: 0, hitFlash: 0 });
-    setB({ snapshot: start.fighters.B, hp: start.fighters.B.hp, swing: 0, hitFlash: 0 });
-  }, [start]);
-
-  useEffect(() => {
-    if (!current) return;
-    applyStep(current, setA, setB);
-    const t = window.setTimeout(() => {
-      setA((s) => (s ? { ...s, swing: 0, hitFlash: 0 } : s));
-      setB((s) => (s ? { ...s, swing: 0, hitFlash: 0 } : s));
-    }, 350);
-    return () => window.clearTimeout(t);
-  }, [current]);
-
-  const winner = useMemo(() => {
-    const end = log.find((s): s is Extract<CombatStep, { type: 'end' }> => s.type === 'end');
-    return end ? end.winner : null;
-  }, [log]);
-
-  if (!start || !a || !b) {
-    return <div className="p-6 text-muted">Preparando arena…</div>;
+  const [aFighter, bFighter] = fightLog.fighters;
+  if (!aFighter || !bFighter) {
+    return null;
   }
 
-  const appA = appearances.A ?? DEFAULT_APPEARANCE;
-  const appB = appearances.B ?? DEFAULT_APPEARANCE;
+  // Initial weapons del log (ArriveStep.w).
+  const initialWeaponA = findInitialWeapon(fightLog, aFighter.id);
+  const initialWeaponB = findInitialWeapon(fightLog, bFighter.id);
+
+  // Player es siempre side 'A' (id matches aFighter), opponent side 'B'.
+  // Determinar quién fue el winner.
+  const winnerName = winnerId
+    ? fightLog.fighters.find((f) => f.id === winnerId)?.name ?? '—'
+    : '—';
+  const isPlayerWinner = winnerId === aFighter.id;
+  const playerHp = hpById[aFighter.id] ?? aFighter.maxHp;
 
   return (
-    <div className="min-h-screen p-6 max-w-4xl mx-auto flex flex-col gap-4">
-      <div className="flex justify-between items-center">
-        <h1 className="font-serif text-2xl text-gold">Arena</h1>
-        {!finished && <button className="btn" onClick={skip}>Saltar</button>}
-      </div>
-
-      <div className="panel p-4">
-        <div className="flex justify-between gap-4 mb-3">
-          <FighterPanel runtime={a} side="A" />
-          <FighterPanel runtime={b} side="B" />
-        </div>
-
-        <div className="relative w-full h-[300px] bg-deep border border-arcane rounded overflow-hidden flex items-end justify-around px-8">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 pointer-events-none" />
-          <BruteAvatar
-            appearance={appA}
-            size="lg"
-            anim={{
-              facing: 'right',
-              swing: a.swing,
-              hitFlash: a.hitFlash,
-              hpPct: a.hp / a.snapshot.hpMax,
-            }}
+    <>
+      <div className="combat-stage">
+        {/* TOP — fighter cards + streak */}
+        <header className="combat-top">
+          <FighterCard
+            fighter={aFighter}
+            hp={hpById[aFighter.id] ?? aFighter.maxHp}
+            side="left"
+            level={playerBrute?.level}
+            rank={playerBrute?.rank}
+            weaponId={initialWeaponA}
+            skills={playerBrute?.skills ?? []}
           />
-          <BruteAvatar
-            appearance={appB}
-            size="lg"
-            anim={{
-              facing: 'left',
-              swing: b.swing,
-              hitFlash: b.hitFlash,
-              hpPct: b.hp / b.snapshot.hpMax,
-            }}
+          <div className="combat-top-center">
+            <div className="streak-badge">
+              <span className="label">Racha</span>
+              <span className="num">×{Math.abs(streak)}</span>
+              <span className="sub">{streak >= 0 ? 'Victorias' : 'Derrotas'}</span>
+            </div>
+          </div>
+          <FighterCard
+            fighter={bFighter}
+            hp={hpById[bFighter.id] ?? bFighter.maxHp}
+            side="right"
+            level={opponentBrute?.level}
+            rank={opponentBrute?.rank}
+            weaponId={initialWeaponB}
+            skills={opponentBrute?.skills ?? []}
           />
-        </div>
+        </header>
+
+        {/* ARENA */}
+        <main className="combat-arena">
+          <div className="canvas-wrap">
+            <div className="canvas-frame">
+              <div className="corner tl"><CornerSVG /></div>
+              <div className="corner tr"><CornerSVG /></div>
+              <div className="corner bl"><CornerSVG /></div>
+              <div className="corner br"><CornerSVG /></div>
+
+              {/* Pixi mount */}
+              <div ref={stageRef} className="canvas-pixi-mount" />
+
+              {/* DOM action banner aditivo */}
+              {showActionBanner && bannerKey && <ActionBanner text={bannerKey.text} />}
+            </div>
+
+            <div className="turn-strip">
+              <span className="ts-label">Turno</span>
+              <TurnPips total={progress.total || fightLog.steps.length} current={progress.done} />
+              <span className="ts-num">
+                {Math.min(progress.done, progress.total || fightLog.steps.length)}/
+                {progress.total || fightLog.steps.length}
+              </span>
+            </div>
+          </div>
+
+          <CombatLog log={fightLog} currentIdx={progress.done} logLength={logLength} />
+        </main>
+
+        {/* BOTTOM — controls */}
+        <footer className="combat-bottom">
+          <div className="cb-side">
+            <button type="button" className="cb-btn" onClick={exit}>
+              ← Salir
+            </button>
+            <button
+              type="button"
+              className="cb-btn danger"
+              onClick={skip}
+              disabled={winnerId !== null}
+            >
+              Saltar ▶▶
+            </button>
+          </div>
+          <div className="cb-center">
+            <button type="button" className="cb-btn gold" onClick={retry} disabled={winnerId === null}>
+              ↺ Repetir
+            </button>
+          </div>
+          <div className="cb-side right">
+            <div className="cb-rewards">
+              <span className="label">En juego</span>
+              <span className="val">+XP por victoria</span>
+            </div>
+          </div>
+        </footer>
       </div>
 
-      <div className="panel p-3 text-sm font-sans space-y-1 min-h-[8rem]">
-        {recent.map((step, i) => (
-          <div key={i} className="text-muted">
-            {narrate(step, start.fighters)}
-          </div>
-        ))}
-      </div>
+      <VSOverlayV2
+        visible={phase === 'versus'}
+        leftName={aFighter.name}
+        rightName={bFighter.name}
+        durationMs={VS_DURATION_MS}
+      />
 
-      {finished && (
-        <div className="panel p-6 text-center animate-rise-in">
-          <div className="font-serif text-3xl text-gold mb-3">
-            🏆 {winner === 'A' ? start.fighters.A.name : start.fighters.B.name} gana
-          </div>
-          <button className="btn-primary" onClick={onContinue}>
-            Continuar
-          </button>
-        </div>
+      {winnerId !== null && (
+        <EndOverlay
+          visible
+          isPlayerWinner={isPlayerWinner}
+          winnerName={winnerName}
+          playerName={aFighter.name}
+          playerHp={playerHp}
+          playerMaxHp={aFighter.maxHp}
+          totalSteps={progress.done}
+          streak={Math.abs(streak)}
+          xpAwarded={undefined /* server no expone xpAwarded en FightResponse aún */}
+          hasLevelUp={lastFight.leveledUp}
+          onRetry={retry}
+          onProfile={() => {
+            navigate(`/brute/${id}`);
+            pushToast('info', isPlayerWinner ? 'Victoria.' : 'Derrota.');
+          }}
+          onLevelUp={goLevelUp}
+        />
       )}
-    </div>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Efectos">
+          <TweakToggle
+            label="Banner de acción (CRIT/BLOQUEO/ESQUIVA)"
+            value={showActionBanner}
+            onChange={setShowActionBanner}
+          />
+        </TweakSection>
+        <TweakSection title="Bitácora">
+          <TweakSlider
+            label="Largo del log"
+            min={5}
+            max={30}
+            step={1}
+            value={logLength}
+            onChange={setLogLength}
+          />
+        </TweakSection>
+      </TweaksPanel>
+    </>
   );
 }
 
-function FighterPanel({ runtime, side }: { runtime: FighterRuntime; side: FighterSide }) {
-  const isA = side === 'A';
-  return (
-    <div className={`flex-1 ${isA ? '' : 'text-right'}`}>
-      <div className="font-serif text-lg text-ink">{runtime.snapshot.name}</div>
-      <HPBar value={runtime.hp} max={runtime.snapshot.hpMax} />
-    </div>
-  );
+/* ─── Helpers ─── */
+
+function findInitialWeapon(log: FightLog, fighterId: number): string | null {
+  for (const step of log.steps) {
+    if (step.a === StepType.Arrive && step.f === fighterId) {
+      return step.w ?? null;
+    }
+  }
+  return null;
 }
 
-function applyStep(
-  step: CombatStep,
-  setA: React.Dispatch<React.SetStateAction<FighterRuntime | null>>,
-  setB: React.Dispatch<React.SetStateAction<FighterRuntime | null>>,
-): void {
-  const apply = (
-    side: FighterSide,
-    fn: (r: FighterRuntime) => FighterRuntime,
-  ) => {
-    const updater = (s: FighterRuntime | null) => (s ? fn(s) : s);
-    if (side === 'A') setA(updater);
-    else setB(updater);
-  };
-  switch (step.type) {
-    case 'attack':
-      apply(step.attacker, (r) => ({ ...r, swing: 1 }));
-      apply(step.defender, (r) => ({ ...r, hp: step.remainingHp, hitFlash: 1 }));
-      break;
-    case 'counter':
-      apply(step.defender, (r) => ({ ...r, swing: 1 }));
-      apply(step.attacker, (r) => ({ ...r, hp: step.remainingHp, hitFlash: 1 }));
-      break;
-    case 'heal':
-      apply(step.side, (r) => ({ ...r, hp: step.remainingHp }));
-      break;
-    case 'pet_attack':
-      apply(step.defender, (r) => ({ ...r, hp: step.remainingHp, hitFlash: 1 }));
-      break;
-    case 'revive':
-      apply(step.side, (r) => ({ ...r, hp: step.hp }));
-      break;
+function stepToBanner(step: FightStep): string | null {
+  switch (step.a) {
+    case StepType.Hit:
+      return step.c === 1 ? '¡CRÍTICO!' : null;
+    case StepType.Block:
+      return '¡BLOQUEO!';
+    case StepType.Evade:
+      return '¡ESQUIVA!';
     default:
-      break;
+      return null;
   }
 }
 
-function narrate(
-  step: CombatStep,
-  fighters: { A: FighterSnapshot; B: FighterSnapshot },
-): string {
-  const name = (s: FighterSide) => fighters[s].name;
-  switch (step.type) {
-    case 'start':
-      return `Comienza el combate: ${fighters.A.name} vs ${fighters.B.name}.`;
-    case 'turn':
-      return `Turno ${step.turn} — actúa ${name(step.side)}.`;
-    case 'attack':
-      return `${name(step.attacker)} ataca a ${name(step.defender)} (-${step.damage} HP)${step.critical ? ' ¡crítico!' : ''}.`;
-    case 'dodge':
-      return `${name(step.defender)} esquiva el ataque.`;
-    case 'block':
-      return `${name(step.defender)} bloquea.`;
-    case 'counter':
-      return `${name(step.defender)} contraataca (-${step.damage} HP a ${name(step.attacker)}).`;
-    case 'skill': {
-      const skillName = getSkill(step.skillId)?.name ?? step.skillId;
-      return `${name(step.side)} usa ${skillName}${step.detail ? `: ${step.detail}` : ''}.`;
-    }
-    case 'heal':
-      return `${name(step.side)} recupera ${step.amount} HP.`;
-    case 'pet_join': {
-      const petName = getPet(step.petId)?.name ?? step.petId;
-      return `${name(step.side)} libera a su mascota (${petName}).`;
-    }
-    case 'pet_attack': {
-      const petName = getPet(step.petId)?.name ?? step.petId;
-      return `${petName} de ${name(step.attacker)} muerde a ${name(step.defender)} (-${step.damage}).`;
-    }
-    case 'pet_death': {
-      const petName = getPet(step.petId)?.name ?? step.petId;
-      return `La mascota (${petName}) de ${name(step.side)} cae.`;
-    }
-    case 'death':
-      return `${name(step.side)} cae derrotado.`;
-    case 'revive':
-      return `¡${name(step.side)} se aferra a la vida!`;
-    case 'end':
-      return `Fin del combate. Vence ${name(step.winner)}.`;
-  }
+function CornerSVG() {
+  return (
+    <svg viewBox="0 0 36 36" aria-hidden>
+      <path d="M0 0 L36 0 L36 4 L8 4 Q4 4 4 8 L4 36 L0 36 Z" fill="#e6b450" />
+      <path d="M4 4 L36 4 L36 8 L8 8 L8 36 L4 36 Z" fill="#3d2530" />
+      <circle cx="6" cy="6" r="1.5" fill="#0d0a14" />
+    </svg>
+  );
 }

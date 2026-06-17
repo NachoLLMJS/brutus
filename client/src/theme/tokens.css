@@ -1,21 +1,81 @@
-/* Brutus v3 — Dark Fantasy Tokens
- * Paleta curada para la temática oscura/rúnica.
- * Consumida tanto por Tailwind (via tailwind.config.ts) como por CSS plano.
+/* Brutus v3 — Tokens dark fantasy "Diablo" (dirección B).
+ * Paleta: abismal + cuero oscuro + oro vibrante + sangre demoníaca + verde tóxico.
+ * Tipografía: MedievalSharp (display) + Inter (body sans). Fallbacks: las
+ * fuentes locales LaBrute/AcmeSa siguen disponibles para retrocompat.
  */
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Inter:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'LaBrute';
+  src: url('/fonts/labrute.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AcmeSa';
+  src: url('/fonts/acmesa.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --bg-deep: #0b0610;
-  --bg-panel: #1a0f22;
-  --bg-elevated: #2a1838;
-  --accent-blood: #8b1a2b;
-  --accent-gold: #c9a449;
-  --accent-rune: #6e3aaa;
-  --text-primary: #e8e0d2;
-  --text-muted: #8a7e90;
-  --border-arcane: #3d2659;
-  --hp-full: #4a8c3a;
-  --hp-low: #c44a2c;
+  /* Backgrounds — abismal con tinte púrpura */
+  --bg-default: #0d0a14;       /* abismal casi-negro */
+  --bg-light: #1f1530;         /* púrpura profundo */
+  --paper: #2a1f24;            /* cuero oscuro (panels) */
+  --paper-dark: #1a1014;       /* cuero más oscuro (header bar, badge) */
+  --paper-accent: #3d2530;     /* cuero elevado (cells, hovers) */
+
+  /* Brand */
+  --primary: #c41a1a;          /* rojo demoníaco */
+  --secondary: #e6b450;        /* oro vibrante */
+  --divider: #5a3a2a;          /* línea bronceada */
+
+  /* Borders */
+  --border-shadow: #5a3a2a;    /* marrón quemado */
+  --border-outer: #1a0f14;     /* sombra profunda */
+  --border-main: #8a6038;      /* bronce */
+  --border-inner: #6a4528;     /* bronce más oscuro */
+
+  /* Texto */
+  --text-primary: #e8d4a8;     /* pergamino claro */
+  --text-secondary: #8a7560;   /* bronceado apagado */
+  --text-disabled: rgba(232, 212, 168, 0.3);
+  --text-strong: #f5e0b8;      /* pergamino fuerte */
+
+  /* Estados */
+  --hp-full: #5fb04a;          /* verde tóxico */
+  --hp-mid: #e6b450;           /* oro */
+  --hp-low: #c41a1a;           /* rojo demonio */
+  --xp-fill: #e6b450;          /* oro */
+  --success: #5fb04a;
+  --error: #ff5a3c;
+
+  /* Surfaces específicas */
+  --surface-tooltip: #050308;  /* tooltip aún más oscuro que el bg */
+  --btn-primary-bg: #c41a1a;
+  --btn-primary-hover: #e02828;
+  --btn-primary-shadow: #5a0a0a;
+  --btn-primary-text: #fff5e0;
+  --btn-arena-bg: #6a4528;     /* bronce profundo */
+  --btn-arena-bg-edge: #3d2718;
+  --btn-arena-border: #e6b450; /* borde dorado vibrante */
+  --btn-arena-text: #f5e0b8;
+
+  /* Aliases para compat con código previo */
+  --bg-deep: var(--bg-default);
+  --bg-panel: var(--paper);
+  --bg-elevated: var(--paper-accent);
+  --accent-blood: #c41a1a;
+  --accent-gold: #e6b450;
+  --accent-rune: #5fb04a;       /* verde tóxico (era púrpura runa) */
+  --text-muted: var(--text-secondary);
+  --border-arcane: var(--border-shadow);
 
   /* Tipografías */
-  --font-serif: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'MedievalSharp', 'LaBrute', 'AcmeSa', Georgia, serif;
+  --font-serif: 'MedievalSharp', 'AcmeSa', 'LaBrute', Georgia, serif;
+  --font-sans: 'Inter', 'AcmeSa', system-ui, -apple-system, sans-serif;
 }

@@ -5,27 +5,50 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Dark-fantasy palette mirrored from src/theme/tokens.css
-        deep: 'var(--bg-deep)',
-        panel: 'var(--bg-panel)',
-        elevated: 'var(--bg-elevated)',
+        // Brutus dark fantasy palette (from src/theme/tokens.css)
+        // Mantenemos aliases legacy (cream, durazno, deep, etc.) para no
+        // romper componentes que ya los usan; las CSS vars están redefinidas.
+        deep: 'var(--bg-default)',
+        panel: 'var(--paper)',
+        elevated: 'var(--paper-accent)',
+        paper: 'var(--paper)',
+        'paper-dark': 'var(--paper-dark)',
+        'paper-accent': 'var(--paper-accent)',
+        cream: 'var(--bg-light)',
+        durazno: 'var(--bg-default)',
+        // Acentos
         blood: 'var(--accent-blood)',
         gold: 'var(--accent-gold)',
         rune: 'var(--accent-rune)',
+        // Texto
         ink: 'var(--text-primary)',
-        muted: 'var(--text-muted)',
-        arcane: 'var(--border-arcane)',
+        'ink-strong': 'var(--text-strong)',
+        muted: 'var(--text-secondary)',
+        // Bordes
+        arcane: 'var(--border-shadow)',
+        'border-shadow': 'var(--border-shadow)',
+        'border-inner': 'var(--border-inner)',
+        'border-main': 'var(--border-main)',
+        'border-outer': 'var(--border-outer)',
+        // Stat bars
         'hp-full': 'var(--hp-full)',
+        'hp-mid': 'var(--hp-mid)',
         'hp-low': 'var(--hp-low)',
+        // Surfaces específicas
+        tooltip: 'var(--surface-tooltip)',
       },
       fontFamily: {
-        serif: ['Cinzel', 'Cormorant Garamond', 'Georgia', 'serif'],
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['MedievalSharp', 'LaBrute', 'AcmeSa', 'Georgia', 'serif'],
+        serif: ['MedievalSharp', 'AcmeSa', 'LaBrute', 'Georgia', 'serif'],
+        sans: ['Inter', 'AcmeSa', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
-        rune: '0 0 0 1px var(--border-arcane), 0 0 18px rgba(110, 58, 170, 0.25)',
-        'rune-strong': '0 0 0 1px var(--accent-rune), 0 0 24px rgba(110, 58, 170, 0.55)',
-        blood: '0 0 0 1px var(--accent-blood), 0 0 18px rgba(139, 26, 43, 0.4)',
+        // Aliases reinterpretados para dark fantasy: glow + drop sutil.
+        rune: '0 0 0 1px var(--border-outer), 0 0 12px rgba(95, 176, 74, 0.25)',
+        'rune-strong': '0 0 0 2px var(--border-outer), 0 0 18px rgba(95, 176, 74, 0.4)',
+        blood: '0 0 0 1px var(--accent-blood), 0 0 22px rgba(196, 26, 26, 0.55)',
+        gold: '0 0 0 1px var(--accent-gold), 0 0 18px rgba(230, 180, 80, 0.45)',
+        paper: '0 0 0 1px var(--border-outer) inset, 0 0 12px rgba(0, 0, 0, 0.55)',
       },
       animation: {
         'fade-in': 'fadeIn 200ms ease-out',

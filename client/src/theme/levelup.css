@@ -1,0 +1,323 @@
+/* Brutus — LevelUp (Bendición) styles.
+ * Pantalla post-combate cuando subís de nivel: 2 cards de elección con
+ * border de color por tipo (stat=sangre, skill=oro, weapon=bronce, pet=verde).
+ * Aesthetic Slay-the-Spire / Hades 2 — la elección es dramática.
+ */
+
+.levelup-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+}
+
+/* Vignette + grain como overlay */
+.levelup-shell::before,
+.levelup-shell::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.levelup-shell::before {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.5;
+  mix-blend-mode: overlay;
+}
+.levelup-shell::after {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(230, 180, 80, 0.10), transparent 60%),
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(196, 26, 26, 0.08), transparent 60%);
+}
+.levelup-shell > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── HERO ── */
+.levelup-hero {
+  text-align: center;
+  margin: 24px 0 40px;
+}
+.levelup-hero .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  opacity: 0.85;
+}
+.levelup-hero .eyebrow::before,
+.levelup-hero .eyebrow::after {
+  content: '';
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-main), transparent);
+}
+.levelup-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 84px);
+  letter-spacing: 0.05em;
+  color: var(--text-strong);
+  text-transform: uppercase;
+  line-height: 1;
+  margin: 0;
+  text-shadow:
+    0 0 38px rgba(230, 180, 80, 0.55),
+    0 0 18px rgba(196, 26, 26, 0.35),
+    0 4px 0 rgba(0, 0, 0, 0.7);
+  animation: levelup-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.levelup-hero h1 em {
+  font-style: normal;
+  color: var(--accent-gold);
+  text-shadow:
+    0 0 28px rgba(230, 180, 80, 0.85),
+    0 4px 0 rgba(0, 0, 0, 0.6);
+}
+@keyframes levelup-pop {
+  0% { transform: scale(0.6) rotate(-3deg); opacity: 0; }
+  60% { transform: scale(1.08) rotate(1deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.levelup-hero .sub {
+  margin-top: 16px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.32em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+.levelup-hero .instruction {
+  margin-top: 8px;
+  font-family: 'Georgia', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ── CHOICE GRID ── */
+.levelup-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 22px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.levelup-card {
+  position: relative;
+  appearance: none;
+  background: linear-gradient(180deg, rgba(42, 31, 36, 0.95) 0%, rgba(26, 16, 20, 0.95) 100%);
+  border: 2px solid var(--border-inner);
+  border-radius: 6px;
+  padding: 28px 24px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  box-shadow:
+    0 0 0 1px var(--border-outer) inset,
+    0 0 0 4px var(--paper-dark),
+    0 12px 28px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  min-height: 280px;
+}
+.levelup-card:hover:not(:disabled) {
+  transform: translateY(-4px) scale(1.02);
+}
+.levelup-card:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Border-top accent por tipo */
+.levelup-card[data-kind="stat"] { border-top: 4px solid var(--primary); }
+.levelup-card[data-kind="skill"] { border-top: 4px solid var(--accent-gold); }
+.levelup-card[data-kind="weapon"] { border-top: 4px solid var(--border-main); }
+.levelup-card[data-kind="pet"] { border-top: 4px solid var(--hp-full); }
+
+/* Glow específico al hover por tipo */
+.levelup-card[data-kind="stat"]:hover:not(:disabled) {
+  border-color: var(--primary);
+  box-shadow:
+    0 0 0 1px var(--border-outer) inset,
+    0 0 0 4px var(--paper-dark),
+    0 16px 36px rgba(0, 0, 0, 0.7),
+    0 0 30px rgba(196, 26, 26, 0.5);
+}
+.levelup-card[data-kind="skill"]:hover:not(:disabled) {
+  border-color: var(--accent-gold);
+  box-shadow:
+    0 0 0 1px var(--border-outer) inset,
+    0 0 0 4px var(--paper-dark),
+    0 16px 36px rgba(0, 0, 0, 0.7),
+    0 0 32px rgba(230, 180, 80, 0.55);
+}
+.levelup-card[data-kind="weapon"]:hover:not(:disabled) {
+  border-color: var(--border-main);
+  box-shadow:
+    0 0 0 1px var(--border-outer) inset,
+    0 0 0 4px var(--paper-dark),
+    0 16px 36px rgba(0, 0, 0, 0.7),
+    0 0 24px rgba(138, 96, 56, 0.55);
+}
+.levelup-card[data-kind="pet"]:hover:not(:disabled) {
+  border-color: var(--hp-full);
+  box-shadow:
+    0 0 0 1px var(--border-outer) inset,
+    0 0 0 4px var(--paper-dark),
+    0 16px 36px rgba(0, 0, 0, 0.7),
+    0 0 30px rgba(95, 176, 74, 0.5);
+}
+
+/* Corner pins ornamentales */
+.levelup-card .corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--accent-gold);
+  pointer-events: none;
+  opacity: 0.55;
+}
+.levelup-card .corner.tl { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+.levelup-card .corner.tr { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+.levelup-card .corner.bl { bottom: 8px; left: 8px; border-right: none; border-top: none; }
+.levelup-card .corner.br { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+
+/* Top: kind badge */
+.levelup-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border: 1px solid;
+  border-radius: 2px;
+  align-self: flex-start;
+}
+.levelup-card[data-kind="stat"] .levelup-kind {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: rgba(196, 26, 26, 0.08);
+}
+.levelup-card[data-kind="skill"] .levelup-kind {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+  background: rgba(230, 180, 80, 0.08);
+}
+.levelup-card[data-kind="weapon"] .levelup-kind {
+  color: var(--border-main);
+  border-color: var(--border-main);
+  background: rgba(138, 96, 56, 0.1);
+}
+.levelup-card[data-kind="pet"] .levelup-kind {
+  color: var(--hp-full);
+  border-color: var(--hp-full);
+  background: rgba(95, 176, 74, 0.08);
+}
+
+/* Icon row */
+.levelup-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  background: var(--paper-dark);
+  border: 2px solid var(--border-inner);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px var(--border-outer) inset;
+  margin: 4px 0 8px;
+  align-self: center;
+}
+.levelup-card[data-kind="stat"] .levelup-icon { border-color: var(--primary); box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 14px rgba(196, 26, 26, 0.35); }
+.levelup-card[data-kind="skill"] .levelup-icon { border-color: var(--accent-gold); box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 14px rgba(230, 180, 80, 0.4); }
+.levelup-card[data-kind="weapon"] .levelup-icon { border-color: var(--border-main); box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 14px rgba(138, 96, 56, 0.4); }
+.levelup-card[data-kind="pet"] .levelup-icon { border-color: var(--hp-full); box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 14px rgba(95, 176, 74, 0.4); }
+.levelup-icon svg { width: 70%; height: 70%; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6)); }
+
+/* Title + flavor */
+.levelup-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 0.05em;
+  color: var(--text-strong);
+  text-transform: uppercase;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+  text-align: center;
+  line-height: 1.1;
+  margin: 0;
+}
+.levelup-desc {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0;
+  flex: 1;
+}
+
+/* Pick label (footer del card) */
+.levelup-pick {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-shadow);
+  opacity: 0.7;
+  transition: opacity 0.18s;
+}
+.levelup-card:hover:not(:disabled) .levelup-pick { opacity: 1; }
+.levelup-pick .arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.levelup-card:hover:not(:disabled) .levelup-pick .arrow { transform: translateX(4px); }
+
+/* ── EMPTY STATE ── */
+.levelup-empty {
+  text-align: center;
+  padding: 48px 24px;
+  background: rgba(13, 10, 20, 0.4);
+  border: 1px dashed var(--border-shadow);
+  border-radius: 6px;
+  margin: 24px auto;
+  max-width: 600px;
+}
+.levelup-empty .empty-mark {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  margin-bottom: 12px;
+}
+.levelup-empty .empty-sub {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 24px;
+}

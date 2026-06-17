@@ -16,6 +16,7 @@ import {
   type LevelUpChoice,
   type LevelUpOffer,
 } from '../lib/coreBridge.js';
+import { toFightLog, type FightLog } from 'core';
 import {
   deserializeBrute,
   serializeForPrisma,
@@ -33,6 +34,8 @@ export interface FightResult {
     duration: number;
     fightType: FightType;
     opponent: { id: string; name: string };
+    /** FightLog en el shape que consume el FightViewer Pixi. */
+    fightLog: FightLog;
   };
   brute: BruteSnapshot;
   leveledUp: boolean;
@@ -160,6 +163,8 @@ export async function runFight(input: FightInput): Promise<FightResult> {
     choices = computeChoices(updatedCore, mulberry32(choiceSeed));
   }
 
+  const fightLog = toFightLog(playerCore, opponentCore, result);
+
   return {
     combat: {
       id: combatRow.id,
@@ -168,6 +173,7 @@ export async function runFight(input: FightInput): Promise<FightResult> {
       duration: result.duration,
       fightType: input.fightType,
       opponent: { id: opponent.id, name: opponent.name },
+      fightLog,
     },
     brute: snapshot,
     leveledUp,

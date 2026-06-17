@@ -30,6 +30,7 @@ function safeParse<T>(raw: string, fallback: T): T {
 }
 
 export function deserializeBrute(row: PrismaBrute): BruteSnapshot {
+  const gender: 'male' | 'female' = row.gender === 'female' ? 'female' : 'male';
   return {
     id: row.id,
     userId: row.userId,
@@ -54,6 +55,9 @@ export function deserializeBrute(row: PrismaBrute): BruteSnapshot {
       shirt: '#3b3b8a',
       pants: '#1f1f1f',
     }),
+    gender,
+    body: row.body,
+    bodyColors: row.bodyColors,
     victories: row.victories,
     defeats: row.defeats,
     fightsRemaining: row.fightsRemaining,

@@ -1,13 +1,56 @@
+// CharacterCreator — Forjar un Bruto.
+// Reskin coherente con el design system dark fantasy. Lógica preservada:
+// pre-pop desde URL params (name, gender, master), randomize body/colors,
+// submit a api.brutes.create, navegación post-creation.
+
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { BruteAvatar } from '@/components/BruteAvatar';
 import { api, ApiError } from '@/api/apiClient';
-import type { Appearance, Brute, Gender } from 'core';
+import {
+  appearancePalettes,
+  generateColorString,
+  getRandomBody,
+  getRandomColors,
+  mulberry32,
+  hashStringToSeed,
+  type Brute,
+  type BruteGender,
+} from 'core';
 import { isValidName } from '@/lib/format';
-import { HAIR_PALETTE, PANTS_PALETTE, SHIRT_PALETTE, SKIN_PALETTE } from '@/lib/palette';
 import { useGameStore } from '@/store/useGameStore';
 import { useToastStore } from '@/store/useToastStore';
+
+function previewId(gender: BruteGender, body: string, bodyColors: string): string {
+  return `preview-${gender}-${body}-${bodyColors}`;
+}
+
+function setColorIdx(
+  current: string,
+  field: 'skin' | 'hair' | 'shirt',
+  idx: number,
+): string {
+  const pairs = Array.from({ length: 16 }, (_, i) => current.slice(i * 2, i * 2 + 2));
+  const padded = pairs.map((p) => (p.length === 2 ? p : '00'));
+  const setIdx = (offset: number) => {
+    padded[offset] = idx.toString().padStart(2, '0');
+  };
+  if (field === 'skin') {
+    setIdx(0); setIdx(1); setIdx(2);
+  } else if (field === 'hair') {
+    setIdx(3); setIdx(4); setIdx(5); setIdx(6); setIdx(7);
+  } else {
+    setIdx(8);
+  }
+  return padded.join('');
+}
+
+function getColorIdx(current: string, field: 'skin' | 'hair' | 'shirt'): number {
+  const offset = field === 'skin' ? 0 : field === 'hair' ? 6 : 16;
+  const v = parseInt(current.slice(offset, offset + 2), 10);
+  return Number.isFinite(v) ? v : 0;
+}
 
 export function CharacterCreator() {
   const [search] = useSearchParams();
@@ -20,21 +63,30 @@ export function CharacterCreator() {
   const [master, setMaster] = useState<Brute | null>(null);
 
   const [name, setName] = useState<string>('');
-  const [gender, setGender] = useState<Gender>('M');
-  const [skin, setSkin] = useState<string>(SKIN_PALETTE[1]!);
-  const [hair, setHair] = useState<string>(HAIR_PALETTE[0]!);
-  const [shirt, setShirt] = useState<string>(SHIRT_PALETTE[0]!);
+  const [gender, setGender] = useState<BruteGender>('male');
+  const [body, setBody] = useState<string>(() => {
+    const rng = mulberry32(hashStringToSeed('brutus-default-body'));
+    return getRandomBody('male', rng);
+  });
+  const [bodyColors, setBodyColors] = useState<string>(() =>
+    generateColorString({
+      col0: 1, col0a: 1, col0c: 1,
+      col1: 0, col1a: 0, col1b: 0, col1c: 0, col1d: 0,
+      col2: 0, col2a: 0, col2b: 0,
+      col3: 0, col3b: 0,
+      col4: 0, col4a: 0, col4b: 0,
+    }),
+  );
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  const appearance = useMemo<Appearance>(
-    () => ({
-      gender,
-      skin,
-      hair,
-      shirt,
-      pants: PANTS_PALETTE[0]!,
-    }),
-    [gender, skin, hair, shirt],
+  useEffect(() => {
+    const rng = mulberry32(hashStringToSeed(`gender-switch-${gender}-${Date.now()}`));
+    setBody((prev) => prev || getRandomBody(gender, rng));
+  }, [gender]);
+
+  const previewSubject = useMemo(
+    () => ({ id: previewId(gender, body, bodyColors), gender, body, bodyColors }),
+    [gender, body, bodyColors],
   );
 
   useEffect(() => {
@@ -45,15 +97,46 @@ export function CharacterCreator() {
         const m = await api.brutes.get(masterId);
         if (!cancelled) setMaster(m);
       } catch {
-        // si falla, ignoramos: simplemente no mostramos banner
+        // ignorar
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [masterId]);
 
+  // Pre-populate name + gender desde URL search params (cuando viene del Landing).
+  useEffect(() => {
+    const qName = search.get('name');
+    const qGender = search.get('gender');
+    if (qName) {
+      setName(qName.slice(0, 20));
+    }
+    if (qGender === 'male' || qGender === 'female') {
+      setGender(qGender);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const nameValid = isValidName(name);
+
+  const skinPalette = appearancePalettes[gender].skin;
+  const hairPalette = appearancePalettes[gender].hair;
+  const clothingPalette = appearancePalettes[gender].clothing;
+
+  const skinIdx = getColorIdx(bodyColors, 'skin');
+  const hairIdx = getColorIdx(bodyColors, 'hair');
+  const shirtIdx = getColorIdx(bodyColors, 'shirt');
+
+  const randomize = () => {
+    const seed = Date.now() & 0x7fffffff;
+    const rng = mulberry32(seed);
+    setBody(getRandomBody(gender, rng));
+    setBodyColors(getRandomColors(gender, rng));
+  };
+
+  const randomizeBodyParts = () => {
+    const rng = mulberry32(Date.now() & 0x7fffffff);
+    setBody(getRandomBody(gender, rng));
+  };
 
   const submit = async () => {
     if (!nameValid || submitting) return;
@@ -61,7 +144,9 @@ export function CharacterCreator() {
     try {
       const brute = await api.brutes.create({
         name: name.trim(),
-        appearance,
+        gender,
+        body,
+        bodyColors,
         masterId: masterId ?? undefined,
       });
       rememberBrute({ id: brute.id, name: brute.name, level: brute.level });
@@ -76,99 +161,163 @@ export function CharacterCreator() {
   };
 
   return (
-    <div className="min-h-screen p-6 max-w-3xl mx-auto">
-      <h1 className="font-serif text-3xl text-gold mb-6">Forjar un Bruto</h1>
+    <div className="creator-shell anim-fade-up">
+      <header className="creator-hero">
+        <div className="eyebrow">
+          <span>Forja tu destino</span>
+        </div>
+        <h1>
+          Invocar <em>bruto</em>
+        </h1>
+        <div className="sub">Elegí su forma, su nombre, libéralo en la arena</div>
+      </header>
 
       {master && (
-        <div className="panel border-gold p-3 mb-6 text-sm">
-          Vas a ser discípulo de <span className="text-gold font-serif">{master.name}</span> (Nivel {master.level}).
+        <div className="creator-pupil-banner">
+          Vas a ser discípulo de <b>{master.name}</b> · Nivel {master.level}
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="panel p-6 flex flex-col items-center justify-center">
-          <BruteAvatar appearance={appearance} size="lg" />
-          <div className="mt-4 font-serif text-xl text-ink">{name || 'Sin nombre'}</div>
-        </div>
-
-        <div className="panel p-6 flex flex-col gap-5">
-          <label className="block">
-            <span className="text-sm text-muted mb-1 block">Nombre</span>
-            <input
-              className="input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={20}
-              placeholder="Aelar el Tuerto"
-              aria-invalid={!nameValid && name.length > 0}
-            />
-            {name.length > 0 && !nameValid && (
-              <p className="text-xs text-blood mt-1">3-20 caracteres alfanuméricos.</p>
-            )}
-          </label>
-
-          <fieldset>
-            <legend className="text-sm text-muted mb-2">Género</legend>
-            <div className="grid grid-cols-2 gap-2">
-              {(['M', 'F'] as const).map((g) => (
-                <button
-                  key={g}
-                  type="button"
-                  onClick={() => setGender(g)}
-                  className={clsx(
-                    'panel py-2 text-sm font-serif transition-all',
-                    gender === g ? 'border-gold shadow-rune-strong text-gold' : 'hover:border-rune',
-                  )}
-                  aria-pressed={gender === g}
-                >
-                  {g === 'M' ? 'Hombre' : 'Mujer'}
-                </button>
-              ))}
+      <section className="creator-panel">
+        <div className="creator-grid">
+          {/* Preview izquierdo */}
+          <div className="creator-preview">
+            <div className="creator-preview-frame">
+              <BruteAvatar brute={previewSubject} size="lg" />
+              <span className="pin tl" />
+              <span className="pin tr" />
+              <span className="pin bl" />
+              <span className="pin br" />
             </div>
-          </fieldset>
+            <div className={clsx('creator-preview-name', !name && 'empty')}>
+              {name || 'Sin nombre'}
+            </div>
+            <div className="creator-randomizers">
+              <button
+                type="button"
+                className="creator-randomizer-btn"
+                onClick={randomizeBodyParts}
+                title="Aleatorizar cuerpo (mantener colores)"
+              >
+                ⚂ Cuerpo
+              </button>
+              <button
+                type="button"
+                className="creator-randomizer-btn"
+                onClick={randomize}
+                title="Aleatorizar todo"
+              >
+                ⚂ Todo
+              </button>
+            </div>
+          </div>
 
-          <Swatches label="Piel" colors={SKIN_PALETTE} value={skin} onChange={setSkin} />
-          <Swatches label="Pelo" colors={HAIR_PALETTE} value={hair} onChange={setHair} />
-          <Swatches label="Camisa" colors={SHIRT_PALETTE} value={shirt} onChange={setShirt} />
+          {/* Form derecho */}
+          <div className="creator-form">
+            <div>
+              <div className="creator-field-label">
+                <span>Nombre del guerrero</span>
+                {name.length > 0 && !nameValid && <span className="err">3-20 alfanuméricos</span>}
+              </div>
+              <input
+                className="creator-name-input"
+                placeholder="Vorgath, Sanguineus, Mörgar…"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={20}
+                spellCheck={false}
+                autoComplete="off"
+                aria-invalid={!nameValid && name.length > 0}
+              />
+            </div>
 
-          <button
-            type="button"
-            onClick={submit}
-            disabled={!nameValid || submitting}
-            className="btn-primary mt-2"
-          >
-            {submitting ? 'Forjando…' : 'Invocar bruto'}
-          </button>
+            <div>
+              <div className="creator-field-label">
+                <span>Linaje</span>
+              </div>
+              <div className="creator-gender">
+                {(['male', 'female'] as const).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setGender(g)}
+                    className={clsx('creator-gender-btn', gender === g && 'active')}
+                    aria-pressed={gender === g}
+                  >
+                    <span className="glyph" aria-hidden>
+                      {g === 'male' ? '♂' : '♀'}
+                    </span>
+                    <span>{g === 'male' ? 'Macho' : 'Hembra'}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <SwatchRow
+              label="Piel"
+              colors={skinPalette}
+              valueIdx={skinIdx}
+              onPick={(idx) => setBodyColors((c) => setColorIdx(c, 'skin', idx))}
+            />
+            <SwatchRow
+              label="Pelo"
+              colors={hairPalette}
+              valueIdx={hairIdx}
+              onPick={(idx) => setBodyColors((c) => setColorIdx(c, 'hair', idx))}
+            />
+            <SwatchRow
+              label="Atuendo"
+              colors={clothingPalette}
+              valueIdx={shirtIdx}
+              onPick={(idx) => setBodyColors((c) => setColorIdx(c, 'shirt', idx))}
+            />
+
+            <button
+              type="button"
+              className="creator-cta"
+              onClick={submit}
+              disabled={!nameValid || submitting}
+            >
+              <span>{submitting ? 'Forjando…' : 'Invocar bruto'}</span>
+              {!submitting && <span className="arrow">›</span>}
+            </button>
+            <div className={clsx('creator-fine', !nameValid && name.length > 0 && 'error')}>
+              {name.length === 0
+                ? 'Cada guerrero es único e irrepetible'
+                : nameValid
+                  ? 'Listo para forjar'
+                  : 'Nombre debe tener entre 3 y 20 caracteres alfanuméricos'}
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
 
-interface SwatchesProps {
+interface SwatchRowProps {
   label: string;
   colors: ReadonlyArray<string>;
-  value: string;
-  onChange: (c: string) => void;
+  valueIdx: number;
+  onPick: (idx: number) => void;
 }
 
-function Swatches({ label, colors, value, onChange }: SwatchesProps) {
+function SwatchRow({ label, colors, valueIdx, onPick }: SwatchRowProps) {
   return (
     <fieldset>
-      <legend className="text-sm text-muted mb-2">{label}</legend>
-      <div className="flex gap-2">
-        {colors.map((c) => (
+      <legend className="creator-field-label">
+        <span>{label}</span>
+      </legend>
+      <div className="creator-swatches">
+        {colors.map((c, i) => (
           <button
             type="button"
-            key={c}
-            onClick={() => onChange(c)}
-            className={clsx(
-              'w-8 h-8 rounded-full border-2 transition-transform',
-              value === c ? 'border-gold scale-110 shadow-rune-strong' : 'border-arcane hover:scale-105',
-            )}
+            key={`${c}-${i}`}
+            onClick={() => onPick(i)}
+            className={clsx('creator-swatch', valueIdx === i && 'active')}
             style={{ backgroundColor: c }}
-            aria-label={`${label} ${c}`}
-            aria-pressed={value === c}
+            aria-label={`${label} ${i + 1}`}
+            aria-pressed={valueIdx === i}
           />
         ))}
       </div>
