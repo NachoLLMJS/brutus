@@ -16,7 +16,7 @@ Recommended Railway settings:
 
 - Root directory: repository root (`/`)
 - Build command: `npm install && npm run build -w core && npm run build -w server`
-- Start command: `npm run start -w server`
+- Start command: `npm run start:railway -w server`
 
 Required variables:
 
