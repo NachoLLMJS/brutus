@@ -1,0 +1,19 @@
+# Deploy only the Vite frontend build inputs needed by Vercel.
+contracts/
+server/
+prisma/
+scripts/
+client/public/debug/
+client/public/brute-parts-static.html
+client/public/assets/weapons/_originals/
+client/public/images/generated/
+client/public/images/game/resources/misc/background/* - copia.jpg
+node_modules/
+dist/
+build/
+coverage/
+*.log
+*.db
+.env
+.env.*
+!.env.example
