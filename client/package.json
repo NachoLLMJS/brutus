@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build -w core && tsc --noEmit && vite build",
-    "start": "vite preview --host 0.0.0.0 --port 4173",
+    "start": "serve -s dist -l tcp://0.0.0.0:4173",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },
@@ -20,8 +20,8 @@
     "@pixi/filter-motion-blur": "^4.2.0",
     "@pixi/filter-outline": "^4.2.0",
     "@pixi/sound": "^4.4.1",
-    "clsx": "2.1.1",
     "brutus-fla-parser": "*",
+    "clsx": "2.1.1",
     "core": "*",
     "labrute-static-fla-parser": "^1.0.6",
     "pixi-tweener": "^0.12.2",
@@ -29,6 +29,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
+    "serve": "^14.2.6",
     "zustand": "4.5.7"
   },
   "devDependencies": {
