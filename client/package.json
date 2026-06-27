@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build -w core && tsc --noEmit && vite build",
-    "start": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
+    "start": "vite preview --host 0.0.0.0 --port 4173",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },
