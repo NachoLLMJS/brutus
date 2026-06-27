@@ -48,3 +48,4 @@ contracts/broadcast/
 
 # Local visual scratch copies
 client/public/images/game/resources/misc/background/* - copia.jpg
+.vercel
