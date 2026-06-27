@@ -29,6 +29,7 @@ import {
   formatTokenUnits,
   getEthereumProvider,
   isSupportedBnbChain,
+  readCombatCanClaim,
   readCombatClaimRequirements,
 } from '@/lib/web3';
 
@@ -202,6 +203,15 @@ export function FightViewer() {
           'error',
           `No puedes claimear todavía: necesitas holdear ${formatTokenUnits(info.minimumHold)} tokens y ahora tienes ${formatTokenUnits(info.walletBalance)}.`,
         );
+        return;
+      }
+      const canClaim = await readCombatCanClaim(provider, walletAddress, reward.fightId);
+      if (!canClaim.ok) {
+        const reason = canClaim.reason || 'claim_not_available';
+        const readable = reason === 'needs 10000 tokens'
+          ? `No puedes claimear todavía: necesitas holdear ${formatTokenUnits(info.minimumHold)} tokens y ahora tienes ${formatTokenUnits(info.walletBalance)}.`
+          : `No puedes claimear todavía: ${reason}.`;
+        pushToast('error', readable);
         return;
       }
       const tx = await claimCombatRewardOnChain(provider, walletAddress, reward.fightId);
