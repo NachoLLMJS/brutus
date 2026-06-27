@@ -6,6 +6,10 @@
 
 import { z } from 'zod';
 
+function defaultHost(): string {
+  return process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
+}
+
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z
@@ -13,7 +17,7 @@ const EnvSchema = z.object({
     .default('3001')
     .transform((v) => Number.parseInt(v, 10))
     .pipe(z.number().int().min(1).max(65535)),
-  HOST: z.string().default('127.0.0.1'),
+  HOST: z.string().default(defaultHost()),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   CLIENT_ORIGIN: z.string().url().default('http://localhost:5173'),
   JWT_SECRET: z.string().min(16).default('dev-only-not-for-production-do-not-use'),

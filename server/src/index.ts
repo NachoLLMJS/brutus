@@ -1,6 +1,6 @@
 // Entry point. Loads env, configures middleware, mounts routes, binds to
-// 127.0.0.1 by default (configurable via HOST). NEVER bind to 0.0.0.0
-// without explicit operator intent — local-first auth model assumes loopback.
+// 127.0.0.1 in development and 0.0.0.0 in production/Railway unless HOST
+// is explicitly configured.
 
 import express from 'express';
 import helmet from 'helmet';
