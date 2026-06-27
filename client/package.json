@@ -6,7 +6,7 @@
   "description": "Brutus v3 frontend (Vite + React + TypeScript + Tailwind, dark fantasy theme).",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run build -w core && tsc --noEmit && vite build",
     "start": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
