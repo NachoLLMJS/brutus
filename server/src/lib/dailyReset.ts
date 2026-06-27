@@ -6,7 +6,7 @@ import { prisma } from '../db.js';
 import type { Brute as PrismaBrute } from '@prisma/client';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const POOL_NORMAL = 5;
+const POOL_NORMAL = 3;
 const POOL_TRAINING = 10;
 
 export async function maybeResetDaily(row: PrismaBrute): Promise<PrismaBrute> {

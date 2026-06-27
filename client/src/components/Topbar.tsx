@@ -7,6 +7,8 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { useGameStore } from '@/store/useGameStore';
+import { useWalletStore, walletStatusLabel } from '@/store/useWalletStore';
+import { isSupportedBnbChain } from '@/lib/web3';
 
 interface NavItem {
   label: string;
@@ -42,6 +44,11 @@ export function Topbar() {
   const { pathname } = useLocation();
   const recentBrutes = useGameStore((s) => s.recentBrutes);
   const currentBruteId = useGameStore((s) => s.currentBruteId);
+  const address = useWalletStore((s) => s.address);
+  const chainId = useWalletStore((s) => s.chainId);
+  const connecting = useWalletStore((s) => s.connecting);
+  const connect = useWalletStore((s) => s.connect);
+  const switchToBnb = useWalletStore((s) => s.switchToBnb);
 
   // Determinar el bruteId activo: prioridad URL → store currentBrute → primer
   // recent. Permite que la nav funcione incluso desde Landing/Creator.
@@ -122,16 +129,32 @@ export function Topbar() {
         <span className="hidden sm:inline">
           {activeBrute?.name ?? 'Sin bruto'}
         </span>
-        <div
-          aria-hidden
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 3,
-            background: 'var(--paper-accent)',
-            border: '1px solid var(--border-shadow)',
+        <button
+          type="button"
+          onClick={() => {
+            if (!address) void connect();
+            else if (!isSupportedBnbChain(chainId)) void switchToBnb();
           }}
-        />
+          disabled={connecting}
+          title="MetaMask BNB wallet"
+          style={{
+            minHeight: 28,
+            padding: '0 10px',
+            borderRadius: 3,
+            border: `1px solid ${address && isSupportedBnbChain(chainId) ? 'rgba(230,180,80,0.55)' : 'var(--border-shadow)'}`,
+            background: address && isSupportedBnbChain(chainId)
+              ? 'rgba(230,180,80,0.12)'
+              : 'var(--paper-accent)',
+            color: address && isSupportedBnbChain(chainId) ? 'var(--accent-gold)' : 'var(--text-secondary)',
+            cursor: connecting ? 'wait' : 'pointer',
+            fontFamily: 'var(--font-sans)',
+            fontSize: 11,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {connecting ? 'Conectando…' : walletStatusLabel(address, chainId)}
+        </button>
       </div>
     </header>
   );

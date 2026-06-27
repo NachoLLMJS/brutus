@@ -26,9 +26,26 @@ export interface CreateBruteInput {
   gender?: 'male' | 'female';
   body?: string;
   bodyColors?: string;
+  walletAddress: string;
+  onChainBruteId?: number;
+  createTxHash?: string;
+}
+
+const WALLET_REGEX = /^0x[0-9a-fA-F]{40}$/;
+const TX_HASH_REGEX = /^0x[0-9a-fA-F]{64}$/;
+const BASE_BRUTE_LIMIT = 3;
+
+function normalizeWallet(address: string): string {
+  if (!WALLET_REGEX.test(address)) throw new HttpError(400, 'invalid_wallet');
+  return address.toLowerCase();
 }
 
 export async function createBrute(input: CreateBruteInput): Promise<BruteSnapshot> {
+  const ownerWallet = normalizeWallet(input.walletAddress);
+  if (input.createTxHash && !TX_HASH_REGEX.test(input.createTxHash)) {
+    throw new HttpError(400, 'invalid_create_tx_hash');
+  }
+
   const taken = await prisma.brute.findUnique({ where: { name: input.name } });
   if (taken) {
     throw new HttpError(409, 'name_taken');
@@ -37,6 +54,15 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
   if (input.masterId) {
     const master = await prisma.brute.findUnique({ where: { id: input.masterId } });
     if (!master) throw new HttpError(404, 'master_not_found');
+  }
+
+  const existingWalletBrutes = await prisma.brute.count({ where: { ownerWallet } });
+  if (existingWalletBrutes >= BASE_BRUTE_LIMIT) {
+    if (!input.onChainBruteId || !input.createTxHash) {
+      throw new HttpError(402, 'base_brute_limit_reached_extra_requires_onchain_payment');
+    }
+    const duplicateOnChain = await prisma.brute.findUnique({ where: { onChainBruteId: input.onChainBruteId } });
+    if (duplicateOnChain) throw new HttpError(409, 'onchain_brute_already_imported');
   }
 
   const stats = generateInitialStats(input.name, {
@@ -55,6 +81,9 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
   const created = await prisma.brute.create({
     data: {
       name: input.name,
+      ownerWallet,
+      onChainBruteId: input.onChainBruteId ?? null,
+      createTxHash: input.createTxHash ?? null,
       seed: stats.seed,
       hp: stats.hp,
       strength: stats.strength,
@@ -67,6 +96,7 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
       gender: stats.gender,
       body: stats.body,
       bodyColors: stats.bodyColors,
+      fightsRemaining: 3,
       masterId: input.masterId ?? null,
     },
   });

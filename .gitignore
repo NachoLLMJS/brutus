@@ -40,3 +40,11 @@ coverage/
 .cache/
 tmp/
 temp/
+
+# Foundry generated outputs / local broadcasts
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# Local visual scratch copies
+client/public/images/game/resources/misc/background/* - copia.jpg

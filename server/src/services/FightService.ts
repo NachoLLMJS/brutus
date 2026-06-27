@@ -23,6 +23,7 @@ import {
   type BruteSnapshot,
 } from '../lib/serialization.js';
 import { maybeResetDaily } from '../lib/dailyReset.js';
+import { combatRewardFightId, recordCombatRewardWinner } from './OnChainService.js';
 
 export type FightType = 'normal' | 'training';
 
@@ -36,6 +37,13 @@ export interface FightResult {
     opponent: { id: string; name: string };
     /** FightLog en el shape que consume el FightViewer Pixi. */
     fightLog: FightLog;
+    reward?: {
+      eligible: boolean;
+      fightId?: string;
+      winnerWallet?: string;
+      recordedTxHash?: string;
+      reason?: string;
+    };
   };
   brute: BruteSnapshot;
   leveledUp: boolean;
@@ -165,6 +173,40 @@ export async function runFight(input: FightInput): Promise<FightResult> {
 
   const fightLog = toFightLog(playerCore, opponentCore, result);
 
+  let reward: FightResult['combat']['reward'] = { eligible: false, reason: playerWon ? 'recording_unavailable' : 'player_lost' };
+  if (playerWon && input.fightType === 'normal') {
+    if (!player.ownerWallet) {
+      reward = { eligible: false, reason: 'winner_wallet_missing' };
+    } else {
+      const fightId = combatRewardFightId(combatRow.id);
+      try {
+        const recordedTxHash = await recordCombatRewardWinner(fightId, player.ownerWallet);
+        await prisma.combat.update({
+          where: { id: combatRow.id },
+          data: {
+            rewardFightId: fightId,
+            rewardWinnerWallet: player.ownerWallet,
+            rewardRecordedTxHash: recordedTxHash,
+          },
+        });
+        reward = {
+          eligible: true,
+          fightId,
+          winnerWallet: player.ownerWallet,
+          recordedTxHash,
+        };
+      } catch (err) {
+        reward = {
+          eligible: false,
+          winnerWallet: player.ownerWallet,
+          reason: err instanceof HttpError ? err.code : 'reward_record_failed',
+        };
+      }
+    }
+  } else if (playerWon && input.fightType === 'training') {
+    reward = { eligible: false, reason: 'training_fight_no_bnb_reward' };
+  }
+
   return {
     combat: {
       id: combatRow.id,
@@ -174,6 +216,7 @@ export async function runFight(input: FightInput): Promise<FightResult> {
       fightType: input.fightType,
       opponent: { id: opponent.id, name: opponent.name },
       fightLog,
+      reward,
     },
     brute: snapshot,
     leveledUp,

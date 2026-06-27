@@ -7,6 +7,7 @@ import { FightViewer } from '@/views/FightViewer';
 import { Tournament } from '@/views/Tournament';
 import { LevelUp } from '@/views/LevelUp';
 import { SymbolDebugger } from '@/views/SymbolDebugger';
+import { BrutePartsViewer } from '@/views/BrutePartsViewer';
 import { Topbar } from '@/components/Topbar';
 
 function RootLayout() {
@@ -34,6 +35,7 @@ export const router = createBrowserRouter([
       // Dev tool — sin link visible en la nav. Para identificar Symbols
       // del fork brutus-fla-parser cuando se reskinea sprites.
       { path: '/debug/symbols', element: <SymbolDebugger /> },
+      { path: '/debug/brute-parts', element: <BrutePartsViewer /> },
     ],
   },
 ]);

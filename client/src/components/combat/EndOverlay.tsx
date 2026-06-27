@@ -1,6 +1,8 @@
 // End overlay post-combate: card con verdict (Victoria/Derrota) + nombre del
 // ganador + summary + rewards (XP real, Streak determinístico) + acciones.
 
+import type { ReactNode } from 'react';
+
 interface EndOverlayProps {
   visible: boolean;
   isPlayerWinner: boolean;
@@ -18,6 +20,7 @@ interface EndOverlayProps {
   /** Si hay levelup pendiente, redirige al level-up en lugar de profile. */
   hasLevelUp?: boolean;
   onLevelUp?: () => void;
+  claimRewardButton?: ReactNode;
 }
 
 export function EndOverlay({
@@ -34,6 +37,7 @@ export function EndOverlay({
   onProfile,
   hasLevelUp,
   onLevelUp,
+  claimRewardButton,
 }: EndOverlayProps) {
   if (!visible) return null;
   const verdict = isPlayerWinner ? 'Victoria' : 'Derrota';
@@ -58,6 +62,7 @@ export function EndOverlay({
             <span className="val">×{streak}</span>
           </div>
         </div>
+        {claimRewardButton}
         <div className="end-actions">
           <button type="button" className="cb-btn" onClick={onRetry}>
             ↺ Volver

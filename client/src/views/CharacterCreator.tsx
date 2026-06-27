@@ -21,10 +21,21 @@ import {
 import { isValidName } from '@/lib/format';
 import { useGameStore } from '@/store/useGameStore';
 import { useToastStore } from '@/store/useToastStore';
+import { useWalletStore } from '@/store/useWalletStore';
+import {
+  createPaidExtraBruteOnChain,
+  formatBnbWei,
+  formatWallet,
+  getEthereumProvider,
+  isSupportedBnbChain,
+  metadataHashForBrute,
+  readExtraBrutePrice,
+} from '@/lib/web3';
 
 function previewId(gender: BruteGender, body: string, bodyColors: string): string {
   return `preview-${gender}-${body}-${bodyColors}`;
 }
+
 
 function setColorIdx(
   current: string,
@@ -58,6 +69,12 @@ export function CharacterCreator() {
   const rememberBrute = useGameStore((s) => s.rememberBrute);
   const setCurrent = useGameStore((s) => s.setCurrentBrute);
   const pushToast = useToastStore((s) => s.push);
+  const walletAddress = useWalletStore((s) => s.address);
+  const chainId = useWalletStore((s) => s.chainId);
+  const walletConnecting = useWalletStore((s) => s.connecting);
+  const walletError = useWalletStore((s) => s.error);
+  const connectWallet = useWalletStore((s) => s.connect);
+  const switchToBnb = useWalletStore((s) => s.switchToBnb);
 
   const masterId = search.get('master');
   const [master, setMaster] = useState<Brute | null>(null);
@@ -78,6 +95,9 @@ export function CharacterCreator() {
     }),
   );
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [paidForgeNeeded, setPaidForgeNeeded] = useState<boolean>(false);
+  const [paidForgePrice, setPaidForgePrice] = useState<bigint | null>(null);
+  const [paidForgeBusy, setPaidForgeBusy] = useState<boolean>(false);
 
   useEffect(() => {
     const rng = mulberry32(hashStringToSeed(`gender-switch-${gender}-${Date.now()}`));
@@ -117,6 +137,8 @@ export function CharacterCreator() {
   }, []);
 
   const nameValid = isValidName(name);
+  const walletReady = Boolean(walletAddress && isSupportedBnbChain(chainId));
+  const forgeDisabled = !nameValid || submitting || !walletReady;
 
   const skinPalette = appearancePalettes[gender].skin;
   const hairPalette = appearancePalettes[gender].hair;
@@ -139,7 +161,16 @@ export function CharacterCreator() {
   };
 
   const submit = async () => {
-    if (!nameValid || submitting) return;
+    if (submitting) return;
+    if (!walletAddress) {
+      pushToast('error', 'Conecta MetaMask para forjar.');
+      return;
+    }
+    if (!isSupportedBnbChain(chainId)) {
+      pushToast('error', 'Cambia a BNB Chain/Testnet para forjar.');
+      return;
+    }
+    if (!nameValid) return;
     setSubmitting(true);
     try {
       const brute = await api.brutes.create({
@@ -147,16 +178,71 @@ export function CharacterCreator() {
         gender,
         body,
         bodyColors,
+        walletAddress,
         masterId: masterId ?? undefined,
       });
       rememberBrute({ id: brute.id, name: brute.name, level: brute.level });
+      setPaidForgeNeeded(false);
       setCurrent(brute.id);
       navigate(`/brute/${brute.id}`);
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'NETWORK_ERROR';
-      pushToast('error', `No se pudo crear: ${code}`);
+      if (code === 'base_brute_limit_reached_extra_requires_onchain_payment') {
+        setPaidForgeNeeded(true);
+        const provider = getEthereumProvider();
+        if (provider && walletAddress) {
+          try {
+            setPaidForgePrice(await readExtraBrutePrice(provider, walletAddress));
+          } catch {
+            setPaidForgePrice(null);
+          }
+        }
+        pushToast('info', 'Ya tienes 3 brutos. Puedes crear otro pagando BNB.');
+      } else {
+        pushToast('error', `No se pudo crear: ${code}`);
+      }
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const submitPaidExtra = async () => {
+    if (paidForgeBusy || !walletAddress || !walletReady || !nameValid) return;
+    const provider = getEthereumProvider();
+    if (!provider) {
+      pushToast('error', 'MetaMask no está disponible.');
+      return;
+    }
+    setPaidForgeBusy(true);
+    try {
+      const metadataHash = await metadataHashForBrute({
+        name: name.trim(),
+        walletAddress,
+        gender,
+        body,
+        bodyColors,
+      });
+      const paid = await createPaidExtraBruteOnChain(provider, walletAddress, metadataHash);
+      const brute = await api.brutes.create({
+        name: name.trim(),
+        gender,
+        body,
+        bodyColors,
+        walletAddress,
+        onChainBruteId: paid.onChainBruteId,
+        createTxHash: paid.txHash,
+        masterId: masterId ?? undefined,
+      });
+      rememberBrute({ id: brute.id, name: brute.name, level: brute.level });
+      setPaidForgeNeeded(false);
+      setCurrent(brute.id);
+      pushToast('success', 'Bruto extra creado pagando BNB.');
+      navigate(`/brute/${brute.id}`);
+    } catch (e) {
+      const code = e instanceof ApiError ? e.code : e instanceof Error ? e.message : 'paid_forge_failed';
+      pushToast('error', `Pago/creación falló: ${code}`);
+    } finally {
+      setPaidForgeBusy(false);
     }
   };
 
@@ -177,6 +263,39 @@ export function CharacterCreator() {
           Vas a ser discípulo de <b>{master.name}</b> · Nivel {master.level}
         </div>
       )}
+
+      <div
+        className="creator-pupil-banner"
+        style={{
+          display: 'grid',
+          gap: 8,
+          borderColor: walletReady ? 'rgba(230,180,80,0.5)' : 'rgba(196,26,26,0.45)',
+        }}
+      >
+        <div>
+          <b>Modo BNB/Flap preparado:</b>{' '}
+          {walletReady
+            ? `MetaMask conectada (${formatWallet(walletAddress)}). La creación local queda preparada para enlazarse al bruteId on-chain.`
+            : walletAddress
+              ? 'Wallet conectada, pero falta cambiar a BNB Chain/Testnet.'
+              : 'Conecta MetaMask antes de forjar. Cada wallet tiene 3 brutos base y los extras pagan BNB.'}
+        </div>
+        <div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+          Regla real: 3 brutos base por wallet · extras con BNB · 50% vault / 50% burn · 3 acciones diarias por bruto.
+        </div>
+        {!walletReady && (
+          <button
+            type="button"
+            className="creator-randomizer-btn"
+            onClick={() => (walletAddress ? void switchToBnb() : void connectWallet())}
+            disabled={walletConnecting}
+            style={{ justifySelf: 'start' }}
+          >
+            {walletConnecting ? 'Conectando…' : walletAddress ? 'Cambiar a BNB Testnet' : 'Conectar MetaMask'}
+          </button>
+        )}
+        {walletError && <div style={{ color: 'var(--primary)', fontSize: 12 }}>{walletError}</div>}
+      </div>
 
       <section className="creator-panel">
         <div className="creator-grid">
@@ -253,6 +372,7 @@ export function CharacterCreator() {
               </div>
             </div>
 
+
             <SwatchRow
               label="Piel"
               colors={skinPalette}
@@ -276,17 +396,46 @@ export function CharacterCreator() {
               type="button"
               className="creator-cta"
               onClick={submit}
-              disabled={!nameValid || submitting}
+              disabled={forgeDisabled}
             >
-              <span>{submitting ? 'Forjando…' : 'Invocar bruto'}</span>
+              <span>{submitting ? 'Forjando…' : walletReady ? 'Invocar bruto' : 'Wallet requerida'}</span>
               {!submitting && <span className="arrow">›</span>}
             </button>
-            <div className={clsx('creator-fine', !nameValid && name.length > 0 && 'error')}>
-              {name.length === 0
-                ? 'Cada guerrero es único e irrepetible'
-                : nameValid
-                  ? 'Listo para forjar'
-                  : 'Nombre debe tener entre 3 y 20 caracteres alfanuméricos'}
+            {paidForgeNeeded && walletReady && (
+              <div
+                style={{
+                  display: 'grid',
+                  gap: 8,
+                  marginTop: 10,
+                  padding: 12,
+                  border: '1px solid rgba(230,180,80,0.45)',
+                  background: 'rgba(230,180,80,0.08)',
+                }}
+              >
+                <b>Ya tienes 3 brutos base.</b>
+                <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                  Puedes forjar este bruto extra pagando {paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}.
+                  El contrato reparte 50% al vault y 50% a burn.
+                </span>
+                <button
+                  type="button"
+                  className="creator-cta"
+                  onClick={() => void submitPaidExtra()}
+                  disabled={paidForgeBusy || !nameValid}
+                >
+                  <span>{paidForgeBusy ? 'Esperando MetaMask…' : `Crear bruto extra pagando ${paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}`}</span>
+                  {!paidForgeBusy && <span className="arrow">›</span>}
+                </button>
+              </div>
+            )}
+            <div className={clsx('creator-fine', (!walletReady || (!nameValid && name.length > 0)) && 'error')}>
+              {!walletReady
+                ? 'Primero conecta MetaMask en BNB Chain/Testnet'
+                : name.length === 0
+                  ? 'Cada guerrero quedará ligado a tu wallet BNB'
+                  : nameValid
+                    ? 'Listo para forjar'
+                    : 'Nombre debe tener entre 3 y 20 caracteres alfanuméricos'}
             </div>
           </div>
         </div>

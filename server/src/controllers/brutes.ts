@@ -5,6 +5,8 @@ import * as BruteService from '../services/BruteService.js';
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 const NAME_REGEX = /^[a-zA-Z0-9 ]+$/;
 const ID_REGEX = /^[a-z0-9]{20,40}$/;
+const WALLET_REGEX = /^0x[0-9a-fA-F]{40}$/;
+const TX_HASH_REGEX = /^0x[0-9a-fA-F]{64}$/;
 
 export const CreateBruteBody = z.object({
   name: z.string().min(3).max(20).regex(NAME_REGEX, 'name_format'),
@@ -22,6 +24,9 @@ export const CreateBruteBody = z.object({
   gender: z.enum(['male', 'female']).optional(),
   body: z.string().regex(/^[0-9a-f]{1,11}$/).optional(),
   bodyColors: z.string().regex(/^[0-9a-f]{0,32}$/).optional(),
+  walletAddress: z.string().regex(WALLET_REGEX, 'invalid_wallet'),
+  onChainBruteId: z.number().int().positive().optional(),
+  createTxHash: z.string().regex(TX_HASH_REGEX, 'invalid_create_tx_hash').optional(),
 });
 
 export const BruteIdParams = z.object({

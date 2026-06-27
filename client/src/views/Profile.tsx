@@ -143,9 +143,9 @@ export function Profile() {
 
   const xpMax = xpToNext(brute.level);
   const xpPct = Math.min(100, Math.floor((brute.xp / xpMax) * 100));
-  const noFights = brute.fightsRemaining <= 0 && brute.trainingFightsRemaining <= 0;
-  const fightsTotal = 6;
-  const fightsRemaining = brute.fightsRemaining;
+  const noNormalFights = brute.fightsRemaining <= 0;
+  const fightsTotal = 3;
+  const fightsRemaining = Math.max(0, Math.min(fightsTotal, brute.fightsRemaining));
 
   const skill = selSkillId ? getSkill(selSkillId) : null;
   const weapon = selWeaponId ? getWeapon(selWeaponId) : null;
@@ -213,7 +213,7 @@ export function Profile() {
             <button type="button" className="btn-hero gold" onClick={goTrain} disabled={brute.trainingFightsRemaining <= 0}>
               Entrenar
             </button>
-            <button type="button" className="btn-hero primary" onClick={goFight} disabled={noFights}>
+            <button type="button" className="btn-hero primary" onClick={goFight} disabled={noNormalFights}>
               <span aria-hidden>⚔</span>
               <span>Pelear</span>
             </button>

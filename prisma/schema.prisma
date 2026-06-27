@@ -25,6 +25,9 @@ model Brute {
   userId                  String?
   user                    User?    @relation(fields: [userId], references: [id])
   name                    String   @unique
+  ownerWallet             String?
+  onChainBruteId          Int?     @unique
+  createTxHash            String?
   seed                    Int
   level                   Int      @default(1)
   xp                      Int      @default(0)
@@ -43,7 +46,7 @@ model Brute {
   bodyColors              String   @default("") // 32 hex chars
   victories               Int      @default(0)
   defeats                 Int      @default(0)
-  fightsRemaining         Int      @default(5)
+  fightsRemaining         Int      @default(3)
   trainingFightsRemaining Int      @default(10)
   defeatsToday            Int      @default(0)
   lastFightReset          DateTime @default(now())
@@ -55,6 +58,7 @@ model Brute {
   createdAt               DateTime @default(now())
 
   @@index([userId])
+  @@index([ownerWallet])
   @@index([masterId])
 }
 
@@ -66,8 +70,13 @@ model Combat {
   bruteB    Brute    @relation("CombatB", fields: [bruteBId], references: [id])
   winner    String   // 'A' | 'B'
   log       String   // JSON
-  fightType String   @default("normal") // 'normal' | 'training' | 'tournament'
-  createdAt DateTime @default(now())
+  fightType             String   @default("normal") // 'normal' | 'training' | 'tournament'
+  rewardFightId         String?  @unique
+  rewardWinnerWallet    String?
+  rewardRecordedTxHash  String?
+  rewardClaimTxHash     String?
+  rewardClaimedAt       DateTime?
+  createdAt             DateTime @default(now())
 
   @@index([bruteAId])
   @@index([bruteBId])

@@ -43,7 +43,7 @@ export const useGameStore = create<GameState>()(
       rememberBrute: (b) =>
         set((state) => {
           const without = state.recentBrutes.filter((r) => r.id !== b.id);
-          return { recentBrutes: [b, ...without].slice(0, 8) };
+          return { recentBrutes: [b, ...without] };
         }),
       forgetBrute: (id) =>
         set((state) => ({

@@ -22,6 +22,15 @@ import { TweaksPanel, TweakSection, TweakToggle, TweakSlider } from '@/component
 import { useCombatSettings } from '@/store/useCombatSettings';
 import { useBrute } from '@/hooks/useBrute';
 import { api } from '@/api/apiClient';
+import { useWalletStore } from '@/store/useWalletStore';
+import {
+  claimCombatRewardOnChain,
+  formatBnbWei,
+  formatTokenUnits,
+  getEthereumProvider,
+  isSupportedBnbChain,
+  readCombatClaimRequirements,
+} from '@/lib/web3';
 
 const VS_DURATION_MS = 1900;
 
@@ -31,6 +40,11 @@ export function FightViewer() {
   const pushToast = useToastStore((s) => s.push);
   const lastFight = useGameStore((s) => s.lastFight);
   const { brute: playerBrute } = useBrute(id);
+  const walletAddress = useWalletStore((s) => s.address);
+  const chainId = useWalletStore((s) => s.chainId);
+  const connectWallet = useWalletStore((s) => s.connect);
+  const switchToBnb = useWalletStore((s) => s.switchToBnb);
+  const walletReady = Boolean(walletAddress && isSupportedBnbChain(chainId));
 
   const stageRef = useRef<HTMLDivElement | null>(null);
   const stageInstance = useRef<FightStage | null>(null);
@@ -41,6 +55,15 @@ export function FightViewer() {
   const [hpById, setHpById] = useState<Record<number, number>>({});
   const [bannerKey, setBannerKey] = useState<{ text: string; epoch: number } | null>(null);
   const [opponentBrute, setOpponentBrute] = useState<Brute | null>(null);
+  const [claimingReward, setClaimingReward] = useState(false);
+  const [claimedRewardTx, setClaimedRewardTx] = useState<string | null>(null);
+  const [claimInfo, setClaimInfo] = useState<{
+    minimumHold: bigint;
+    walletBalance: bigint;
+    claimAmount: bigint;
+    canHoldClaim: boolean;
+  } | null>(null);
+  const [claimInfoLoading, setClaimInfoLoading] = useState(false);
 
   const showActionBanner = useCombatSettings((s) => s.showActionBanner);
   const setShowActionBanner = useCombatSettings((s) => s.setShowActionBanner);
@@ -103,6 +126,31 @@ export function FightViewer() {
     };
   }, [phase, fightLog]);
 
+  useEffect(() => {
+    const reward = lastFight?.combat.reward;
+    if (!reward?.eligible || !walletReady || !walletAddress) {
+      setClaimInfo(null);
+      return;
+    }
+    const provider = getEthereumProvider();
+    if (!provider) return;
+    let cancelled = false;
+    setClaimInfoLoading(true);
+    void readCombatClaimRequirements(provider, walletAddress)
+      .then((info) => {
+        if (!cancelled) setClaimInfo(info);
+      })
+      .catch(() => {
+        if (!cancelled) setClaimInfo(null);
+      })
+      .finally(() => {
+        if (!cancelled) setClaimInfoLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [lastFight?.combat.reward?.eligible, walletAddress, walletReady]);
+
   // Detectar steps recientes para disparar action banners DOM.
   useEffect(() => {
     if (!fightLog || !showActionBanner) return;
@@ -127,6 +175,47 @@ export function FightViewer() {
   };
   const goLevelUp = () => {
     navigate(`/brute/${id}/levelup`);
+  };
+
+  const claimReward = async () => {
+    const reward = lastFight?.combat.reward;
+    if (!reward?.eligible || !reward.fightId) return;
+    if (!walletAddress) {
+      await connectWallet();
+      return;
+    }
+    if (!walletReady) {
+      await switchToBnb();
+      return;
+    }
+    const provider = getEthereumProvider();
+    if (!provider) {
+      pushToast('error', 'MetaMask no está disponible.');
+      return;
+    }
+    setClaimingReward(true);
+    try {
+      const info = claimInfo ?? await readCombatClaimRequirements(provider, walletAddress);
+      setClaimInfo(info);
+      if (!info.canHoldClaim) {
+        pushToast(
+          'error',
+          `No puedes claimear todavía: necesitas holdear ${formatTokenUnits(info.minimumHold)} tokens y ahora tienes ${formatTokenUnits(info.walletBalance)}.`,
+        );
+        return;
+      }
+      const tx = await claimCombatRewardOnChain(provider, walletAddress, reward.fightId);
+      setClaimedRewardTx(tx.txHash);
+      pushToast('success', `Claim enviado: ${formatBnbWei(info.claimAmount)} BNB testnet.`);
+    } catch (e) {
+      const raw = e instanceof Error ? e.message : 'claim_failed';
+      const msg = raw.toLowerCase().includes('minimum token hold')
+        ? 'No puedes claimear todavía: necesitas holdear 10,000 tokens para cobrar la victoria.'
+        : raw;
+      pushToast('error', `No se pudo claimear: ${msg}`);
+    } finally {
+      setClaimingReward(false);
+    }
   };
 
   // Streak determinístico: simple wins-losses del player brute, sign con clamp.
@@ -290,6 +379,45 @@ export function FightViewer() {
             pushToast('info', isPlayerWinner ? 'Victoria.' : 'Derrota.');
           }}
           onLevelUp={goLevelUp}
+          claimRewardButton={isPlayerWinner && lastFight.combat.reward?.eligible ? (
+            <div style={{ display: 'grid', gap: 8, margin: '14px 0', justifyItems: 'center' }}>
+              <button
+                type="button"
+                className="cb-btn gold"
+                onClick={() => void claimReward()}
+                disabled={claimingReward || Boolean(claimedRewardTx) || Boolean(claimInfo && !claimInfo.canHoldClaim)}
+              >
+                {claimedRewardTx
+                  ? `✓ ${claimInfo ? formatBnbWei(claimInfo.claimAmount) : '0.001'} BNB claimeado`
+                  : claimingReward
+                    ? 'Claimeando…'
+                    : claimInfo
+                      ? `Claim ${formatBnbWei(claimInfo.claimAmount)} BNB testnet`
+                      : 'Claim BNB testnet'}
+              </button>
+              {claimInfoLoading && !claimInfo && !claimedRewardTx && (
+                <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                  Comprobando hold on-chain…
+                </span>
+              )}
+              {claimInfo && !claimInfo.canHoldClaim && !claimedRewardTx && (
+                <span style={{ color: 'var(--primary)', fontSize: 12, maxWidth: 360, textAlign: 'center' }}>
+                  No puedes claimear todavía: necesitas holdear {formatTokenUnits(claimInfo.minimumHold)} tokens.
+                  Ahora tienes {formatTokenUnits(claimInfo.walletBalance)}.
+                </span>
+              )}
+              {claimInfo?.canHoldClaim && !claimedRewardTx && (
+                <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                  Hold verificado on-chain: puedes cobrar.
+                </span>
+              )}
+              {!walletReady && !claimedRewardTx && (
+                <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                  Conecta MetaMask en BNB Testnet para cobrar desde el vault.
+                </span>
+              )}
+            </div>
+          ) : undefined}
         />
       )}
 

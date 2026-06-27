@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '@/store/useGameStore';
 import { BruteAvatar } from '@/components/BruteAvatar';
-import { TweaksPanel, TweakSection, TweakToggle, TweakSelect, TweakSlider } from '@/components/TweaksPanel';
+import { TweaksPanel, TweakSection, TweakToggle, TweakSelect } from '@/components/TweaksPanel';
 import { useLandingSettings, type AccentIntensity, type HeroLayout } from '@/store/useLandingSettings';
 import { rankName } from '@/lib/profileFlavor';
 import { api } from '@/api/apiClient';
@@ -28,8 +28,6 @@ export function Landing() {
 
   const heroLayout = useLandingSettings((s) => s.heroLayout);
   const setHeroLayout = useLandingSettings((s) => s.setHeroLayout);
-  const warriorCount = useLandingSettings((s) => s.warriorCount);
-  const setWarriorCount = useLandingSettings((s) => s.setWarriorCount);
   const accentIntensity = useLandingSettings((s) => s.accentIntensity);
   const setAccentIntensity = useLandingSettings((s) => s.setAccentIntensity);
   const showClock = useLandingSettings((s) => s.showClock);
@@ -82,7 +80,7 @@ export function Landing() {
     } as React.CSSProperties;
   }, [accentIntensity]);
 
-  const visibleBrutes = useMemo(() => recent.slice(0, warriorCount), [recent, warriorCount]);
+  const visibleBrutes = useMemo(() => recent, [recent]);
 
   return (
     <div className="landing-shell" style={glowVars}>
@@ -140,16 +138,6 @@ export function Landing() {
               { value: 'infernal', label: 'Infernal' },
             ]}
             onChange={setAccentIntensity}
-          />
-        </TweakSection>
-        <TweakSection title="Guerreros recientes">
-          <TweakSlider
-            label="Cantidad"
-            min={3}
-            max={6}
-            step={3}
-            value={warriorCount}
-            onChange={setWarriorCount}
           />
         </TweakSection>
       </TweaksPanel>

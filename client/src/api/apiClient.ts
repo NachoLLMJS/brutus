@@ -69,6 +69,9 @@ export interface CreateBruteBody {
   gender?: 'male' | 'female';
   body?: string;
   bodyColors?: string;
+  walletAddress: string;
+  onChainBruteId?: number;
+  createTxHash?: string;
 }
 
 export interface FightBody {
@@ -86,6 +89,13 @@ export interface FightResponse {
     fightType: 'normal' | 'training';
     opponent: { id: string; name: string };
     fightLog: FightLog;
+    reward?: {
+      eligible: boolean;
+      fightId?: string;
+      winnerWallet?: string;
+      recordedTxHash?: string;
+      reason?: string;
+    };
   };
   brute: Brute;
   leveledUp: boolean;
