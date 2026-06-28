@@ -17,19 +17,19 @@ Real Flap vault:
 `0xae21b38dD8Ef95aa41824fb840436fc1f049fcFf`
 
 Brutus contracts already wired to the real token:
-- RewardPool: `0x79182dEF2B8662F2F932B358bbd0F4Ab6496fe8F`
-- Registry: `0xe1A2c617C358C7e3DB73B7cD2b10fdca2d4F8A6B`
-- DailyActions: `0xe241a941A8642877ab7848741c3a51F3033B2B6d`
-- ArenaEscrow: `0xeC0fba251500F60b5151d5030aA1D5b3E347464B`
+- RewardPool / CombatRewardsV3: `0x9b9b801Fef24947D13b850a93B456C03aeed1Aec`
+- Registry: `0xd74a0941c441Bac2121992f33bd910059300B2C3`
+- DailyActions: `0xecF5EA60D706c7D96Bbf1aaE19be8B40E149eB49`
+- ArenaEscrow: `0x2415248C3adAEc3484E041A741C1BFE1AA9bBC14`
 - VaultFactory: `0x1A641ca0aDeEc88817A5D9E0CCeD281d41AdaE49`
 
 ## Verified wiring
 
 - Registry `gameToken` = real Flap token.
-- RewardPool `stakingToken` = real Flap token.
+- CombatRewardsV3 `gameToken` = real Flap token.
 - Real vault `taxToken` = real Flap token.
-- Real vault `rewardReceiver` = BrutusRewardPool.
-- DailyActions points to the real Registry.
+- Real vault `rewardReceiver` = CombatRewardsV3.
+- DailyActions points to the current DailyActions deployment.
 - ArenaEscrow resolver is the deployer/operator wallet.
 
 ## Vault UI

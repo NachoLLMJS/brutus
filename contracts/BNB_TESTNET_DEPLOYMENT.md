@@ -96,12 +96,12 @@ For production/Railway, use Postgres by changing `DATABASE_URL` and `provider = 
 
 Fixes applied after live UI testing:
 
-- `BrutusRegistryV3`: `0x26F8b59F93e5525a431C55bdebb87C8075Ca7951`
+- `BrutusRegistryV3`: `0xd74a0941c441Bac2121992f33bd910059300B2C3`
   - Paid `createExtraBrute(bytes32)` now works even if the user's first 3 local brutes were created before on-chain base minting existed.
   - Backend/UI still only exposes paid extra after the local 3-brute limit.
   - Verified gas estimate for `createExtraBrute` is normal: `176113`.
 
-- `BrutusCombatRewardsV3`: `0x79182dEF2B8662F2F932B358bbd0F4Ab6496fe8F`
+- `BrutusCombatRewardsV3`: `0x9b9b801Fef24947D13b850a93B456C03aeed1Aec`
   - Backend records local combat wins with `recordCombatWin(bytes32,address)`.
   - Winner claims `0.001 BNB` from this reward contract via MetaMask.
   - Claim still requires holding `10,000` of the launched token.
@@ -126,12 +126,13 @@ Patch txs:
 
 - Token: `0xe7B0C3574C85C5A8C8Bbbfde299B223F68477777`
 - Vault: `0xae21b38dD8Ef95aa41824fb840436fc1f049fcFf`
-- RegistryV3 final: `0x26F8b59F93e5525a431C55bdebb87C8075Ca7951`
-- CombatRewardsV3 final: `0x79182dEF2B8662F2F932B358bbd0F4Ab6496fe8F`
+- RegistryV3 final: `0xd74a0941c441Bac2121992f33bd910059300B2C3`
+- CombatRewardsV3 final: `0x9b9b801Fef24947D13b850a93B456C03aeed1Aec`
 - VaultFactory with hidden burn: `0x1A641ca0aDeEc88817A5D9E0CCeD281d41AdaE49`
-- Vault `rewardReceiver` set to final CombatRewardsV3. Tx: `0x31da76ece186b0b44fe4b00e5351e89607896e0fc87caa838f4320ac920f3e77`
-- Vault tax balance forwarded to final CombatRewardsV3. Tx: `0x4205ffe4061431016b660eaaf68f64dbd955631b5fb48955f9ab254d27494b1f`
-- Forwarded amount: `0.001791 BNB`
+- Vault `rewardReceiver` set to final CombatRewardsV3. Tx: `0x89589177900e8bd5d626d3e9458d532a2dd229bcf17de9d4319f09f7e546430f`
+- Final CombatRewardsV3 directly seed-funded with `0.01 BNB`. Tx: `0x318b3ba936409087e52b3d876966728f2d68b0a47357d0cd07730ff9a0a68146`
+- Intermediary CombatRewardsV3 also seed-funded with `0.01 BNB` to unblock old production bundles. Tx: `0x0a8171034073c6ff5b9fec70e192aa497ecee7b8176fc943b14482088fd4b18f`
+- Note: `forwardTaxRewards` from the launched vault currently reverts against CombatRewardsV3; direct funding is used while that compatibility issue is investigated.
 - Extra brute payments route 100% BNB to the vault.
 - Combat reward claim amount: `0.001 BNB`; minimum token hold: `10,000` tokens.
 - Operator gas refund cap: `0.0002 BNB`.
