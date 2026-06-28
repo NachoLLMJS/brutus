@@ -6,6 +6,8 @@
 
 import { z } from 'zod';
 
+const FINAL_BRUTUS_COMBAT_REWARDS = '0x79182dEF2B8662F2F932B358bbd0F4Ab6496fe8F';
+
 function defaultHost(): string {
   return process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
 }
@@ -59,7 +61,10 @@ function loadEnv(): Env {
         'Generate a real secret with `openssl rand -base64 32` and set it in .env.',
     );
   }
-  return parsed.data;
+  return {
+    ...parsed.data,
+    BRUTUS_COMBAT_REWARDS: FINAL_BRUTUS_COMBAT_REWARDS,
+  };
 }
 
 export const env: Env = loadEnv();
