@@ -4,6 +4,7 @@
 
 import { prisma } from '../db.js';
 import { HttpError } from '../middleware/errorHandler.js';
+import { logger } from '../logger.js';
 import {
   applyChoice,
   bruteSnapshotToCore,
@@ -196,10 +197,20 @@ export async function runFight(input: FightInput): Promise<FightResult> {
           recordedTxHash,
         };
       } catch (err) {
+        const reason = err instanceof HttpError ? err.code : 'reward_record_failed';
+        logger.warn(
+          {
+            combatId: combatRow.id,
+            rewardFightId: fightId,
+            winnerWallet: player.ownerWallet,
+            reason,
+          },
+          'combat_reward_record_failed',
+        );
         reward = {
           eligible: false,
           winnerWallet: player.ownerWallet,
-          reason: err instanceof HttpError ? err.code : 'reward_record_failed',
+          reason,
         };
       }
     }

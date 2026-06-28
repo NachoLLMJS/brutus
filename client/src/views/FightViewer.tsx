@@ -389,41 +389,49 @@ export function FightViewer() {
             pushToast('info', isPlayerWinner ? 'Victoria.' : 'Derrota.');
           }}
           onLevelUp={goLevelUp}
-          claimRewardButton={isPlayerWinner && lastFight.combat.reward?.eligible ? (
+          claimRewardButton={isPlayerWinner ? (
             <div style={{ display: 'grid', gap: 8, margin: '14px 0', justifyItems: 'center' }}>
-              <button
-                type="button"
-                className="cb-btn gold"
-                onClick={() => void claimReward()}
-                disabled={claimingReward || Boolean(claimedRewardTx) || Boolean(claimInfo && !claimInfo.canHoldClaim)}
-              >
-                {claimedRewardTx
-                  ? `✓ ${claimInfo ? formatBnbWei(claimInfo.claimAmount) : '0.001'} BNB claimeado`
-                  : claimingReward
-                    ? 'Claimeando…'
-                    : claimInfo
-                      ? `Claim ${formatBnbWei(claimInfo.claimAmount)} BNB testnet`
-                      : 'Claim BNB testnet'}
-              </button>
-              {claimInfoLoading && !claimInfo && !claimedRewardTx && (
-                <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                  Comprobando hold on-chain…
-                </span>
-              )}
-              {claimInfo && !claimInfo.canHoldClaim && !claimedRewardTx && (
-                <span style={{ color: 'var(--primary)', fontSize: 12, maxWidth: 360, textAlign: 'center' }}>
-                  No puedes claimear todavía: necesitas holdear {formatTokenUnits(claimInfo.minimumHold)} tokens.
-                  Ahora tienes {formatTokenUnits(claimInfo.walletBalance)}.
-                </span>
-              )}
-              {claimInfo?.canHoldClaim && !claimedRewardTx && (
-                <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                  Hold verificado on-chain: puedes cobrar.
-                </span>
-              )}
-              {!walletReady && !claimedRewardTx && (
-                <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                  Conecta MetaMask en BNB Testnet para cobrar desde el vault.
+              {lastFight.combat.reward?.eligible ? (
+                <>
+                  <button
+                    type="button"
+                    className="cb-btn gold"
+                    onClick={() => void claimReward()}
+                    disabled={claimingReward || Boolean(claimedRewardTx) || Boolean(claimInfo && !claimInfo.canHoldClaim)}
+                  >
+                    {claimedRewardTx
+                      ? `✓ ${claimInfo ? formatBnbWei(claimInfo.claimAmount) : '0.001'} BNB claimeado`
+                      : claimingReward
+                        ? 'Claimeando…'
+                        : claimInfo
+                          ? `Claim ${formatBnbWei(claimInfo.claimAmount)} BNB testnet`
+                          : 'Claim BNB testnet'}
+                  </button>
+                  {claimInfoLoading && !claimInfo && !claimedRewardTx && (
+                    <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                      Comprobando hold on-chain…
+                    </span>
+                  )}
+                  {claimInfo && !claimInfo.canHoldClaim && !claimedRewardTx && (
+                    <span style={{ color: 'var(--primary)', fontSize: 12, maxWidth: 360, textAlign: 'center' }}>
+                      No puedes claimear todavía: necesitas holdear {formatTokenUnits(claimInfo.minimumHold)} tokens.
+                      Ahora tienes {formatTokenUnits(claimInfo.walletBalance)}.
+                    </span>
+                  )}
+                  {claimInfo?.canHoldClaim && !claimedRewardTx && (
+                    <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                      Hold verificado on-chain: puedes cobrar.
+                    </span>
+                  )}
+                  {!walletReady && !claimedRewardTx && (
+                    <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                      Conecta MetaMask en BNB Testnet para cobrar desde el vault.
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span style={{ color: 'var(--primary)', fontSize: 12, maxWidth: 380, textAlign: 'center' }}>
+                  Claim no disponible: {rewardReasonLabel(lastFight.combat.reward?.reason)}
                 </span>
               )}
             </div>
@@ -463,6 +471,25 @@ function findInitialWeapon(log: FightLog, fighterId: number): string | null {
     }
   }
   return null;
+}
+
+function rewardReasonLabel(reason?: string): string {
+  switch (reason) {
+    case 'operator_private_key_missing':
+      return 'falta configurar BRUTUS_OPERATOR_PRIVATE_KEY en Railway.';
+    case 'record_combat_reward_failed':
+      return 'el contrato no pudo registrar esta victoria. Revisa RPC, saldo del operador o permisos del contrato.';
+    case 'winner_wallet_missing':
+      return 'este bruto no tiene wallet owner asociada.';
+    case 'training_fight_no_bnb_reward':
+      return 'las peleas de entrenamiento no tienen reward BNB.';
+    case 'player_lost':
+      return 'solo se puede claimear si ganas.';
+    case 'recording_unavailable':
+      return 'registro on-chain no disponible.';
+    default:
+      return reason || 'registro on-chain no disponible.';
+  }
 }
 
 function stepToBanner(step: FightStep): string | null {

@@ -16,6 +16,9 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 const app = express();
 
 app.disable('x-powered-by');
+if (env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 app.use(
   helmet({
     contentSecurityPolicy: {
