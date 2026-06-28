@@ -16,7 +16,15 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 const app = express();
 
 app.disable('x-powered-by');
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        "script-src": ["'self'", "'unsafe-eval'"],
+      },
+    },
+  }),
+);
 app.use(
   cors({
     origin: env.CLIENT_ORIGIN,
