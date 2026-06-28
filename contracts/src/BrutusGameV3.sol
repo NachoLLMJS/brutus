@@ -61,12 +61,10 @@ contract BrutusRegistryV3 is ReentrancyGuardV3 {
         uint256 price = extraBrutePrice(msg.sender);
         require(msg.value == price, "wrong BNB amount");
 
-        uint256 toVault = msg.value / 2;
-        uint256 burned = msg.value - toVault;
+        uint256 toVault = msg.value;
+        uint256 burned = 0;
         (bool okVault,) = vaultReceiver.call{value: toVault}("");
         require(okVault, "vault transfer failed");
-        (bool okBurn,) = payable(BURN_ADDRESS).call{value: burned}("");
-        require(okBurn, "burn transfer failed");
 
         paidExtraBruteCount[msg.sender] += 1;
         bruteId = _mintBrute(msg.sender, metadataHash, true, msg.value);
@@ -98,8 +96,10 @@ contract BrutusCombatRewardsV3 is ReentrancyGuardV3 {
     address public operator;
     uint256 public minimumTokenHold;
     uint256 public claimAmountWei;
+    uint256 public maxOperatorGasRefundWei;
     uint256 public totalDeposited;
     uint256 public totalClaimed;
+    uint256 public totalOperatorGasRefunded;
 
     mapping(bytes32 => address) public fightWinner;
     mapping(bytes32 => bool) public fightClaimed;
@@ -107,13 +107,21 @@ contract BrutusCombatRewardsV3 is ReentrancyGuardV3 {
     event CombatRewardFunded(address indexed from, uint256 amount, uint256 totalDeposited);
     event CombatWinRecorded(bytes32 indexed fightId, address indexed winner);
     event CombatRewardClaimed(bytes32 indexed fightId, address indexed winner, uint256 amount);
+    event OperatorGasRefunded(address indexed operator, bytes32 indexed fightId, uint256 amount);
+    event OperatorGasRefundCapUpdated(uint256 maxOperatorGasRefundWei);
 
     modifier onlyOperator() {
         require(msg.sender == operator, "only operator");
         _;
     }
 
-    constructor(address token_, uint256 minimumTokenHold_, uint256 claimAmountWei_, address operator_) {
+    constructor(
+        address token_,
+        uint256 minimumTokenHold_,
+        uint256 claimAmountWei_,
+        address operator_,
+        uint256 maxOperatorGasRefundWei_
+    ) {
         require(token_ != address(0), "token required");
         require(minimumTokenHold_ > 0, "minimum hold required");
         require(claimAmountWei_ > 0, "claim amount required");
@@ -121,17 +129,25 @@ contract BrutusCombatRewardsV3 is ReentrancyGuardV3 {
         minimumTokenHold = minimumTokenHold_;
         claimAmountWei = claimAmountWei_;
         operator = operator_ == address(0) ? msg.sender : operator_;
+        maxOperatorGasRefundWei = maxOperatorGasRefundWei_;
     }
 
     receive() external payable { _recordFunding(); }
     function depositRewards() external payable { _recordFunding(); }
 
-    function recordCombatWin(bytes32 fightId, address winner) external onlyOperator {
+    function recordCombatWin(bytes32 fightId, address winner) external onlyOperator nonReentrant {
+        uint256 gasStart = gasleft();
         require(fightId != bytes32(0), "fight id required");
         require(winner != address(0), "winner required");
         require(fightWinner[fightId] == address(0), "fight already recorded");
         fightWinner[fightId] = winner;
         emit CombatWinRecorded(fightId, winner);
+        _refundOperatorGas(fightId, gasStart);
+    }
+
+    function setMaxOperatorGasRefundWei(uint256 newMaxOperatorGasRefundWei) external onlyOperator {
+        maxOperatorGasRefundWei = newMaxOperatorGasRefundWei;
+        emit OperatorGasRefundCapUpdated(newMaxOperatorGasRefundWei);
     }
 
     function canClaim(bytes32 fightId, address user) external view returns (bool ok, string memory reason) {
@@ -152,6 +168,39 @@ contract BrutusCombatRewardsV3 is ReentrancyGuardV3 {
         (bool ok,) = msg.sender.call{value: claimAmountWei}("");
         require(ok, "claim transfer failed");
         emit CombatRewardClaimed(fightId, msg.sender, claimAmountWei);
+    }
+
+    function _refundOperatorGas(bytes32 fightId, uint256 gasStart) private {
+        uint256 cap = maxOperatorGasRefundWei;
+        if (cap == 0) {
+            emit OperatorGasRefunded(msg.sender, fightId, 0);
+            return;
+        }
+
+        uint256 gasUsed = gasStart - gasleft() + 32_000;
+        uint256 refund = gasUsed * tx.gasprice;
+        if (refund > cap) refund = cap;
+
+        uint256 balance = address(this).balance;
+        if (balance <= claimAmountWei) {
+            emit OperatorGasRefunded(msg.sender, fightId, 0);
+            return;
+        }
+        uint256 refundableBalance = balance - claimAmountWei;
+        if (refund > refundableBalance) refund = refundableBalance;
+        if (refund == 0) {
+            emit OperatorGasRefunded(msg.sender, fightId, 0);
+            return;
+        }
+
+        totalOperatorGasRefunded += refund;
+        (bool ok,) = payable(msg.sender).call{value: refund}("");
+        if (ok) {
+            emit OperatorGasRefunded(msg.sender, fightId, refund);
+        } else {
+            totalOperatorGasRefunded -= refund;
+            emit OperatorGasRefunded(msg.sender, fightId, 0);
+        }
     }
 
     function _recordFunding() private {
