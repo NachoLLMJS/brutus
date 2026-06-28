@@ -64,7 +64,7 @@ export function CharacterCreator() {
   const [master, setMaster] = useState<Brute | null>(null);
 
   const [name, setName] = useState<string>('');
-  const [gender, setGender] = useState<BruteGender>('male');
+  const [gender] = useState<BruteGender>('male');
   const [body, setBody] = useState<string>(() => {
     const rng = mulberry32(hashStringToSeed('brutus-default-body'));
     return getRandomBody('male', rng);
@@ -112,15 +112,11 @@ export function CharacterCreator() {
     return () => { cancelled = true; };
   }, [masterId]);
 
-  // Pre-populate name + gender desde URL search params (cuando viene del Landing).
+  // Pre-populate name desde URL search params (cuando viene del Landing). El juego usa macho fijo por ahora.
   useEffect(() => {
     const qName = search.get('name');
-    const qGender = search.get('gender');
     if (qName) {
       setName(qName.slice(0, 20));
-    }
-    if (qGender === 'male' || qGender === 'female') {
-      setGender(qGender);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -188,7 +184,7 @@ export function CharacterCreator() {
             setPaidForgePrice(null);
           }
         }
-        pushToast('info', 'Ya tienes 3 brutos. Puedes crear otro pagando BNB.');
+        pushToast('info', 'Ya tienes 3 AFK HEROES. Puedes crear otro pagando BNB.');
       } else {
         pushToast('error', `No se pudo crear: ${code}`);
       }
@@ -228,7 +224,7 @@ export function CharacterCreator() {
       rememberBrute({ id: brute.id, name: brute.name, level: brute.level });
       setPaidForgeNeeded(false);
       setCurrent(brute.id);
-      pushToast('success', 'Bruto extra creado pagando BNB.');
+      pushToast('success', 'AFK HERO extra creado pagando BNB.');
       navigate(`/brute/${brute.id}`);
     } catch (e) {
       const code = e instanceof ApiError ? e.code : e instanceof Error ? e.message : 'paid_forge_failed';
@@ -245,7 +241,7 @@ export function CharacterCreator() {
           <span>Forja tu destino</span>
         </div>
         <h1>
-          Invocar <em>bruto</em>
+          Invocar <em>AFK HERO</em>
         </h1>
         <div className="sub">Elegí su forma, su nombre, libéralo en la arena</div>
       </header>
@@ -307,7 +303,7 @@ export function CharacterCreator() {
               />
             </div>
 
-            <div style={{ display: 'grid', gap: 10 }}>
+            <div className="creator-select-grid">
               <LpcSelect label="Human head" value={lpcHead} options={LPC_HEAD_OPTIONS} onChange={(value) => setLpcHead(value as LpcHeadKey)} />
               <LpcSelect label="Pelo" value={lpcHair} options={LPC_HAIR_OPTIONS} onChange={(value) => setLpcHair(value as LpcHairKey)} />
               {lpcHeadwear !== 'none' && (
@@ -331,7 +327,7 @@ export function CharacterCreator() {
               onClick={submit}
               disabled={forgeDisabled}
             >
-              <span>{submitting ? 'Forjando…' : walletReady ? 'Invocar bruto' : 'Wallet requerida'}</span>
+              <span>{submitting ? 'Forjando…' : walletReady ? 'Invocar AFK HERO' : 'Wallet requerida'}</span>
               {!submitting && <span className="arrow">›</span>}
             </button>
             {paidForgeNeeded && walletReady && (
@@ -345,9 +341,9 @@ export function CharacterCreator() {
                   background: 'rgba(230,180,80,0.08)',
                 }}
               >
-                <b>Ya tienes 3 brutos base.</b>
+                <b>Ya tienes 3 AFK HEROES base.</b>
                 <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                  Puedes forjar este bruto extra pagando {paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}.
+                  Puedes invocar este AFK HERO extra pagando {paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}.
                   El contrato reparte 50% al vault y 50% a burn.
                 </span>
                 <button
@@ -356,7 +352,7 @@ export function CharacterCreator() {
                   onClick={() => void submitPaidExtra()}
                   disabled={paidForgeBusy || !nameValid}
                 >
-                  <span>{paidForgeBusy ? 'Esperando MetaMask…' : `Crear bruto extra pagando ${paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}`}</span>
+                  <span>{paidForgeBusy ? 'Esperando MetaMask…' : `Crear AFK HERO extra pagando ${paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}`}</span>
                   {!paidForgeBusy && <span className="arrow">›</span>}
                 </button>
               </div>
@@ -394,15 +390,14 @@ function LpcSelect({
   onChange: (value: string) => void;
 }) {
   return (
-    <label style={{ display: 'grid', gap: 4, textAlign: 'left' }}>
-      <span className="creator-field-label" style={{ margin: 0 }}>
+    <label className="creator-lpc-select">
+      <span className="creator-field-label creator-lpc-label">
         <span>{label}</span>
       </span>
       <select
-        className="creator-name-input"
+        className="creator-name-input creator-lpc-control"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        style={{ height: 38, padding: '0 10px', fontSize: 12 }}
       >
         {options.map((option) => (
           <option key={option.key} value={option.key}>

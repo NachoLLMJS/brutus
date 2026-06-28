@@ -76,7 +76,7 @@ export function Topbar() {
           color: 'var(--text-strong)',
         }}
       >
-        BRUT<span style={{ color: 'var(--primary)' }}>U</span>S
+        AFK<span style={{ color: 'var(--primary)' }}>F</span>LAP
       </Link>
 
       {/* Nav */}

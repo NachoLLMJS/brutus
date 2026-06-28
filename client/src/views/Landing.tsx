@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '@/store/useGameStore';
 import { BruteAvatar } from '@/components/BruteAvatar';
-import { TweaksPanel, TweakSection, TweakToggle, TweakSelect } from '@/components/TweaksPanel';
+import { TweaksPanel, TweakSection, TweakSelect } from '@/components/TweaksPanel';
 import { useLandingSettings, type AccentIntensity, type HeroLayout } from '@/store/useLandingSettings';
 import { rankName } from '@/lib/profileFlavor';
 import { api } from '@/api/apiClient';
@@ -30,20 +30,9 @@ export function Landing() {
   const setHeroLayout = useLandingSettings((s) => s.setHeroLayout);
   const accentIntensity = useLandingSettings((s) => s.accentIntensity);
   const setAccentIntensity = useLandingSettings((s) => s.setAccentIntensity);
-  const showClock = useLandingSettings((s) => s.showClock);
-  const setShowClock = useLandingSettings((s) => s.setShowClock);
 
   const [bruteInfo, setBruteInfo] = useState<Record<string, Brute>>({});
-  const [time, setTime] = useState<string>(() => formatTime(new Date()));
   const [toast, setToast] = useState<string | null>(null);
-
-  // Reloj cada 30s (lo suficiente para minutos visibles).
-  useEffect(() => {
-    const tick = () => setTime(formatTime(new Date()));
-    tick();
-    const id = window.setInterval(tick, 30000);
-    return () => window.clearInterval(id);
-  }, []);
 
   // Hidratamos info real de cada bruto reciente.
   useEffect(() => {
@@ -84,7 +73,7 @@ export function Landing() {
 
   return (
     <div className="landing-shell" style={glowVars}>
-      <Hero time={showClock ? time : null} asym={heroLayout === 'asym'} />
+      <Hero asym={heroLayout === 'asym'} />
 
       <Forge
         onForge={({ name, gender }) => {
@@ -108,7 +97,7 @@ export function Landing() {
       <footer className="landing-footer">
         <div className="footer-mark">
           <span className="pip" />
-          <span>Brutus · MMXXVI · Forjado en sangre</span>
+          <span>AFKFLAP · MMXXVI · Forjado en sangre</span>
         </div>
         <a href="#how">Cómo se juega</a>
       </footer>
@@ -126,7 +115,6 @@ export function Landing() {
             ]}
             onChange={setHeroLayout}
           />
-          <TweakToggle label="Reloj de torneo" value={showClock} onChange={setShowClock} />
         </TweakSection>
         <TweakSection title="Atmósfera">
           <TweakSelect<AccentIntensity>
@@ -145,15 +133,9 @@ export function Landing() {
   );
 }
 
-function formatTime(d: Date): string {
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${hh}:${mm}`;
-}
-
 /* ─────────────────────── HERO ─────────────────────── */
 
-function Hero({ time, asym }: { time: string | null; asym: boolean }) {
+function Hero({ asym }: { asym: boolean }) {
   return (
     <header className={`hero${asym ? ' asym' : ''}`}>
       <div className="hero-frame" />
@@ -170,20 +152,10 @@ function Hero({ time, asym }: { time: string | null; asym: boolean }) {
           <span>Donde la sangre forja leyendas</span>
         </div>
         <h1 className="hero-title">
-          BRUT<span className="v">U</span>S
+          AFK<span className="v">F</span>LAP
         </h1>
         <div className="hero-sub">Forja tu campeón en la arena</div>
       </div>
-
-      {time && (
-        <div className="hero-clock" title="Próxima ronda de torneo">
-          <HourglassIcon />
-          <div>
-            <div className="label">Próxima ronda</div>
-            <div>{time}</div>
-          </div>
-        </div>
-      )}
     </header>
   );
 }
@@ -225,25 +197,10 @@ function SkullSigil({ side }: { side: 'left' | 'right' }) {
   );
 }
 
-function HourglassIcon() {
-  return (
-    <svg width="14" height="16" viewBox="0 0 14 16" fill="none" aria-hidden>
-      <path
-        d="M2 1h10M2 15h10M3 1v3l4 4-4 4v3M11 1v3l-4 4 4 4v3"
-        stroke="#e6b450"
-        strokeWidth="1.2"
-        strokeLinecap="square"
-      />
-      <path d="M5 3h4l-2 2-2-2zM5 13h4l-2-2-2 2z" fill="#e6b450" opacity="0.7" />
-    </svg>
-  );
-}
-
 /* ─────────────────────── FORGE FORM ─────────────────────── */
 
-function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' | 'F' }) => void }) {
+function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => void }) {
   const [name, setName] = useState('');
-  const [gender, setGender] = useState<'M' | 'F'>('M');
   const [error, setError] = useState('');
 
   const submit = (e: React.FormEvent) => {
@@ -254,7 +211,7 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' | 'F' 
       return;
     }
     setError('');
-    onForge({ name: trimmed, gender });
+    onForge({ name: trimmed, gender: 'M' });
   };
 
   return (
@@ -293,30 +250,6 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' | 'F' 
             spellCheck={false}
             autoComplete="off"
           />
-        </div>
-
-        <div>
-          <div className="field-label">
-            <span>Linaje</span>
-          </div>
-          <div className="gender">
-            <button
-              type="button"
-              className={`gender-btn${gender === 'M' ? ' active' : ''}`}
-              onClick={() => setGender('M')}
-            >
-              <span className="glyph">♂</span>
-              <span>Macho</span>
-            </button>
-            <button
-              type="button"
-              className={`gender-btn${gender === 'F' ? ' active' : ''}`}
-              onClick={() => setGender('F')}
-            >
-              <span className="glyph">♀</span>
-              <span>Hembra</span>
-            </button>
-          </div>
         </div>
 
         <button type="submit" className="btn-forge" disabled={!name.trim()}>

@@ -8,7 +8,7 @@
   z-index: 1;
   max-width: 1100px;
   margin: 0 auto;
-  padding: 32px 24px 64px;
+  padding: 18px 24px 48px;
   font-family: var(--font-sans);
   color: var(--text-primary);
 }
@@ -39,7 +39,7 @@
 /* ── HERO (eyebrow + title pequeños vs Landing) ── */
 .creator-hero {
   text-align: center;
-  margin: 12px 0 28px;
+  margin: 6px 0 18px;
 }
 .creator-hero .eyebrow {
   display: inline-flex;
@@ -50,7 +50,7 @@
   letter-spacing: 0.36em;
   color: var(--accent-gold);
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   opacity: 0.85;
 }
 .creator-hero .eyebrow::before,
@@ -62,7 +62,7 @@
 }
 .creator-hero h1 {
   font-family: var(--font-display);
-  font-size: clamp(36px, 5vw, 56px);
+  font-size: clamp(34px, 4.6vw, 50px);
   letter-spacing: 0.05em;
   color: var(--text-strong);
   text-transform: uppercase;
@@ -81,10 +81,10 @@
     0 2px 0 rgba(0, 0, 0, 0.6);
 }
 .creator-hero .sub {
-  margin-top: 12px;
+  margin-top: 8px;
   font-family: var(--font-display);
-  font-size: 12px;
-  letter-spacing: 0.28em;
+  font-size: 11px;
+  letter-spacing: 0.24em;
   color: var(--text-secondary);
   text-transform: uppercase;
 }
@@ -117,7 +117,7 @@
     var(--paper);
   border: 2px solid var(--border-inner);
   border-radius: 6px;
-  padding: 32px;
+  padding: 24px;
   box-shadow:
     0 0 0 1px var(--border-outer) inset,
     0 0 0 1px rgba(230, 180, 80, 0.1),
@@ -140,8 +140,8 @@
 
 .creator-grid {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 36px;
+  grid-template-columns: 300px 1fr;
+  gap: 28px;
   position: relative;
   z-index: 1;
 }
@@ -256,7 +256,7 @@
 .creator-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 12px;
 }
 
 .creator-field-label {
@@ -264,8 +264,8 @@
   align-items: center;
   justify-content: space-between;
   font-family: var(--font-sans);
-  font-size: 11px;
-  letter-spacing: 0.2em;
+  font-size: 10px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-secondary);
   margin-bottom: 6px;
@@ -279,7 +279,7 @@
 
 .creator-name-input {
   width: 100%;
-  padding: 14px 16px;
+  padding: 11px 14px;
   border-radius: 4px;
   background: var(--paper-dark);
   border: 2px solid var(--border-inner);
@@ -305,44 +305,32 @@
     0 0 14px rgba(230, 180, 80, 0.35);
 }
 
-/* ── GENDER ── */
-.creator-gender {
+.creator-select-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 12px;
+  row-gap: 8px;
 }
-.creator-gender-btn {
-  appearance: none;
-  background: var(--paper-dark);
-  border: 2px solid var(--border-inner);
-  border-radius: 4px;
-  padding: 14px 8px;
-  cursor: pointer;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: 14px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.15s ease;
+.creator-lpc-select {
+  display: grid;
+  gap: 3px;
+  text-align: left;
+  min-width: 0;
 }
-.creator-gender-btn:hover { color: var(--text-strong); border-color: var(--border-main); }
-.creator-gender-btn.active {
-  color: var(--accent-gold);
-  border-color: var(--accent-gold);
-  background: var(--paper-accent);
-  box-shadow:
-    0 0 0 1px var(--border-outer) inset,
-    0 0 16px rgba(230, 180, 80, 0.3);
+.creator-lpc-label {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.creator-gender-btn .glyph {
-  font-size: 24px;
-  line-height: 1;
-  font-family: 'Inter', sans-serif;
-  font-weight: 300;
+.creator-lpc-control {
+  height: 34px;
+  padding: 0 9px;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+@media (max-width: 760px) {
+  .creator-select-grid { grid-template-columns: 1fr; }
 }
 
 /* ── SWATCHES ── */
@@ -379,12 +367,12 @@
     0 0 14px rgba(230, 180, 80, 0.6);
 }
 
-/* ── CTA "Invocar bruto" ── */
+/* ── CTA "Invocar AFK HERO" ── */
 .creator-cta {
-  margin-top: 12px;
+  margin-top: 4px;
   appearance: none;
   width: 100%;
-  padding: 18px;
+  padding: 14px;
   background: var(--btn-primary-bg);
   color: var(--btn-primary-text);
   border: 2px solid #5a0a0a;

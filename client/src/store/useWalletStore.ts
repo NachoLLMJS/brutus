@@ -56,7 +56,7 @@ export const useWalletStore = create<WalletState>()(
           return;
         }
         if (!isMetaMaskProvider(provider)) {
-          set({ error: 'Brutus solo acepta MetaMask como provider.' });
+          set({ error: 'AFKFLAP solo acepta MetaMask como provider.' });
           return;
         }
 
