@@ -112,6 +112,55 @@ describe('CombatEngine.simulate', () => {
     }
   });
 
+  it('nunca permite actuar a un bruto muerto y el winner final siempre está vivo', () => {
+    const builds = [
+      {
+        a: makeBrute({ id: 'a', stats: { hp: 100, strength: 10, agility: 10, speed: 10 } }),
+        b: makeBrute({ id: 'b', stats: { hp: 100, strength: 10, agility: 10, speed: 10 } }),
+      },
+      {
+        a: makeBrute({ id: 'a', stats: { hp: 40, strength: 8, agility: 8, speed: 8 }, skills: ['shield', 'monk'] }),
+        b: makeBrute({ id: 'b', stats: { hp: 40, strength: 16, agility: 8, speed: 8 }, skills: ['shield', 'monk'] }),
+      },
+      {
+        a: makeBrute({ id: 'a', stats: { hp: 55, strength: 10, agility: 10, speed: 10 }, pets: ['wolf'] }),
+        b: makeBrute({ id: 'b', stats: { hp: 55, strength: 10, agility: 10, speed: 10 }, pets: ['wolf'] }),
+      },
+    ];
+    for (const build of builds) {
+      for (let seed = 1; seed <= 1000; seed++) {
+        const r = simulate(build.a, build.b, mulberry32(seed));
+        const alive: Record<'A' | 'B', boolean> = { A: true, B: true };
+        let pendingDown: 'A' | 'B' | null = null;
+        for (const step of r.log) {
+          const actingSide = 'attacker' in step
+            ? step.attacker
+            : 'side' in step
+              ? step.side
+              : null;
+          if (actingSide && !alive[actingSide] && step.type !== 'death') {
+            throw new Error(`dead ${actingSide} acted with ${step.type} at seed ${seed}`);
+          }
+          if (pendingDown && !['death', 'revive', 'end'].includes(step.type)) {
+            throw new Error(`${pendingDown} reached 0 HP but next step was ${step.type} at seed ${seed}`);
+          }
+          if ((step.type === 'attack' || step.type === 'pet_attack') && step.remainingHp <= 0) pendingDown = step.defender;
+          if (step.type === 'counter' && step.remainingHp <= 0) pendingDown = step.attacker;
+          if (step.type === 'death') {
+            expect(step.side).toBe(pendingDown);
+            alive[step.side] = false;
+            pendingDown = null;
+          }
+          if (step.type === 'revive') {
+            alive[step.side] = true;
+            pendingDown = null;
+          }
+        }
+        expect(r.finalState[r.winner].alive).toBe(true);
+      }
+    }
+  });
+
   it('counter letal mata al atacante y gana el defensor', () => {
     const attackerDies = makeBrute({
       id: 'attacker',
