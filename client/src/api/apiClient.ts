@@ -18,7 +18,11 @@ import type {
   FightLog,
 } from 'core';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
+const railwayClientApiBase =
+  typeof window !== 'undefined' && window.location.hostname === 'client-production-efa8.up.railway.app'
+    ? 'https://server-production-3079.up.railway.app/api'
+    : undefined;
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? railwayClientApiBase ?? '/api';
 
 export class ApiError extends Error {
   readonly code: string;

@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "npm run build -w core && tsc --noEmit && vite build",
     "railway:build": "npm run build",
-    "start": "serve -s dist -l tcp://0.0.0.0:4173",
+    "start": "sh -c 'serve -s dist -l tcp://0.0.0.0:${PORT:-4173}'",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },
