@@ -13,7 +13,7 @@ The Express server serves both:
 Recommended settings:
 
 - Root directory: repository root (`/`)
-- Build command: `npm ci && npm run build`
+- Build command: `npm run build`
 - Start command: `npm run start:railway`
 - Healthcheck path: `/api/health`
 

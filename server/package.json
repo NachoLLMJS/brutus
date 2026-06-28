@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "tsx watch --env-file=.env src/index.ts",
     "build": "npm run build -w core && npm run prisma:generate && tsc -p tsconfig.json",
+    "railway:build": "npm run build",
     "start": "prisma migrate deploy --schema=../prisma/schema.prisma && node dist/index.js",
     "start:railway": "npm run start",
     "typecheck": "tsc -p tsconfig.json --noEmit",
