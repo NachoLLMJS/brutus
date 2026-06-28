@@ -11,12 +11,26 @@ export interface Stats {
   speed: number;
 }
 
+export interface LpcAppearance {
+  head: string;
+  hair: string;
+  wings: string;
+  headwear: string;
+  armsArmor: string;
+  torsoArmor: string;
+  legsArmor: string;
+  feetArmor: string;
+  armorColor: string;
+  weapon: string;
+}
+
 export interface Appearance {
   gender: Gender;
   skin: string;
   hair: string;
   shirt: string;
   pants: string;
+  lpc?: LpcAppearance;
 }
 
 export interface Brute {

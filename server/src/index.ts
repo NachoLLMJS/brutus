@@ -2,6 +2,9 @@
 // 127.0.0.1 in development and 0.0.0.0 in production/Railway unless HOST
 // is explicitly configured.
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -26,6 +29,18 @@ app.use(express.json({ limit: '32kb' }));
 app.use(httpLogger);
 
 app.use('/api', apiRouter);
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientDistDir = path.resolve(__dirname, '../../client/dist');
+const clientIndexFile = path.join(clientDistDir, 'index.html');
+
+if (fs.existsSync(clientIndexFile)) {
+  app.use(express.static(clientDistDir, { index: false, maxAge: '1h' }));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(clientIndexFile);
+  });
+}
 
 app.use(notFoundHandler);
 app.use(errorHandler);

@@ -8,6 +8,19 @@ const ID_REGEX = /^[a-z0-9]{20,40}$/;
 const WALLET_REGEX = /^0x[0-9a-fA-F]{40}$/;
 const TX_HASH_REGEX = /^0x[0-9a-fA-F]{64}$/;
 
+const LpcAppearanceSchema = z.object({
+  head: z.enum(['humanMale', 'humanGaunt', 'humanPlump', 'humanElder']),
+  hair: z.enum(['none', 'bedhead', 'bob', 'afro', 'buzzcut', 'long', 'curlyShort', 'bangs']),
+  wings: z.enum(['none', 'monarchPurple', 'pixiePurple']),
+  headwear: z.enum(['none', 'armet', 'barbuta', 'flattop', 'greathelm', 'horned', 'maximus', 'sugarloafSimple', 'xeon']),
+  armsArmor: z.enum(['none', 'plate', 'bracers']),
+  torsoArmor: z.enum(['none', 'plate', 'legion', 'chainmail']),
+  legsArmor: z.enum(['none', 'plate']),
+  feetArmor: z.enum(['none', 'plate']),
+  armorColor: z.enum(['steel', 'gold', 'iron', 'bronze', 'copper', 'brass', 'silver', 'black']),
+  weapon: z.enum(['none', 'swordSteel', 'swordGold', 'mace', 'waraxe', 'halberd']),
+});
+
 export const CreateBruteBody = z.object({
   name: z.string().min(3).max(20).regex(NAME_REGEX, 'name_format'),
   masterId: z.string().regex(ID_REGEX, 'invalid_id').optional(),
@@ -18,6 +31,7 @@ export const CreateBruteBody = z.object({
       hair: z.string().regex(HEX_COLOR),
       shirt: z.string().regex(HEX_COLOR),
       pants: z.string().regex(HEX_COLOR),
+      lpc: LpcAppearanceSchema.optional(),
     })
     .optional(),
   // Renderer Pixi (opcional; si vienen, sobrescriben los random del seed)

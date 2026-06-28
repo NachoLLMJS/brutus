@@ -45,6 +45,7 @@ export function FighterCard({
               gender: fighter.gender,
               body: fighter.body,
               bodyColors: fighter.bodyColors,
+              lpc: fighter.lpc,
             }}
             size="sm"
           />

@@ -11,12 +11,26 @@ import {
 import { generateInitialStats } from '../lib/coreBridge.js';
 import { maybeResetDaily } from '../lib/dailyReset.js';
 
+const DEFAULT_LPC_APPEARANCE = {
+  head: 'humanMale',
+  hair: 'bedhead',
+  wings: 'none',
+  headwear: 'none',
+  armsArmor: 'none',
+  torsoArmor: 'plate',
+  legsArmor: 'plate',
+  feetArmor: 'plate',
+  armorColor: 'steel',
+  weapon: 'none',
+};
+
 const DEFAULT_APPEARANCE: Appearance = {
   gender: 'M',
   skin: '#d2a679',
   hair: '#3b1f0e',
   shirt: '#3b3b8a',
   pants: '#1f1f1f',
+  lpc: DEFAULT_LPC_APPEARANCE,
 };
 
 export interface CreateBruteInput {
@@ -70,7 +84,14 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
     body: input.body,
     bodyColors: input.bodyColors,
   });
-  const appearance = input.appearance ?? DEFAULT_APPEARANCE;
+  const appearance: Appearance = {
+    ...DEFAULT_APPEARANCE,
+    ...(input.appearance ?? {}),
+    lpc: {
+      ...DEFAULT_LPC_APPEARANCE,
+      ...(input.appearance?.lpc ?? {}),
+    },
+  };
   const serialized = serializeForPrisma({
     skills: stats.skills,
     weapons: stats.weapons,

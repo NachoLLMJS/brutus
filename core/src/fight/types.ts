@@ -184,6 +184,7 @@ export interface FightFighter {
   gender: 'male' | 'female';
   body: string;
   bodyColors: string;
+  lpc?: import('../types.js').LpcAppearance;
   /** HP inicial del bruto (max para barra). */
   maxHp: number;
 }

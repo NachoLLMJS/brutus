@@ -52,6 +52,7 @@ function buildFighter(side: FighterSide, brute: Brute): FightFighter {
     gender: brute.gender,
     body: brute.body,
     bodyColors: brute.bodyColors,
+    lpc: brute.appearance.lpc,
     maxHp: brute.stats.hp,
   };
 }

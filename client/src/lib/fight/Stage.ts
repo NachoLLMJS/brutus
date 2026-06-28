@@ -54,6 +54,7 @@ interface StealStep {
   w: string;
 }
 import FighterHolder, { type AnimationName } from '@/lib/fight/FighterHolder';
+import { createLpcFightOverlay } from '@/lib/fight/lpcOverlay';
 import {
   playSfx,
   playSkillSfx,
@@ -297,6 +298,25 @@ export class FightStage {
     holder.x = facing === 'right' ? -150 : ARENA_W + 150;
     holder.y = GROUND_Y;
     holder.addChild(display.container);
+    if (f.lpc) {
+      // El FighterHolder clásico sigue existiendo solo para timing/frame events,
+      // pero no debe pintarse nunca detrás del LPC.
+      display.container.visible = false;
+      display.container.renderable = false;
+      display.container.alpha = 0;
+      const lpcOverlay = createLpcFightOverlay(this.app, f.lpc, facing);
+      holder.addChild(lpcOverlay);
+      const setClassicAnimation = display.setAnimation.bind(display);
+      display.setAnimation = (name: AnimationName) => {
+        lpcOverlay.setLpcAnimation(name);
+        return setClassicAnimation(name);
+      };
+      const playClassicAnimation = display.playAnimation.bind(display);
+      display.playAnimation = (name: AnimationName) => {
+        void lpcOverlay.playLpcAnimation(name);
+        return playClassicAnimation(name);
+      };
+    }
     this.stage.addChild(holder);
 
     // HP bar flotante sobre el bruto.
@@ -478,10 +498,10 @@ export class FightStage {
     await Promise.all(arriving);
   }
 
-  /** Aplica daño/heal a un fighter (o pet) y actualiza la HP bar. */
-  private applyHpDelta(id: FighterId, delta: number) {
+  /** Aplica daño/heal a un fighter (o pet), actualiza la HP bar y devuelve la HP nueva. */
+  private applyHpDelta(id: FighterId, delta: number): number {
     const r = this.fighters.get(id);
-    if (!r) return;
+    if (!r) return 0;
     const newHp = Math.max(0, Math.min(r.maxHp, r.hp + delta));
     r.hp = newHp;
     const pct = newHp / Math.max(1, r.maxHp);
@@ -490,6 +510,31 @@ export class FightStage {
     r.hpText.text = r.isPet ? `${label}` : `${label}  ${newHp}`;
     // Notificar al header React.
     this.onHpChange?.(id, newHp, r.maxHp);
+    return newHp;
+  }
+
+  private async forceDeath(id: FighterId): Promise<void> {
+    const f = this.fighters.get(id);
+    if (!f || !f.alive) return;
+    f.alive = false;
+    f.hp = 0;
+    drawHpFillSized(f.hpBarFg, 0, f.hpBarW, f.hpBarH);
+    const label = f.isPet ? f.pet?.name ?? '' : f.fighter?.name ?? '';
+    f.hpText.text = f.isPet ? `${label}` : `${label}  0`;
+    this.onHpChange?.(id, 0, f.maxHp);
+    f.display.setAnimation('death');
+    dustCloud(this.stage, f.holder.x, f.holder.y - 6, { count: 8, spread: 40 });
+    await this.awaitFrameEvent(f.display, 'death:drop', 550);
+    playSfx('lose');
+    souls(this.stage, f.holder.x, f.holder.y - f.display.baseHeight * 0.5);
+    await Tweener.add(
+      {
+        target: f.holder,
+        duration: 0.35 / this.speed,
+        ease: Easing.easeOutQuad,
+      },
+      { alpha: 0.45 },
+    );
   }
 
   async play(): Promise<void> {
@@ -519,6 +564,16 @@ export class FightStage {
         void winner.display.playAnimation('win');
       }
       this.onComplete?.(endStep.w as FighterId);
+      return;
+    }
+
+    // Failsafe: una pelea jamás debe quedarse sin final si el log llega sin End.
+    const alive = [...this.fighters.values()].filter((f) => !f.isPet && f.hp > 0);
+    const winner = alive.sort((a, b) => b.hp - a.hp)[0];
+    if (winner) {
+      playSfx('win');
+      void winner.display.playAnimation('win');
+      this.onComplete?.(winner.id as FighterId);
     }
   }
 
@@ -729,7 +784,7 @@ export class FightStage {
     await this.awaitFrameEvent(attacker.display, `${attackAnim}:hit`, 600);
 
     // ---- IMPACTO (sincronizado con el frame) ----
-    this.applyHpDelta(target.id as FighterId, -step.d);
+    const targetHp = this.applyHpDelta(target.id as FighterId, -step.d);
     if (attacker.isPet) {
       playPetHit(attacker.pet?.model ?? 'dog');
     } else {
@@ -751,6 +806,13 @@ export class FightStage {
         1.5,
       );
     }
+
+    if (targetHp <= 0) {
+      await this.forceDeath(target.id as FighterId);
+      await this.animMoveBack(attacker.id as FighterId);
+      return;
+    }
+
     void target.display.playAnimation(this.pickHitAnim()).then(() => {
       if (!this.destroyed && target.alive) target.display.setAnimation('idle');
     });
@@ -846,26 +908,7 @@ export class FightStage {
   }
 
   private async animDeath(step: DeathStep) {
-    const f = this.get(step.f);
-    if (!f) return;
-    f.alive = false;
-    // Usar la animación de muerte real. Como tiene loop_start=24, no resuelve
-    // sola; usamos el frame event :drop (frame 24) para sync el SFX.
-    f.display.setAnimation('death');
-    // Polvo en los pies arranca al inicio (caída visualmente progresiva).
-    dustCloud(this.stage, f.holder.x, f.holder.y - 6, { count: 8, spread: 40 });
-    // Esperar al frame del impacto en el suelo para el SFX y las almas.
-    await this.awaitFrameEvent(f.display, 'death:drop', 700);
-    playSfx('lose');
-    souls(this.stage, f.holder.x, f.holder.y - f.display.baseHeight * 0.5);
-    await Tweener.add(
-      {
-        target: f.holder,
-        duration: 0.5 / this.speed,
-        ease: Easing.easeOutQuad,
-      },
-      { alpha: 0.5 },
-    );
+    await this.forceDeath(step.f as FighterId);
   }
 
   private async animSurvive(step: SurviveStep) {

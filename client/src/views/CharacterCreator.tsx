@@ -3,16 +3,36 @@
 // pre-pop desde URL params (name, gender, master), randomize body/colors,
 // submit a api.brutes.create, navegación post-creation.
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
-import { BruteAvatar } from '@/components/BruteAvatar';
+import {
+  LpcAvatarPreview,
+  LPC_ARMOR_COLOR_OPTIONS,
+  LPC_ARMS_ARMOR_OPTIONS,
+  LPC_FEET_ARMOR_OPTIONS,
+  LPC_HAIR_OPTIONS,
+  LPC_HEAD_OPTIONS,
+  LPC_HEADWEAR_OPTIONS,
+  LPC_LEGS_ARMOR_OPTIONS,
+  LPC_TORSO_ARMOR_OPTIONS,
+  LPC_WEAPON_OPTIONS,
+  LPC_WINGS_OPTIONS,
+  type LpcArmsArmorKey,
+  type LpcArmorColorKey,
+  type LpcFeetArmorKey,
+  type LpcHairKey,
+  type LpcHeadKey,
+  type LpcHeadwearKey,
+  type LpcLegsArmorKey,
+  type LpcTorsoArmorKey,
+  type LpcWeaponKey,
+  type LpcWingsKey,
+} from '@/components/LpcAvatarPreview';
 import { api, ApiError } from '@/api/apiClient';
 import {
-  appearancePalettes,
   generateColorString,
   getRandomBody,
-  getRandomColors,
   mulberry32,
   hashStringToSeed,
   type Brute,
@@ -25,43 +45,11 @@ import { useWalletStore } from '@/store/useWalletStore';
 import {
   createPaidExtraBruteOnChain,
   formatBnbWei,
-  formatWallet,
   getEthereumProvider,
   isSupportedBnbChain,
   metadataHashForBrute,
   readExtraBrutePrice,
 } from '@/lib/web3';
-
-function previewId(gender: BruteGender, body: string, bodyColors: string): string {
-  return `preview-${gender}-${body}-${bodyColors}`;
-}
-
-
-function setColorIdx(
-  current: string,
-  field: 'skin' | 'hair' | 'shirt',
-  idx: number,
-): string {
-  const pairs = Array.from({ length: 16 }, (_, i) => current.slice(i * 2, i * 2 + 2));
-  const padded = pairs.map((p) => (p.length === 2 ? p : '00'));
-  const setIdx = (offset: number) => {
-    padded[offset] = idx.toString().padStart(2, '0');
-  };
-  if (field === 'skin') {
-    setIdx(0); setIdx(1); setIdx(2);
-  } else if (field === 'hair') {
-    setIdx(3); setIdx(4); setIdx(5); setIdx(6); setIdx(7);
-  } else {
-    setIdx(8);
-  }
-  return padded.join('');
-}
-
-function getColorIdx(current: string, field: 'skin' | 'hair' | 'shirt'): number {
-  const offset = field === 'skin' ? 0 : field === 'hair' ? 6 : 16;
-  const v = parseInt(current.slice(offset, offset + 2), 10);
-  return Number.isFinite(v) ? v : 0;
-}
 
 export function CharacterCreator() {
   const [search] = useSearchParams();
@@ -71,10 +59,6 @@ export function CharacterCreator() {
   const pushToast = useToastStore((s) => s.push);
   const walletAddress = useWalletStore((s) => s.address);
   const chainId = useWalletStore((s) => s.chainId);
-  const walletConnecting = useWalletStore((s) => s.connecting);
-  const walletError = useWalletStore((s) => s.error);
-  const connectWallet = useWalletStore((s) => s.connect);
-  const switchToBnb = useWalletStore((s) => s.switchToBnb);
 
   const masterId = search.get('master');
   const [master, setMaster] = useState<Brute | null>(null);
@@ -85,7 +69,7 @@ export function CharacterCreator() {
     const rng = mulberry32(hashStringToSeed('brutus-default-body'));
     return getRandomBody('male', rng);
   });
-  const [bodyColors, setBodyColors] = useState<string>(() =>
+  const [bodyColors] = useState<string>(() =>
     generateColorString({
       col0: 1, col0a: 1, col0c: 1,
       col1: 0, col1a: 0, col1b: 0, col1c: 0, col1d: 0,
@@ -95,6 +79,16 @@ export function CharacterCreator() {
     }),
   );
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [lpcHead, setLpcHead] = useState<LpcHeadKey>('humanMale');
+  const [lpcHair, setLpcHair] = useState<LpcHairKey>('bedhead');
+  const [lpcWings, setLpcWings] = useState<LpcWingsKey>('none');
+  const [lpcHeadwear, setLpcHeadwear] = useState<LpcHeadwearKey>('none');
+  const [lpcArmsArmor, setLpcArmsArmor] = useState<LpcArmsArmorKey>('none');
+  const [lpcTorsoArmor, setLpcTorsoArmor] = useState<LpcTorsoArmorKey>('plate');
+  const [lpcLegsArmor, setLpcLegsArmor] = useState<LpcLegsArmorKey>('plate');
+  const [lpcFeetArmor, setLpcFeetArmor] = useState<LpcFeetArmorKey>('plate');
+  const [lpcArmorColor, setLpcArmorColor] = useState<LpcArmorColorKey>('steel');
+  const [lpcWeapon, setLpcWeapon] = useState<LpcWeaponKey>('none');
   const [paidForgeNeeded, setPaidForgeNeeded] = useState<boolean>(false);
   const [paidForgePrice, setPaidForgePrice] = useState<bigint | null>(null);
   const [paidForgeBusy, setPaidForgeBusy] = useState<boolean>(false);
@@ -103,11 +97,6 @@ export function CharacterCreator() {
     const rng = mulberry32(hashStringToSeed(`gender-switch-${gender}-${Date.now()}`));
     setBody((prev) => prev || getRandomBody(gender, rng));
   }, [gender]);
-
-  const previewSubject = useMemo(
-    () => ({ id: previewId(gender, body, bodyColors), gender, body, bodyColors }),
-    [gender, body, bodyColors],
-  );
 
   useEffect(() => {
     if (!masterId) return;
@@ -139,25 +128,26 @@ export function CharacterCreator() {
   const nameValid = isValidName(name);
   const walletReady = Boolean(walletAddress && isSupportedBnbChain(chainId));
   const forgeDisabled = !nameValid || submitting || !walletReady;
-
-  const skinPalette = appearancePalettes[gender].skin;
-  const hairPalette = appearancePalettes[gender].hair;
-  const clothingPalette = appearancePalettes[gender].clothing;
-
-  const skinIdx = getColorIdx(bodyColors, 'skin');
-  const hairIdx = getColorIdx(bodyColors, 'hair');
-  const shirtIdx = getColorIdx(bodyColors, 'shirt');
-
-  const randomize = () => {
-    const seed = Date.now() & 0x7fffffff;
-    const rng = mulberry32(seed);
-    setBody(getRandomBody(gender, rng));
-    setBodyColors(getRandomColors(gender, rng));
+  const effectiveLpcHair = lpcHeadwear === 'none' ? lpcHair : 'none';
+  const lpcAppearance = {
+    head: lpcHead,
+    hair: lpcHair,
+    wings: lpcWings,
+    headwear: lpcHeadwear,
+    armsArmor: lpcArmsArmor,
+    torsoArmor: lpcTorsoArmor,
+    legsArmor: lpcLegsArmor,
+    feetArmor: lpcFeetArmor,
+    armorColor: lpcArmorColor,
+    weapon: lpcWeapon,
   };
-
-  const randomizeBodyParts = () => {
-    const rng = mulberry32(Date.now() & 0x7fffffff);
-    setBody(getRandomBody(gender, rng));
+  const appearance = {
+    gender: 'M' as const,
+    skin: '#d2a679',
+    hair: '#3b1f0e',
+    shirt: '#3b3b8a',
+    pants: '#1f1f1f',
+    lpc: lpcAppearance,
   };
 
   const submit = async () => {
@@ -178,6 +168,7 @@ export function CharacterCreator() {
         gender,
         body,
         bodyColors,
+        appearance,
         walletAddress,
         masterId: masterId ?? undefined,
       });
@@ -228,6 +219,7 @@ export function CharacterCreator() {
         gender,
         body,
         bodyColors,
+        appearance,
         walletAddress,
         onChainBruteId: paid.onChainBruteId,
         createTxHash: paid.txHash,
@@ -264,45 +256,25 @@ export function CharacterCreator() {
         </div>
       )}
 
-      <div
-        className="creator-pupil-banner"
-        style={{
-          display: 'grid',
-          gap: 8,
-          borderColor: walletReady ? 'rgba(230,180,80,0.5)' : 'rgba(196,26,26,0.45)',
-        }}
-      >
-        <div>
-          <b>Modo BNB/Flap preparado:</b>{' '}
-          {walletReady
-            ? `MetaMask conectada (${formatWallet(walletAddress)}). La creación local queda preparada para enlazarse al bruteId on-chain.`
-            : walletAddress
-              ? 'Wallet conectada, pero falta cambiar a BNB Chain/Testnet.'
-              : 'Conecta MetaMask antes de forjar. Cada wallet tiene 3 brutos base y los extras pagan BNB.'}
-        </div>
-        <div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-          Regla real: 3 brutos base por wallet · extras con BNB · 50% vault / 50% burn · 3 acciones diarias por bruto.
-        </div>
-        {!walletReady && (
-          <button
-            type="button"
-            className="creator-randomizer-btn"
-            onClick={() => (walletAddress ? void switchToBnb() : void connectWallet())}
-            disabled={walletConnecting}
-            style={{ justifySelf: 'start' }}
-          >
-            {walletConnecting ? 'Conectando…' : walletAddress ? 'Cambiar a BNB Testnet' : 'Conectar MetaMask'}
-          </button>
-        )}
-        {walletError && <div style={{ color: 'var(--primary)', fontSize: 12 }}>{walletError}</div>}
-      </div>
-
       <section className="creator-panel">
         <div className="creator-grid">
           {/* Preview izquierdo */}
           <div className="creator-preview">
             <div className="creator-preview-frame">
-              <BruteAvatar brute={previewSubject} size="lg" />
+              <LpcAvatarPreview
+                head={lpcHead}
+                hair={effectiveLpcHair}
+                wings={lpcWings}
+                headwear={lpcHeadwear}
+                armsArmor={lpcArmsArmor}
+                torsoArmor={lpcTorsoArmor}
+                legsArmor={lpcLegsArmor}
+                feetArmor={lpcFeetArmor}
+                armorColor={lpcArmorColor}
+                weapon={lpcWeapon}
+                scale={3}
+                compact
+              />
               <span className="pin tl" />
               <span className="pin tr" />
               <span className="pin bl" />
@@ -311,23 +283,8 @@ export function CharacterCreator() {
             <div className={clsx('creator-preview-name', !name && 'empty')}>
               {name || 'Sin nombre'}
             </div>
-            <div className="creator-randomizers">
-              <button
-                type="button"
-                className="creator-randomizer-btn"
-                onClick={randomizeBodyParts}
-                title="Aleatorizar cuerpo (mantener colores)"
-              >
-                ⚂ Cuerpo
-              </button>
-              <button
-                type="button"
-                className="creator-randomizer-btn"
-                onClick={randomize}
-                title="Aleatorizar todo"
-              >
-                ⚂ Todo
-              </button>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginTop: 10 }}>
+              Human heads con cara integrada. Equipamiento LPC útil para creator y combate.
             </div>
           </div>
 
@@ -350,47 +307,23 @@ export function CharacterCreator() {
               />
             </div>
 
-            <div>
-              <div className="creator-field-label">
-                <span>Linaje</span>
-              </div>
-              <div className="creator-gender">
-                {(['male', 'female'] as const).map((g) => (
-                  <button
-                    key={g}
-                    type="button"
-                    onClick={() => setGender(g)}
-                    className={clsx('creator-gender-btn', gender === g && 'active')}
-                    aria-pressed={gender === g}
-                  >
-                    <span className="glyph" aria-hidden>
-                      {g === 'male' ? '♂' : '♀'}
-                    </span>
-                    <span>{g === 'male' ? 'Macho' : 'Hembra'}</span>
-                  </button>
-                ))}
-              </div>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <LpcSelect label="Human head" value={lpcHead} options={LPC_HEAD_OPTIONS} onChange={(value) => setLpcHead(value as LpcHeadKey)} />
+              <LpcSelect label="Pelo" value={lpcHair} options={LPC_HAIR_OPTIONS} onChange={(value) => setLpcHair(value as LpcHairKey)} />
+              {lpcHeadwear !== 'none' && (
+                <div style={{ marginTop: -6, color: 'var(--text-secondary)', fontSize: 11 }}>
+                  Pelo oculto por casco; al quitar el casco vuelve el pelo seleccionado.
+                </div>
+              )}
+              <LpcSelect label="Monarch wings" value={lpcWings} options={LPC_WINGS_OPTIONS} onChange={(value) => setLpcWings(value as LpcWingsKey)} />
+              <LpcSelect label="Headwear / helmets" value={lpcHeadwear} options={LPC_HEADWEAR_OPTIONS} onChange={(value) => setLpcHeadwear(value as LpcHeadwearKey)} />
+              <LpcSelect label="Armor color" value={lpcArmorColor} options={LPC_ARMOR_COLOR_OPTIONS} onChange={(value) => setLpcArmorColor(value as LpcArmorColorKey)} />
+              <LpcSelect label="Arms armour" value={lpcArmsArmor} options={LPC_ARMS_ARMOR_OPTIONS} onChange={(value) => setLpcArmsArmor(value as LpcArmsArmorKey)} />
+              <LpcSelect label="Torso armour plate" value={lpcTorsoArmor} options={LPC_TORSO_ARMOR_OPTIONS} onChange={(value) => setLpcTorsoArmor(value as LpcTorsoArmorKey)} />
+              <LpcSelect label="Legs armour" value={lpcLegsArmor} options={LPC_LEGS_ARMOR_OPTIONS} onChange={(value) => setLpcLegsArmor(value as LpcLegsArmorKey)} />
+              <LpcSelect label="Feet armour" value={lpcFeetArmor} options={LPC_FEET_ARMOR_OPTIONS} onChange={(value) => setLpcFeetArmor(value as LpcFeetArmorKey)} />
+              <LpcSelect label="Weapon" value={lpcWeapon} options={LPC_WEAPON_OPTIONS} onChange={(value) => setLpcWeapon(value as LpcWeaponKey)} />
             </div>
-
-
-            <SwatchRow
-              label="Piel"
-              colors={skinPalette}
-              valueIdx={skinIdx}
-              onPick={(idx) => setBodyColors((c) => setColorIdx(c, 'skin', idx))}
-            />
-            <SwatchRow
-              label="Pelo"
-              colors={hairPalette}
-              valueIdx={hairIdx}
-              onPick={(idx) => setBodyColors((c) => setColorIdx(c, 'hair', idx))}
-            />
-            <SwatchRow
-              label="Atuendo"
-              colors={clothingPalette}
-              valueIdx={shirtIdx}
-              onPick={(idx) => setBodyColors((c) => setColorIdx(c, 'shirt', idx))}
-            />
 
             <button
               type="button"
@@ -444,32 +377,39 @@ export function CharacterCreator() {
   );
 }
 
-interface SwatchRowProps {
+interface LpcSelectOption {
+  key: string;
   label: string;
-  colors: ReadonlyArray<string>;
-  valueIdx: number;
-  onPick: (idx: number) => void;
 }
 
-function SwatchRow({ label, colors, valueIdx, onPick }: SwatchRowProps) {
+function LpcSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: ReadonlyArray<LpcSelectOption>;
+  onChange: (value: string) => void;
+}) {
   return (
-    <fieldset>
-      <legend className="creator-field-label">
+    <label style={{ display: 'grid', gap: 4, textAlign: 'left' }}>
+      <span className="creator-field-label" style={{ margin: 0 }}>
         <span>{label}</span>
-      </legend>
-      <div className="creator-swatches">
-        {colors.map((c, i) => (
-          <button
-            type="button"
-            key={`${c}-${i}`}
-            onClick={() => onPick(i)}
-            className={clsx('creator-swatch', valueIdx === i && 'active')}
-            style={{ backgroundColor: c }}
-            aria-label={`${label} ${i + 1}`}
-            aria-pressed={valueIdx === i}
-          />
+      </span>
+      <select
+        className="creator-name-input"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        style={{ height: 38, padding: '0 10px', fontSize: 12 }}
+      >
+        {options.map((option) => (
+          <option key={option.key} value={option.key}>
+            {option.label}
+          </option>
         ))}
-      </div>
-    </fieldset>
+      </select>
+    </label>
   );
 }
