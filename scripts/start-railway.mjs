@@ -1,17 +1,14 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 
-const serviceName = (
-  process.env.RAILWAY_SERVICE_NAME ||
-  process.env.RAILWAY_SERVICE_SLUG ||
-  process.env.RAILWAY_SERVICE_ID ||
-  ''
-).toLowerCase();
+// Railway production runs from the repository root. The server package is the
+// canonical production entrypoint: it serves both the REST API and the built
+// React client from client/dist. Starting the server for every Railway web
+// service keeps production healthy even if the Railway service name/slug does
+// not include "client" or "server".
+const target = ['npm', ['run', 'start', '-w', 'server']];
 
-const isClientService = serviceName.includes('client');
-const target = isClientService ? ['npm', ['run', 'start', '-w', 'client']] : ['npm', ['run', 'start', '-w', 'server']];
-
-console.log(`[start-railway] service=${serviceName || '<unknown>'} command=${target[0]} ${target[1].join(' ')}`);
+console.log(`[start-railway] command=${target[0]} ${target[1].join(' ')}`);
 
 const child = spawn(target[0], target[1], {
   stdio: 'inherit',
