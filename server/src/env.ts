@@ -18,7 +18,7 @@ const EnvSchema = z.object({
     .transform((v) => Number.parseInt(v, 10))
     .pipe(z.number().int().min(1).max(65535)),
   HOST: z.string().default(defaultHost()),
-  DATABASE_URL: z.string().min(1).default('file:/tmp/brutus-railway.db'),
+  DATABASE_URL: z.string().min(1).default('file:/data/brutus.db'),
   CLIENT_ORIGIN: z.string().url().default('http://localhost:5173'),
   JWT_SECRET: z.string().min(16).default('dev-only-not-for-production-do-not-use'),
   WALLET_AUTH_ENABLED: z

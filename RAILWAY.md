@@ -46,17 +46,32 @@ BRUTUS_COMBAT_REWARDS=0x22703D0153133450067C2A310D07d44f1Af7584a
 BRUTUS_OPERATOR_PRIVATE_KEY=<operator-private-key>
 ```
 
-## SQLite warning
+## SQLite persistent volume
 
-For the current quick Railway deployment, SQLite can work if Railway has a persistent volume mounted at:
+For the current Railway deployment, SQLite should use a persistent volume.
+
+Railway UI steps:
+
+1. Open the `server` service.
+2. Go to `Volumes`.
+3. Add/create a volume mounted at:
 
 `/data`
 
-Use:
+4. Go to `Variables` for the same `server` service.
+5. Set:
 
 `DATABASE_URL=file:/data/brutus.db`
 
-Without a volume, SQLite data is ephemeral and can disappear on redeploy/restart.
+6. Redeploy the `server` service.
+
+The production start script now also defaults missing `DATABASE_URL` to:
+
+`file:/data/brutus.db`
+
+and creates the parent directory before Prisma runs. This only becomes truly persistent when Railway has a volume mounted at `/data`.
+
+Without a volume, SQLite data is still ephemeral and can disappear on redeploy/restart.
 
 For real production/mainnet, consider a controlled migration to Postgres before depending on persistent data.
 
