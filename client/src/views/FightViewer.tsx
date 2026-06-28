@@ -478,7 +478,17 @@ function rewardReasonLabel(reason?: string): string {
     case 'operator_private_key_missing':
       return 'falta configurar BRUTUS_OPERATOR_PRIVATE_KEY en Railway.';
     case 'record_combat_reward_failed':
-      return 'el contrato no pudo registrar esta victoria. Revisa RPC, saldo del operador o permisos del contrato.';
+      return 'el contrato no pudo registrar esta victoria.';
+    case 'reward_contract_missing':
+      return 'la dirección del contrato de rewards no tiene contrato desplegado en BNB Testnet.';
+    case 'operator_not_authorized':
+      return 'la wallet operadora del servidor no es el operator del contrato de rewards.';
+    case 'operator_bnb_missing':
+      return 'la wallet operadora del servidor no tiene BNB testnet para pagar gas.';
+    case 'reward_rpc_failed':
+      return 'falló el RPC de BNB Testnet al registrar la victoria.';
+    case 'fight_already_recorded':
+      return 'esta pelea ya estaba registrada on-chain.';
     case 'winner_wallet_missing':
       return 'este bruto no tiene wallet owner asociada.';
     case 'training_fight_no_bnb_reward':

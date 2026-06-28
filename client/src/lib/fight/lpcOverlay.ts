@@ -106,7 +106,7 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
     armsArmor === 'bracers' ? { src: p(`armor/armsBracers/${a}.png`), tint: armorTint } : undefined,
     { src: p(`head/${head}/${a}.png`) },
     hair !== 'none' ? { src: p(`hair/${hair}/${a}.png`) } : undefined,
-    headwear !== 'none' ? { src: p(`helmet/${headwear}/${a}.png`) } : undefined,
+    headwear !== 'none' ? { src: p(`helmet/${headwear}/${a}.png`), tint: armorTint } : undefined,
     wings !== 'none' ? { src: p(`wings/${wings === 'monarchPurple' ? 'monarch' : 'pixie'}/fg/${a}.png`) } : undefined,
   ];
   return layers.filter(Boolean) as Layer[];

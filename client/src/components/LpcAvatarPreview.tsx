@@ -19,7 +19,7 @@ import helmetArmetIdle from '@/assets/lpc-test/helmet-armet-idle.png?url';
 import helmetBarbutaIdle from '@/assets/lpc-test/helmet-barbuta-idle.png?url';
 import helmetGreathelmIdle from '@/assets/lpc-test/helmet-greathelm-idle.png?url';
 import helmetMaximusIdle from '@/assets/lpc-test/helmet-maximus-idle.png?url';
-import armorLeatherIdle from '@/assets/lpc-test/armor-leather-idle.png?url';
+import trenchCoatOfficialWalk from '@/assets/lpc-test/torso-jacket-trench-gray-walk.png?url';
 import armsArmorPlateIdle from '@/assets/lpc-test/arms-armor-plate-idle.png?url';
 import armsBracersIdle from '@/assets/lpc-test/arms-bracers-idle.png?url';
 import torsoArmorPlateIdle from '@/assets/lpc-test/torso-armor-plate-idle.png?url';
@@ -115,7 +115,7 @@ export const LPC_ARMS_ARMOR_OPTIONS = [
 
 export const LPC_TORSO_ARMOR_OPTIONS = [
   { key: 'none', label: 'No jacket/armour' },
-  { key: 'trenchCoat', label: 'Trench coat', src: armorLeatherIdle },
+  { key: 'trenchCoat', label: 'Trench coat', src: trenchCoatOfficialWalk },
   { key: 'plate', label: 'Torso armour plate', src: torsoArmorPlateIdle },
   { key: 'legion', label: 'Torso legion', src: torsoArmorLegionIdle },
   { key: 'chainmail', label: 'Chainmail', src: torsoChainmailIdle },
