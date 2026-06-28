@@ -17,12 +17,10 @@ import wingsPixiePurpleBgWalk from '@/assets/lpc-test/wings-pixie-purple-bg-walk
 import wingsPixiePurpleFgWalk from '@/assets/lpc-test/wings-pixie-purple-fg-walk.png?url';
 import helmetArmetIdle from '@/assets/lpc-test/helmet-armet-idle.png?url';
 import helmetBarbutaIdle from '@/assets/lpc-test/helmet-barbuta-idle.png?url';
-import helmetFlattopIdle from '@/assets/lpc-test/helmet-flattop-idle.png?url';
 import helmetGreathelmIdle from '@/assets/lpc-test/helmet-greathelm-idle.png?url';
-import helmetHornedIdle from '@/assets/lpc-test/helmet-horned-idle.png?url';
 import helmetMaximusIdle from '@/assets/lpc-test/helmet-maximus-idle.png?url';
-import helmetSugarloafSimpleIdle from '@/assets/lpc-test/helmet-sugarloaf-simple-idle.png?url';
-import helmetXeonIdle from '@/assets/lpc-test/helmet-xeon-idle.png?url';
+import headwearMailIdle from '@/assets/lpc-test/ulpc-real/headwear-mail-idle.png?url';
+import armorLeatherIdle from '@/assets/lpc-test/armor-leather-idle.png?url';
 import armsArmorPlateIdle from '@/assets/lpc-test/arms-armor-plate-idle.png?url';
 import armsBracersIdle from '@/assets/lpc-test/arms-bracers-idle.png?url';
 import torsoArmorPlateIdle from '@/assets/lpc-test/torso-armor-plate-idle.png?url';
@@ -30,11 +28,6 @@ import torsoArmorLegionIdle from '@/assets/lpc-test/torso-armor-legion-idle.png?
 import torsoChainmailIdle from '@/assets/lpc-test/torso-chainmail-idle.png?url';
 import legsArmorPlateIdle from '@/assets/lpc-test/legs-armor-plate-idle.png?url';
 import feetArmorPlateSteelIdle from '@/assets/lpc-test/feet-armor-plate-steel-idle.png?url';
-import weaponSwordSteelIdle from '@/assets/lpc-test/weapon-arming-sword-steel-idle.png?url';
-import weaponSwordGoldIdle from '@/assets/lpc-test/weapon-arming-sword-gold-idle.png?url';
-import weaponMaceWalk from '@/assets/lpc-test/weapon-mace-walk.png?url';
-import weaponWaraxeWalk from '@/assets/lpc-test/weapon-waraxe-walk.png?url';
-import weaponHalberdWalk from '@/assets/lpc-test/weapon-halberd-walk.png?url';
 
 const FRAME = 64;
 const DIRECTIONS = [
@@ -51,34 +44,36 @@ type Layer = { src: string; tint?: string };
 export type LpcHeadKey = 'humanMale' | 'humanGaunt' | 'humanPlump' | 'humanElder';
 export type LpcHairKey = 'bedhead' | 'bob' | 'afro' | 'buzzcut' | 'long' | 'curlyShort' | 'bangs' | 'none';
 export type LpcWingsKey = 'none' | 'monarchPurple' | 'pixiePurple';
-export type LpcHeadwearKey = 'none' | 'armet' | 'barbuta' | 'flattop' | 'greathelm' | 'horned' | 'maximus' | 'sugarloafSimple' | 'xeon';
-export type LpcArmorColorKey = 'steel' | 'gold' | 'iron' | 'bronze' | 'copper' | 'brass' | 'silver' | 'black';
+export type LpcHeadwearKey = 'none' | 'mail' | 'armet' | 'barbuta' | 'greathelm' | 'maximus';
+export type LpcArmorColorKey = 'steel' | 'yellow' | 'iron' | 'bronze' | 'copper' | 'pink' | 'purple' | 'silver' | 'black';
 export type LpcArmsArmorKey = 'none' | 'plate' | 'bracers';
-export type LpcTorsoArmorKey = 'none' | 'plate' | 'legion' | 'chainmail';
+export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail';
 export type LpcLegsArmorKey = 'none' | 'plate';
 export type LpcFeetArmorKey = 'none' | 'plate';
-export type LpcWeaponKey = 'none' | 'swordSteel' | 'swordGold' | 'mace' | 'waraxe' | 'halberd';
+export type LpcWeaponKey = 'none';
 
 const ARMOR_TINTS: Record<LpcArmorColorKey, string> = {
   steel: 'rgba(185, 196, 202, 0.28)',
-  gold: 'rgba(255, 196, 54, 0.32)',
+  yellow: 'rgba(255, 221, 54, 0.36)',
   iron: 'rgba(106, 117, 128, 0.3)',
   bronze: 'rgba(176, 105, 43, 0.3)',
   copper: 'rgba(210, 104, 58, 0.28)',
-  brass: 'rgba(214, 168, 72, 0.28)',
+  pink: 'rgba(255, 83, 184, 0.34)',
+  purple: 'rgba(153, 91, 255, 0.36)',
   silver: 'rgba(225, 230, 235, 0.34)',
   black: 'rgba(20, 24, 31, 0.44)',
 };
 
 export const LPC_ARMOR_COLOR_OPTIONS = [
+  { key: 'black', label: 'Black' },
+  { key: 'purple', label: 'Purple' },
+  { key: 'yellow', label: 'Yellow' },
+  { key: 'pink', label: 'Pink' },
+  { key: 'silver', label: 'Silver' },
   { key: 'steel', label: 'Steel' },
-  { key: 'gold', label: 'Gold' },
   { key: 'iron', label: 'Iron' },
   { key: 'bronze', label: 'Bronze' },
   { key: 'copper', label: 'Copper' },
-  { key: 'brass', label: 'Brass' },
-  { key: 'silver', label: 'Silver' },
-  { key: 'black', label: 'Black' },
 ] as const satisfies ReadonlyArray<LpcOption<LpcArmorColorKey>>;
 
 export const LPC_HEAD_OPTIONS = [
@@ -106,25 +101,23 @@ export const LPC_WINGS_OPTIONS = [
 ] as const satisfies ReadonlyArray<LpcOption<LpcWingsKey>>;
 
 export const LPC_HEADWEAR_OPTIONS = [
-  { key: 'none', label: 'Sin helmet/headwear' },
+  { key: 'none', label: 'No headwear' },
+  { key: 'mail', label: 'Mail coif', src: headwearMailIdle },
   { key: 'armet', label: 'Armet', src: helmetArmetIdle },
   { key: 'barbuta', label: 'Barbuta', src: helmetBarbutaIdle },
-  { key: 'flattop', label: 'Flattop', src: helmetFlattopIdle },
   { key: 'greathelm', label: 'Greathelm', src: helmetGreathelmIdle },
-  { key: 'horned', label: 'Horned helmet', src: helmetHornedIdle },
   { key: 'maximus', label: 'Maximus', src: helmetMaximusIdle },
-  { key: 'sugarloafSimple', label: 'Simple sugarloaf helm', src: helmetSugarloafSimpleIdle },
-  { key: 'xeon', label: 'Xeon helmet', src: helmetXeonIdle },
 ] as const satisfies ReadonlyArray<LpcOption<LpcHeadwearKey>>;
 
 export const LPC_ARMS_ARMOR_OPTIONS = [
-  { key: 'none', label: 'Sin arms armour' },
+  { key: 'none', label: 'No arms armour' },
   { key: 'plate', label: 'Arms armour plate', src: armsArmorPlateIdle },
   { key: 'bracers', label: 'Bracers', src: armsBracersIdle },
 ] as const satisfies ReadonlyArray<LpcOption<LpcArmsArmorKey>>;
 
 export const LPC_TORSO_ARMOR_OPTIONS = [
-  { key: 'none', label: 'Sin torso armour' },
+  { key: 'none', label: 'No jacket/armour' },
+  { key: 'trenchCoat', label: 'Trench coat', src: armorLeatherIdle },
   { key: 'plate', label: 'Torso armour plate', src: torsoArmorPlateIdle },
   { key: 'legion', label: 'Torso legion', src: torsoArmorLegionIdle },
   { key: 'chainmail', label: 'Chainmail', src: torsoChainmailIdle },
@@ -142,11 +135,6 @@ export const LPC_FEET_ARMOR_OPTIONS = [
 
 export const LPC_WEAPON_OPTIONS = [
   { key: 'none', label: 'Sin weapon' },
-  { key: 'swordSteel', label: 'Arming sword steel', src: weaponSwordSteelIdle },
-  { key: 'swordGold', label: 'Arming sword gold', src: weaponSwordGoldIdle },
-  { key: 'mace', label: 'Mace', src: weaponMaceWalk },
-  { key: 'waraxe', label: 'Waraxe', src: weaponWaraxeWalk },
-  { key: 'halberd', label: 'Halberd', src: weaponHalberdWalk },
 ] as const satisfies ReadonlyArray<LpcOption<LpcWeaponKey>>;
 
 interface LpcAvatarPreviewProps {
@@ -179,6 +167,8 @@ function tintLayer(option: LpcOption<string> | undefined, tint: string): Layer |
 function layerPaths(props: Required<Omit<LpcAvatarPreviewProps, 'scale' | 'compact'>>) {
   const wings = pick(LPC_WINGS_OPTIONS, props.wings);
   const armorTint = ARMOR_TINTS[props.armorColor];
+  const headwear = pick(LPC_HEADWEAR_OPTIONS, props.headwear);
+  const headwearLayer = tintLayer(headwear, armorTint);
   return [
     wings?.bgSrc ? { src: wings.bgSrc } : undefined,
     { src: bodyMaleIdle },
@@ -188,7 +178,7 @@ function layerPaths(props: Required<Omit<LpcAvatarPreviewProps, 'scale' | 'compa
     tintLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor), armorTint),
     tintLayer(pick(LPC_ARMS_ARMOR_OPTIONS, props.armsArmor), armorTint),
     toLayer(pick(LPC_HAIR_OPTIONS, props.hair)),
-    tintLayer(pick(LPC_HEADWEAR_OPTIONS, props.headwear), armorTint),
+    headwearLayer,
     toLayer(pick(LPC_WEAPON_OPTIONS, props.weapon)),
     wings?.fgSrc ? { src: wings.fgSrc } : undefined,
   ].filter(Boolean) as Layer[];

@@ -14,7 +14,7 @@ import { maybeResetDaily } from '../lib/dailyReset.js';
 const DEFAULT_LPC_APPEARANCE = {
   head: 'humanMale',
   hair: 'bedhead',
-  wings: 'none',
+  wings: 'monarchPurple',
   headwear: 'none',
   armsArmor: 'none',
   torsoArmor: 'plate',
@@ -94,7 +94,7 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
   };
   const serialized = serializeForPrisma({
     skills: stats.skills,
-    weapons: stats.weapons,
+    weapons: [],
     pets: stats.pets,
     appearance,
   });

@@ -91,7 +91,13 @@ export function Landing() {
           setCurrent(id);
           navigate(`/brute/${id}`);
         }}
-        onForget={forget}
+        onForget={(id) => {
+          const stub = recent.find((b) => b.id === id);
+          const name = stub?.name ?? 'este personaje';
+          const ok = window.confirm(`¿Estás seguro de que quieres eliminar a ${name} de guerreros recientes?`);
+          if (!ok) return;
+          forget(id);
+        }}
       />
 
       <footer className="landing-footer">

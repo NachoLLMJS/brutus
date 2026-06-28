@@ -722,7 +722,7 @@ export class FightStage {
   private async animMove(step: MoveStep) {
     const f = this.get(step.f);
     const t = this.get(step.t);
-    if (!f || !t) return;
+    if (!f || !t || !f.alive || !t.alive) return;
     const targetX = t.holder.x + (t.facing === 'left' ? -ATTACK_OFFSET : ATTACK_OFFSET);
     f.display.setAnimation('run');
     dustCloud(this.stage, f.holder.x, f.holder.y - 8, { count: 4, spread: 20 });
@@ -763,7 +763,7 @@ export class FightStage {
   private async animHit(step: HitStep) {
     const target = this.get(step.t);
     const attacker = this.get(step.f);
-    if (!target || !attacker) return;
+    if (!target || !attacker || !target.alive || !attacker.alive) return;
 
     const dmgPct = Math.min(0.6, step.d / Math.max(1, target.maxHp));
     const knockback = 18 + 30 * dmgPct;

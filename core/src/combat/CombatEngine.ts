@@ -516,16 +516,16 @@ export function simulate(a: Brute, b: Brute, rng: Rng): CombatResult {
 
       // ataque normal
       const ended = performAttack(log, turn, rng, attacker, defender);
-      if (ended || defender.hp <= 0) {
-        winner = attacker.side;
+      if (ended || attacker.hp <= 0 || defender.hp <= 0) {
+        winner = attacker.hp <= 0 ? defender.side : attacker.side;
         break;
       }
 
       // swift wind: posible turno extra
-      if (attacker.effects.swiftWind && rng() < 0.15 && defender.hp > 0) {
+      if (attacker.effects.swiftWind && rng() < 0.15 && attacker.hp > 0 && defender.hp > 0) {
         const ended2 = performAttack(log, turn, rng, attacker, defender);
-        if (ended2 || defender.hp <= 0) {
-          winner = attacker.side;
+        if (ended2 || attacker.hp <= 0 || defender.hp <= 0) {
+          winner = attacker.hp <= 0 ? defender.side : attacker.side;
           break;
         }
       }

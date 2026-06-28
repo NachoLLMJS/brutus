@@ -12,21 +12,17 @@ import {
   LPC_ARMS_ARMOR_OPTIONS,
   LPC_FEET_ARMOR_OPTIONS,
   LPC_HAIR_OPTIONS,
-  LPC_HEAD_OPTIONS,
   LPC_HEADWEAR_OPTIONS,
   LPC_LEGS_ARMOR_OPTIONS,
   LPC_TORSO_ARMOR_OPTIONS,
-  LPC_WEAPON_OPTIONS,
   LPC_WINGS_OPTIONS,
   type LpcArmsArmorKey,
   type LpcArmorColorKey,
   type LpcFeetArmorKey,
   type LpcHairKey,
-  type LpcHeadKey,
   type LpcHeadwearKey,
   type LpcLegsArmorKey,
   type LpcTorsoArmorKey,
-  type LpcWeaponKey,
   type LpcWingsKey,
 } from '@/components/LpcAvatarPreview';
 import { api, ApiError } from '@/api/apiClient';
@@ -79,16 +75,14 @@ export function CharacterCreator() {
     }),
   );
   const [submitting, setSubmitting] = useState<boolean>(false);
-  const [lpcHead, setLpcHead] = useState<LpcHeadKey>('humanMale');
   const [lpcHair, setLpcHair] = useState<LpcHairKey>('bedhead');
-  const [lpcWings, setLpcWings] = useState<LpcWingsKey>('none');
+  const [lpcWings, setLpcWings] = useState<LpcWingsKey>('monarchPurple');
   const [lpcHeadwear, setLpcHeadwear] = useState<LpcHeadwearKey>('none');
   const [lpcArmsArmor, setLpcArmsArmor] = useState<LpcArmsArmorKey>('none');
-  const [lpcTorsoArmor, setLpcTorsoArmor] = useState<LpcTorsoArmorKey>('plate');
+  const [lpcTorsoArmor, setLpcTorsoArmor] = useState<LpcTorsoArmorKey>('trenchCoat');
   const [lpcLegsArmor, setLpcLegsArmor] = useState<LpcLegsArmorKey>('plate');
   const [lpcFeetArmor, setLpcFeetArmor] = useState<LpcFeetArmorKey>('plate');
-  const [lpcArmorColor, setLpcArmorColor] = useState<LpcArmorColorKey>('steel');
-  const [lpcWeapon, setLpcWeapon] = useState<LpcWeaponKey>('none');
+  const [lpcArmorColor, setLpcArmorColor] = useState<LpcArmorColorKey>('black');
   const [paidForgeNeeded, setPaidForgeNeeded] = useState<boolean>(false);
   const [paidForgePrice, setPaidForgePrice] = useState<bigint | null>(null);
   const [paidForgeBusy, setPaidForgeBusy] = useState<boolean>(false);
@@ -126,7 +120,7 @@ export function CharacterCreator() {
   const forgeDisabled = !nameValid || submitting || !walletReady;
   const effectiveLpcHair = lpcHeadwear === 'none' ? lpcHair : 'none';
   const lpcAppearance = {
-    head: lpcHead,
+    head: 'humanMale' as const,
     hair: lpcHair,
     wings: lpcWings,
     headwear: lpcHeadwear,
@@ -135,8 +129,9 @@ export function CharacterCreator() {
     legsArmor: lpcLegsArmor,
     feetArmor: lpcFeetArmor,
     armorColor: lpcArmorColor,
-    weapon: lpcWeapon,
+    weapon: 'none' as const,
   };
+
   const appearance = {
     gender: 'M' as const,
     skin: '#d2a679',
@@ -258,7 +253,6 @@ export function CharacterCreator() {
           <div className="creator-preview">
             <div className="creator-preview-frame">
               <LpcAvatarPreview
-                head={lpcHead}
                 hair={effectiveLpcHair}
                 wings={lpcWings}
                 headwear={lpcHeadwear}
@@ -267,7 +261,7 @@ export function CharacterCreator() {
                 legsArmor={lpcLegsArmor}
                 feetArmor={lpcFeetArmor}
                 armorColor={lpcArmorColor}
-                weapon={lpcWeapon}
+                weapon="none"
                 scale={3}
                 compact
               />
@@ -280,7 +274,7 @@ export function CharacterCreator() {
               {name || 'Sin nombre'}
             </div>
             <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginTop: 10 }}>
-              Human heads con cara integrada. Equipamiento LPC útil para creator y combate.
+              Equipamiento LPC editable para creator y combate.
             </div>
           </div>
 
@@ -304,21 +298,14 @@ export function CharacterCreator() {
             </div>
 
             <div className="creator-select-grid">
-              <LpcSelect label="Human head" value={lpcHead} options={LPC_HEAD_OPTIONS} onChange={(value) => setLpcHead(value as LpcHeadKey)} />
               <LpcSelect label="Pelo" value={lpcHair} options={LPC_HAIR_OPTIONS} onChange={(value) => setLpcHair(value as LpcHairKey)} />
-              {lpcHeadwear !== 'none' && (
-                <div style={{ marginTop: -6, color: 'var(--text-secondary)', fontSize: 11 }}>
-                  Pelo oculto por casco; al quitar el casco vuelve el pelo seleccionado.
-                </div>
-              )}
-              <LpcSelect label="Monarch wings" value={lpcWings} options={LPC_WINGS_OPTIONS} onChange={(value) => setLpcWings(value as LpcWingsKey)} />
-              <LpcSelect label="Headwear / helmets" value={lpcHeadwear} options={LPC_HEADWEAR_OPTIONS} onChange={(value) => setLpcHeadwear(value as LpcHeadwearKey)} />
-              <LpcSelect label="Armor color" value={lpcArmorColor} options={LPC_ARMOR_COLOR_OPTIONS} onChange={(value) => setLpcArmorColor(value as LpcArmorColorKey)} />
+              <LpcSelect label="Wings" value={lpcWings} options={LPC_WINGS_OPTIONS} onChange={(value) => setLpcWings(value as LpcWingsKey)} />
+              <LpcSelect label="Headwear / helmet" value={lpcHeadwear} options={LPC_HEADWEAR_OPTIONS} onChange={(value) => setLpcHeadwear(value as LpcHeadwearKey)} />
+              <LpcSelect label="Color" value={lpcArmorColor} options={LPC_ARMOR_COLOR_OPTIONS} onChange={(value) => setLpcArmorColor(value as LpcArmorColorKey)} />
               <LpcSelect label="Arms armour" value={lpcArmsArmor} options={LPC_ARMS_ARMOR_OPTIONS} onChange={(value) => setLpcArmsArmor(value as LpcArmsArmorKey)} />
-              <LpcSelect label="Torso armour plate" value={lpcTorsoArmor} options={LPC_TORSO_ARMOR_OPTIONS} onChange={(value) => setLpcTorsoArmor(value as LpcTorsoArmorKey)} />
+              <LpcSelect label="Jacket / armour" value={lpcTorsoArmor} options={LPC_TORSO_ARMOR_OPTIONS} onChange={(value) => setLpcTorsoArmor(value as LpcTorsoArmorKey)} />
               <LpcSelect label="Legs armour" value={lpcLegsArmor} options={LPC_LEGS_ARMOR_OPTIONS} onChange={(value) => setLpcLegsArmor(value as LpcLegsArmorKey)} />
               <LpcSelect label="Feet armour" value={lpcFeetArmor} options={LPC_FEET_ARMOR_OPTIONS} onChange={(value) => setLpcFeetArmor(value as LpcFeetArmorKey)} />
-              <LpcSelect label="Weapon" value={lpcWeapon} options={LPC_WEAPON_OPTIONS} onChange={(value) => setLpcWeapon(value as LpcWeaponKey)} />
             </div>
 
             <button

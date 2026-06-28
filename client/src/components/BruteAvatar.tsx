@@ -71,7 +71,9 @@ function keyOrDefault<T extends string>(
   value: string | undefined,
   options: ReadonlyArray<{ key: T }>,
   fallback: T,
+  aliases?: Record<string, T>,
 ): T {
+  if (value && aliases?.[value]) return aliases[value];
   return options.some((option) => option.key === value) ? (value as T) : fallback;
 }
 
@@ -87,10 +89,13 @@ function normalizeLpc(raw: Partial<LpcAppearance> | undefined) {
     wings: keyOrDefault(raw.wings, LPC_WINGS_OPTIONS, 'none' as LpcWingsKey),
     headwear,
     armsArmor: keyOrDefault(raw.armsArmor, LPC_ARMS_ARMOR_OPTIONS, 'none' as LpcArmsArmorKey),
-    torsoArmor: keyOrDefault(raw.torsoArmor, LPC_TORSO_ARMOR_OPTIONS, 'plate' as LpcTorsoArmorKey),
+    torsoArmor: keyOrDefault(raw.torsoArmor, LPC_TORSO_ARMOR_OPTIONS, 'trenchCoat' as LpcTorsoArmorKey),
     legsArmor: keyOrDefault(raw.legsArmor, LPC_LEGS_ARMOR_OPTIONS, 'plate' as LpcLegsArmorKey),
     feetArmor: keyOrDefault(raw.feetArmor, LPC_FEET_ARMOR_OPTIONS, 'plate' as LpcFeetArmorKey),
-    armorColor: keyOrDefault(raw.armorColor, LPC_ARMOR_COLOR_OPTIONS, 'steel' as LpcArmorColorKey),
+    armorColor: keyOrDefault(raw.armorColor, LPC_ARMOR_COLOR_OPTIONS, 'black' as LpcArmorColorKey, {
+      gold: 'yellow' as LpcArmorColorKey,
+      brass: 'pink' as LpcArmorColorKey,
+    }),
     weapon: keyOrDefault(raw.weapon, LPC_WEAPON_OPTIONS, 'none' as LpcWeaponKey),
   };
 }

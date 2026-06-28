@@ -11,14 +11,22 @@ const TX_HASH_REGEX = /^0x[0-9a-fA-F]{64}$/;
 const LpcAppearanceSchema = z.object({
   head: z.enum(['humanMale', 'humanGaunt', 'humanPlump', 'humanElder']),
   hair: z.enum(['none', 'bedhead', 'bob', 'afro', 'buzzcut', 'long', 'curlyShort', 'bangs']),
-  wings: z.enum(['none', 'monarchPurple', 'pixiePurple']),
-  headwear: z.enum(['none', 'armet', 'barbuta', 'flattop', 'greathelm', 'horned', 'maximus', 'sugarloafSimple', 'xeon']),
+  wings: z.enum(['none', 'monarchPurple', 'pixiePurple']).default('monarchPurple'),
+  headwear: z.enum([
+    'none',
+    'mail',
+    'armet',
+    'barbuta',
+    'greathelm',
+    'maximus',
+  ]),
   armsArmor: z.enum(['none', 'plate', 'bracers']),
-  torsoArmor: z.enum(['none', 'plate', 'legion', 'chainmail']),
+  gloves: z.literal('none').optional(),
+  torsoArmor: z.enum(['none', 'trenchCoat', 'plate', 'legion', 'chainmail']),
   legsArmor: z.enum(['none', 'plate']),
   feetArmor: z.enum(['none', 'plate']),
-  armorColor: z.enum(['steel', 'gold', 'iron', 'bronze', 'copper', 'brass', 'silver', 'black']),
-  weapon: z.enum(['none', 'swordSteel', 'swordGold', 'mace', 'waraxe', 'halberd']),
+  armorColor: z.enum(['steel', 'yellow', 'iron', 'bronze', 'copper', 'pink', 'purple', 'silver', 'black']),
+  weapon: z.literal('none'),
 });
 
 export const CreateBruteBody = z.object({

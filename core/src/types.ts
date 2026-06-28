@@ -17,6 +17,7 @@ export interface LpcAppearance {
   wings: string;
   headwear: string;
   armsArmor: string;
+  gloves?: string;
   torsoArmor: string;
   legsArmor: string;
   feetArmor: string;

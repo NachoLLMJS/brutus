@@ -63,33 +63,41 @@ function p(path: string): string {
 function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
   const a = fileAction(action);
   const head = value(lpc.head, ['humanMale', 'humanGaunt', 'humanPlump', 'humanElder'] as const, 'humanMale');
-  const headwear = value(lpc.headwear, ['none', 'armet', 'barbuta', 'flattop', 'greathelm', 'horned', 'maximus', 'sugarloafSimple', 'xeon'] as const, 'none');
+  const headwear = value(lpc.headwear, [
+    'none',
+    'mail',
+    'armet',
+    'barbuta',
+    'greathelm',
+    'maximus',
+  ] as const, 'none');
   const hair = headwear === 'none'
     ? value(lpc.hair, ['none', 'bedhead', 'bob', 'afro', 'buzzcut', 'long', 'curlyShort', 'bangs'] as const, 'bedhead')
     : 'none';
   const wings = value(lpc.wings, ['none', 'monarchPurple', 'pixiePurple'] as const, 'none');
   const armsArmor = value(lpc.armsArmor, ['none', 'plate', 'bracers'] as const, 'none');
-  const torsoArmor = value(lpc.torsoArmor, ['none', 'plate', 'legion', 'chainmail'] as const, 'plate');
+  const torsoArmor = value(lpc.torsoArmor, ['none', 'trenchCoat', 'plate', 'legion', 'chainmail'] as const, 'trenchCoat');
   const legsArmor = value(lpc.legsArmor, ['none', 'plate'] as const, 'plate');
   const feetArmor = value(lpc.feetArmor, ['none', 'plate'] as const, 'plate');
-  const armorColor = value(lpc.armorColor, ['steel', 'gold', 'iron', 'bronze', 'copper', 'brass', 'silver', 'black'] as const, 'steel');
-  const feetColor = armorColor === 'black' ? 'black' : armorColor;
-  const weapon = value(lpc.weapon, ['none', 'swordSteel', 'swordGold', 'mace', 'waraxe', 'halberd'] as const, 'none');
+  const armorColor = value(lpc.armorColor, ['steel', 'yellow', 'iron', 'bronze', 'copper', 'pink', 'purple', 'silver', 'black'] as const, 'black');
+  // Combat atlas currently has the original metal palette folders. Keep user-facing labels while resolving to available sheets.
+  const metalColor = armorColor === 'yellow' ? 'gold' : armorColor === 'pink' ? 'brass' : armorColor === 'purple' ? 'silver' : armorColor;
+  const feetColor = metalColor === 'black' ? 'black' : metalColor;
 
   const layers: Array<Layer | undefined> = [
     wings !== 'none' ? { src: p(`wings/${wings === 'monarchPurple' ? 'monarch' : 'pixie'}/bg/${a}.png`) } : undefined,
     { src: p(`body/male/${a}.png`) },
-    { src: p(`head/${head}/${a}.png`) },
     legsArmor === 'plate' ? { src: p(`armor/legsPlate/${a}.png`) } : undefined,
     feetArmor === 'plate' ? { src: p(`armor/feetPlate/${feetColor}/${a}.png`) } : undefined,
+    torsoArmor === 'trenchCoat' ? { src: p(`armor/trenchCoat/${a}.png`) } : undefined,
     torsoArmor === 'plate' ? { src: p(`armor/torsoPlate/${a}.png`) } : undefined,
     torsoArmor === 'legion' ? { src: p(`armor/torsoLegion/${a}.png`) } : undefined,
     torsoArmor === 'chainmail' ? { src: p(`armor/torsoChainmail/${a}.png`) } : undefined,
     armsArmor === 'plate' ? { src: p(`armor/armsPlate/${a}.png`) } : undefined,
     armsArmor === 'bracers' ? { src: p(`armor/armsBracers/${a}.png`) } : undefined,
+    { src: p(`head/${head}/${a}.png`) },
     hair !== 'none' ? { src: p(`hair/${hair}/${a}.png`) } : undefined,
     headwear !== 'none' ? { src: p(`helmet/${headwear}/${a}.png`) } : undefined,
-    weapon !== 'none' ? { src: p(`weapon/${weapon}/${a}.png`) } : undefined,
     wings !== 'none' ? { src: p(`wings/${wings === 'monarchPurple' ? 'monarch' : 'pixie'}/fg/${a}.png`) } : undefined,
   ];
   return layers.filter(Boolean) as Layer[];
