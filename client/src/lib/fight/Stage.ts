@@ -498,19 +498,25 @@ export class FightStage {
     await Promise.all(arriving);
   }
 
+  /** Fija la HP absoluta de un fighter/pet, actualiza barra, texto y devuelve la HP nueva. */
+  private setHp(id: FighterId, hp: number): number {
+    const r = this.fighters.get(id);
+    if (!r) return 0;
+    const newHp = Math.max(0, Math.min(r.maxHp, hp));
+    r.hp = newHp;
+    const pct = r.maxHp > 0 ? newHp / r.maxHp : 0;
+    drawHpFillSized(r.hpBarFg, pct, r.hpBarW, r.hpBarH);
+    const label = r.label.text.split(' ')[0] || r.label.text;
+    r.hpText.text = r.isPet ? `${label}` : `${label}  ${newHp}`;
+    this.onHpChange?.(Number(id), newHp, r.maxHp);
+    return newHp;
+  }
+
   /** Aplica daño/heal a un fighter (o pet), actualiza la HP bar y devuelve la HP nueva. */
   private applyHpDelta(id: FighterId, delta: number): number {
     const r = this.fighters.get(id);
     if (!r) return 0;
-    const newHp = Math.max(0, Math.min(r.maxHp, r.hp + delta));
-    r.hp = newHp;
-    const pct = newHp / Math.max(1, r.maxHp);
-    drawHpFillSized(r.hpBarFg, pct, r.hpBarW, r.hpBarH);
-    const label = r.isPet ? r.pet?.name ?? '' : r.fighter?.name ?? '';
-    r.hpText.text = r.isPet ? `${label}` : `${label}  ${newHp}`;
-    // Notificar al header React.
-    this.onHpChange?.(id, newHp, r.maxHp);
-    return newHp;
+    return this.setHp(id, r.hp + delta);
   }
 
   private async forceDeath(id: FighterId): Promise<void> {
@@ -735,7 +741,7 @@ export class FightStage {
 
   private async animMoveBack(id: FighterId) {
     const f = this.get(id);
-    if (!f) return;
+    if (!f || !f.alive) return;
     f.display.setAnimation('run');
     dustCloud(this.stage, f.holder.x, f.holder.y - 8, { count: 3, spread: 18 });
     await Tweener.add(
@@ -784,7 +790,9 @@ export class FightStage {
     await this.awaitFrameEvent(attacker.display, `${attackAnim}:hit`, 600);
 
     // ---- IMPACTO (sincronizado con el frame) ----
-    const targetHp = this.applyHpDelta(target.id as FighterId, -step.d);
+    const targetHp = typeof step.hp === 'number'
+      ? this.setHp(target.id as FighterId, step.hp)
+      : this.applyHpDelta(target.id as FighterId, -step.d);
     if (attacker.isPet) {
       playPetHit(attacker.pet?.model ?? 'dog');
     } else {
@@ -896,7 +904,7 @@ export class FightStage {
   private async animCounter(step: CounterStep) {
     const f = this.get(step.f);
     const t = this.get(step.t);
-    if (!f || !t) return;
+    if (!f || !t || !f.alive || !t.alive) return;
     const targetX = t.holder.x + (t.facing === 'left' ? -ATTACK_OFFSET : ATTACK_OFFSET);
     f.display.setAnimation('run');
     await Tweener.add(
@@ -929,7 +937,11 @@ export class FightStage {
   private async animHeal(step: HealStep) {
     const f = this.get(step.b);
     if (!f) return this.wait(180);
-    this.applyHpDelta(step.b as FighterId, step.h);
+    if (typeof step.hp === 'number') {
+      this.setHp(step.b as FighterId, step.hp);
+    } else {
+      this.applyHpDelta(step.b as FighterId, step.h);
+    }
     void glow(f.display.container, 0x4ade80, 480);
     void floatingText(
       this.stage,

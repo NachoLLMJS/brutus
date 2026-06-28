@@ -111,4 +111,74 @@ describe('CombatEngine.simulate', () => {
       expect(r.finalState.B.alive).toBe(true);
     }
   });
+
+  it('counter letal mata al atacante y gana el defensor', () => {
+    const attackerDies = makeBrute({
+      id: 'attacker',
+      name: 'Attacker',
+      stats: { hp: 1, strength: 1, agility: 1, speed: 100 },
+    });
+    const counterDefender = makeBrute({
+      id: 'counter-defender',
+      name: 'Counter Defender',
+      stats: { hp: 100, strength: 100, agility: 1, speed: 1 },
+      skills: ['counter'],
+    });
+    const sequence = [
+      0.99, // no dodge
+      0.01, // block
+      0.01, // counter
+      0.99, // high damage variance
+      0.99, // no crit required
+    ];
+    let idx = 0;
+    const r = simulate(attackerDies, counterDefender, () => sequence[idx++] ?? 0.99);
+
+    expect(r.winner).toBe('B');
+    expect(r.finalState.A).toEqual({ hp: 0, alive: false });
+    expect(r.finalState.B.alive).toBe(true);
+    expect(r.log).toEqual(expect.arrayContaining([
+      expect.objectContaining({ type: 'counter', attacker: 'A', defender: 'B', remainingHp: 0 }),
+      expect.objectContaining({ type: 'death', side: 'A' }),
+      expect.objectContaining({ type: 'end', winner: 'B', reason: 'death' }),
+    ]));
+  });
+
+  it('un fighter muerto no vuelve a actuar después de death', () => {
+    const a = makeBrute({
+      id: 'a',
+      stats: { hp: 80, strength: 18, agility: 8, speed: 14 },
+      skills: ['counter', 'feline_agility'],
+      weapons: ['broadsword'],
+      pets: ['wolf'],
+    });
+    const b = makeBrute({
+      id: 'b',
+      stats: { hp: 80, strength: 18, agility: 8, speed: 14 },
+      skills: ['counter', 'martial_arts'],
+      weapons: ['axe'],
+      pets: ['panthers'],
+    });
+
+    for (let seed = 1; seed <= 250; seed += 1) {
+      const r = simulate(a, b, mulberry32(seed));
+      const dead = new Set<string>();
+      for (const step of r.log) {
+        if (step.type === 'death') {
+          dead.add(step.side);
+          continue;
+        }
+        if (step.type === 'end') break;
+        if (step.type === 'turn') {
+          expect(dead.has(step.side)).toBe(false);
+        }
+        if ('attacker' in step && typeof step.attacker === 'string') {
+          expect(dead.has(step.attacker)).toBe(false);
+        }
+        if ('side' in step && typeof step.side === 'string' && step.type !== 'pet_death') {
+          expect(dead.has(step.side)).toBe(false);
+        }
+      }
+    }
+  });
 });
