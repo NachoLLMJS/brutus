@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { simulate, mulberry32 } from '../src/index.js';
+import { simulate, mulberry32, toFightLog, StepType } from '../src/index.js';
 import { makeBrute } from './helpers.js';
 
 describe('CombatEngine.simulate', () => {
@@ -228,6 +228,19 @@ describe('CombatEngine.simulate', () => {
           expect(dead.has(step.side)).toBe(false);
         }
       }
+    }
+  });
+
+  it('FightLog visual conserva HP absoluto en golpes para que Pixi no adivine por delta', () => {
+    const a = makeBrute({ id: 'a', stats: { hp: 35, strength: 20, agility: 5, speed: 10 } });
+    const b = makeBrute({ id: 'b', stats: { hp: 35, strength: 20, agility: 5, speed: 10 } });
+    const result = simulate(a, b, mulberry32(4));
+    const fightLog = toFightLog(a, b, result);
+    const coreDamageSteps = result.log.filter((step) => step.type === 'attack' || step.type === 'counter' || step.type === 'pet_attack');
+    const visualHits = fightLog.steps.filter((step) => step.a === StepType.Hit);
+    expect(visualHits.length).toBe(coreDamageSteps.length);
+    for (let i = 0; i < visualHits.length; i += 1) {
+      expect(visualHits[i]).toHaveProperty('hp', coreDamageSteps[i]?.remainingHp);
     }
   });
 });
