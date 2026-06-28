@@ -210,7 +210,7 @@ export function Profile() {
             <span className="lvl">Nivel <b>{brute.level}</b> · {xpPct}% al {brute.level + 1}</span>
           </div>
           <div className="profile-hero-actions">
-            <button type="button" className="btn-hero gold" onClick={goTrain} disabled={brute.trainingFightsRemaining <= 0}>
+            <button type="button" className="btn-hero gold" onClick={goTrain}>
               Entrenar
             </button>
             <button type="button" className="btn-hero primary" onClick={goFight} disabled={noNormalFights}>

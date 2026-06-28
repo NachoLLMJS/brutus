@@ -97,14 +97,12 @@ export async function runFight(input: FightInput): Promise<FightResult> {
   if (!opponent) throw new HttpError(404, 'opponent_not_found');
   if (player.id === opponent.id) throw new HttpError(400, 'cannot_fight_self');
 
-  // Daily caps
+  // Daily caps only apply to normal reward-eligible fights. Training is sparring:
+  // it never consumes daily attempts and remains available even after the normal day ends.
   if (input.fightType === 'normal' && player.fightsRemaining <= 0) {
     throw new HttpError(429, 'no_fights_remaining');
   }
-  if (input.fightType === 'training' && player.trainingFightsRemaining <= 0) {
-    throw new HttpError(429, 'no_training_fights_remaining');
-  }
-  if (player.defeatsToday >= DAILY_DEFEAT_LIMIT) {
+  if (input.fightType === 'normal' && player.defeatsToday >= DAILY_DEFEAT_LIMIT) {
     throw new HttpError(400, 'day_ended');
   }
 
@@ -134,11 +132,13 @@ export async function runFight(input: FightInput): Promise<FightResult> {
   }
 
   const fightsRemainingDelta = input.fightType === 'normal' ? -1 : 0;
-  const trainingDelta = input.fightType === 'training' ? -1 : 0;
-  const newDefeatsToday = playerWon ? player.defeatsToday : player.defeatsToday + 1;
-  const dayEnded =
+  const newDefeatsToday = input.fightType === 'normal' && !playerWon
+    ? player.defeatsToday + 1
+    : player.defeatsToday;
+  const dayEnded = input.fightType === 'normal' && (
     newDefeatsToday >= DAILY_DEFEAT_LIMIT ||
-    (input.fightType === 'normal' && player.fightsRemaining + fightsRemainingDelta <= 0);
+    player.fightsRemaining + fightsRemainingDelta <= 0
+  );
 
   const [combatRow, updated] = await prisma.$transaction([
     prisma.combat.create({
@@ -157,9 +157,8 @@ export async function runFight(input: FightInput): Promise<FightResult> {
         level: newLevel,
         victories: { increment: playerWon ? 1 : 0 },
         defeats: { increment: playerWon ? 0 : 1 },
-        defeatsToday: { increment: playerWon ? 0 : 1 },
+        defeatsToday: { increment: input.fightType === 'normal' && !playerWon ? 1 : 0 },
         fightsRemaining: { increment: fightsRemainingDelta },
-        trainingFightsRemaining: { increment: trainingDelta },
       },
     }),
   ]);

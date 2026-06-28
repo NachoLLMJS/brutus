@@ -113,18 +113,19 @@ export function Arena() {
     }
   };
 
+  const fightsTotal = 3;
   const fightsRemaining = trainingMode
-    ? brute?.trainingFightsRemaining ?? 0
+    ? fightsTotal
     : brute?.fightsRemaining ?? 0;
-  const fightsTotal = 6; // Pips visuales: hard-coded a 6 (ajustar si el server cambia el cap).
   const fightsDisplay = trainingMode ? '∞' : `${fightsRemaining}/${fightsTotal}`;
+  const fightsLabel = trainingMode ? 'Sparring' : 'Peleas hoy';
 
   return (
     <>
       <div className="lobby-bg" />
 
       <main className={clsx('lobby anim-fade-up', !showSidebar && 'no-sidebar')}>
-        <BoardHeader fightsDisplay={fightsDisplay} fightsRemaining={fightsRemaining} fightsTotal={fightsTotal} />
+        <BoardHeader fightsDisplay={fightsDisplay} fightsRemaining={fightsRemaining} fightsTotal={fightsTotal} fightsLabel={fightsLabel} />
 
         {showSidebar && (
           <aside className="lobby-side">
@@ -221,10 +222,12 @@ function BoardHeader({
   fightsDisplay,
   fightsRemaining,
   fightsTotal,
+  fightsLabel,
 }: {
   fightsDisplay: string;
   fightsRemaining: number;
   fightsTotal: number;
+  fightsLabel: string;
 }) {
   return (
     <section className="board-header">
@@ -240,7 +243,7 @@ function BoardHeader({
         <div className="board-sub">Ocho almas dispuestas. Elegí la primera.</div>
       </div>
       <div className="fights-counter">
-        <span className="lbl">Peleas hoy</span>
+        <span className="lbl">{fightsLabel}</span>
         <span className="val">{fightsDisplay}</span>
         <span className="pips">
           {Array.from({ length: fightsTotal }).map((_, i) => (
