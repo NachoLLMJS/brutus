@@ -28,7 +28,7 @@ const EnvSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   BNB_TESTNET_RPC_URL: z.string().url().default('https://data-seed-prebsc-1-s1.binance.org:8545/'),
   BRUTUS_OPERATOR_PRIVATE_KEY: z.string().regex(/^0x[0-9a-fA-F]{64}$/).optional(),
-  BRUTUS_COMBAT_REWARDS: z.string().regex(/^0x[0-9a-fA-F]{40}$/).default('0x22703D0153133450067C2A310D07d44f1Af7584a'),
+  BRUTUS_COMBAT_REWARDS: z.string().regex(/^0x[0-9a-fA-F]{40}$/).default('0x79182dEF2B8662F2F932B358bbd0F4Ab6496fe8F'),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

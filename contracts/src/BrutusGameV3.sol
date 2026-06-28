@@ -134,6 +134,7 @@ contract BrutusCombatRewardsV3 is ReentrancyGuardV3 {
 
     receive() external payable { _recordFunding(); }
     function depositRewards() external payable { _recordFunding(); }
+    function depositTaxRewards() external payable { _recordFunding(); }
 
     function recordCombatWin(bytes32 fightId, address winner) external onlyOperator nonReentrant {
         uint256 gasStart = gasleft();

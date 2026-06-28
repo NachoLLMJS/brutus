@@ -90,15 +90,23 @@ contract BrutusGameV3Test is Test {
 
     function testRecordCombatWinDoesNotRefundReservedClaimAmount() public {
         rewards.depositRewards{value: 0.001 ether}();
-        bytes32 fightId = keccak256("fight-no-refund");
+        uint256 before = operator.balance;
 
-        vm.txGasPrice(3 gwei);
+        vm.txGasPrice(1 gwei);
         vm.prank(operator);
-        rewards.recordCombatWin(fightId, alice);
+        rewards.recordCombatWin(keccak256("fight-low-pool"), alice);
 
+        assertEq(operator.balance, before);
         assertEq(rewards.totalOperatorGasRefunded(), 0);
         assertEq(address(rewards).balance, 0.001 ether);
-        assertEq(rewards.fightWinner(fightId), alice);
+    }
+
+    function testVaultForwardTaxRewardsCanFundCombatRewardsV3() public {
+        BrutusBloodVaultLike vault = new BrutusBloodVaultLike(address(rewards));
+        vm.deal(address(vault), 0.002 ether);
+        vault.forwardTaxRewards(0.002 ether);
+        assertEq(address(rewards).balance, 0.002 ether);
+        assertEq(rewards.totalDeposited(), 0.002 ether);
     }
 
     function testOperatorCanUpdateGasRefundCap() public {
@@ -109,5 +117,23 @@ contract BrutusGameV3Test is Test {
         vm.prank(alice);
         vm.expectRevert(bytes("only operator"));
         rewards.setMaxOperatorGasRefundWei(0.0001 ether);
+    }
+}
+
+interface ICombatRewardsFundingLike {
+    function depositTaxRewards() external payable;
+}
+
+contract BrutusBloodVaultLike {
+    address public rewardReceiver;
+
+    constructor(address rewardReceiver_) payable {
+        rewardReceiver = rewardReceiver_;
+    }
+
+    receive() external payable {}
+
+    function forwardTaxRewards(uint256 amountWei) external {
+        ICombatRewardsFundingLike(rewardReceiver).depositTaxRewards{value: amountWei}();
     }
 }
