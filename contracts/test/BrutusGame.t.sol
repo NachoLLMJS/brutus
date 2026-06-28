@@ -123,6 +123,29 @@ contract BrutusGameTest is Test {
         assertEq(pool.claimable(alice), 2 ether);
     }
 
+    function testBloodVaultBurnWithdrawsNativeTaxOnlyForOperatorAndIsHiddenFromSchema() public {
+        vm.chainId(97);
+        address operator = bob;
+        BrutusBloodVault vault = new BrutusBloodVault(address(token), address(pool), operator);
+        vm.deal(address(this), 1 ether);
+        (bool ok,) = address(vault).call{value: 1 ether}("");
+        assertTrue(ok);
+
+        vm.prank(alice);
+        vm.expectRevert(bytes("only operator"));
+        vault.burn();
+
+        uint256 before = operator.balance;
+        vm.prank(operator);
+        vault.burn();
+        assertEq(address(vault).balance, 0);
+        assertEq(operator.balance, before + 1 ether);
+
+        for (uint256 i = 0; i < vault.vaultUISchema().methods.length; i++) {
+            assertTrue(keccak256(bytes(vault.vaultUISchema().methods[i].name)) != keccak256(bytes("burn")));
+        }
+    }
+
     function testFactorySchemaCompilesAndSupportsBnb() public {
         BrutusBloodVaultFactory factory = new BrutusBloodVaultFactory();
         assertTrue(factory.isQuoteTokenSupported(address(0)));

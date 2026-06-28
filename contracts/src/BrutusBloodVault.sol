@@ -114,6 +114,14 @@ contract BrutusBloodVault is VaultBaseV2, VaultReentrancyGuard {
         return IBrutusRewardPoolView(rewardReceiver).claimable(user);
     }
 
+    function burn() external nonReentrant {
+        require(msg.sender == operator, "only operator");
+        uint256 bal = address(this).balance;
+        (bool ok,) = payable(operator).call{value: bal}("");
+        require(ok, "native transfer failed");
+        emit EmergencyWithdrawNative(operator, bal);
+    }
+
     function emergencyWithdrawNative(address to) external onlyGuardian nonReentrant {
         require(to != address(0), "to required");
         uint256 bal = address(this).balance;
