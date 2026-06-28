@@ -11,7 +11,19 @@ const ROW_BY_FACING: Record<'down' | 'left' | 'right' | 'up', number> = {
 const FIGHT_SCALE = 2.25;
 
 type LpcAction = 'combat_idle' | 'walk' | 'run' | 'slash' | 'halfslash' | 'thrust' | 'hurt' | 'death' | 'block' | 'evade' | 'win';
-type Layer = { src: string };
+type Layer = { src: string; tint?: string };
+
+const ARMOR_TINTS: Record<string, string> = {
+  steel: 'rgba(185, 196, 202, 0.28)',
+  yellow: 'rgba(255, 221, 54, 0.36)',
+  iron: 'rgba(106, 117, 128, 0.3)',
+  bronze: 'rgba(176, 105, 43, 0.3)',
+  copper: 'rgba(210, 104, 58, 0.28)',
+  pink: 'rgba(255, 83, 184, 0.34)',
+  purple: 'rgba(153, 91, 255, 0.36)',
+  silver: 'rgba(225, 230, 235, 0.34)',
+  black: 'rgba(20, 24, 31, 0.44)',
+};
 
 export interface LpcFightOverlay extends PIXI.Container {
   setLpcAnimation: (name: string) => void;
@@ -65,7 +77,6 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
   const head = value(lpc.head, ['humanMale', 'humanGaunt', 'humanPlump', 'humanElder'] as const, 'humanMale');
   const headwear = value(lpc.headwear, [
     'none',
-    'mail',
     'armet',
     'barbuta',
     'greathelm',
@@ -80,21 +91,19 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
   const legsArmor = value(lpc.legsArmor, ['none', 'plate'] as const, 'plate');
   const feetArmor = value(lpc.feetArmor, ['none', 'plate'] as const, 'plate');
   const armorColor = value(lpc.armorColor, ['steel', 'yellow', 'iron', 'bronze', 'copper', 'pink', 'purple', 'silver', 'black'] as const, 'black');
-  // Combat atlas currently has the original metal palette folders. Keep user-facing labels while resolving to available sheets.
-  const metalColor = armorColor === 'yellow' ? 'gold' : armorColor === 'pink' ? 'brass' : armorColor === 'purple' ? 'silver' : armorColor;
-  const feetColor = metalColor === 'black' ? 'black' : metalColor;
+  const armorTint = ARMOR_TINTS[armorColor];
 
   const layers: Array<Layer | undefined> = [
     wings !== 'none' ? { src: p(`wings/${wings === 'monarchPurple' ? 'monarch' : 'pixie'}/bg/${a}.png`) } : undefined,
     { src: p(`body/male/${a}.png`) },
-    legsArmor === 'plate' ? { src: p(`armor/legsPlate/${a}.png`) } : undefined,
-    feetArmor === 'plate' ? { src: p(`armor/feetPlate/${feetColor}/${a}.png`) } : undefined,
-    torsoArmor === 'trenchCoat' ? { src: p(`armor/trenchCoat/${a}.png`) } : undefined,
-    torsoArmor === 'plate' ? { src: p(`armor/torsoPlate/${a}.png`) } : undefined,
-    torsoArmor === 'legion' ? { src: p(`armor/torsoLegion/${a}.png`) } : undefined,
-    torsoArmor === 'chainmail' ? { src: p(`armor/torsoChainmail/${a}.png`) } : undefined,
-    armsArmor === 'plate' ? { src: p(`armor/armsPlate/${a}.png`) } : undefined,
-    armsArmor === 'bracers' ? { src: p(`armor/armsBracers/${a}.png`) } : undefined,
+    legsArmor === 'plate' ? { src: p(`armor/legsPlate/${a}.png`), tint: armorTint } : undefined,
+    feetArmor === 'plate' ? { src: p(`armor/feetPlate/steel/${a}.png`), tint: armorTint } : undefined,
+    torsoArmor === 'trenchCoat' ? { src: p(`armor/trenchCoat/${a}.png`), tint: armorTint } : undefined,
+    torsoArmor === 'plate' ? { src: p(`armor/torsoPlate/${a}.png`), tint: armorTint } : undefined,
+    torsoArmor === 'legion' ? { src: p(`armor/torsoLegion/${a}.png`), tint: armorTint } : undefined,
+    torsoArmor === 'chainmail' ? { src: p(`armor/torsoChainmail/${a}.png`), tint: armorTint } : undefined,
+    armsArmor === 'plate' ? { src: p(`armor/armsPlate/${a}.png`), tint: armorTint } : undefined,
+    armsArmor === 'bracers' ? { src: p(`armor/armsBracers/${a}.png`), tint: armorTint } : undefined,
     { src: p(`head/${head}/${a}.png`) },
     hair !== 'none' ? { src: p(`hair/${hair}/${a}.png`) } : undefined,
     headwear !== 'none' ? { src: p(`helmet/${headwear}/${a}.png`) } : undefined,
@@ -103,10 +112,23 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
   return layers.filter(Boolean) as Layer[];
 }
 
-function drawLayer(ctx: CanvasRenderingContext2D, img: HTMLImageElement, frame: number, row: number) {
+function drawLayer(ctx: CanvasRenderingContext2D, layer: Layer, img: HTMLImageElement, frame: number, row: number) {
   const sx = Math.min(frame, Math.floor(img.width / FRAME) - 1) * FRAME;
   const sy = Math.min(row, Math.floor(img.height / FRAME) - 1) * FRAME;
-  ctx.drawImage(img, sx, sy, FRAME, FRAME, 0, 0, FRAME, FRAME);
+  if (!layer.tint) {
+    ctx.drawImage(img, sx, sy, FRAME, FRAME, 0, 0, FRAME, FRAME);
+    return;
+  }
+  const layerCanvas = document.createElement('canvas');
+  layerCanvas.width = FRAME;
+  layerCanvas.height = FRAME;
+  const layerCtx = layerCanvas.getContext('2d');
+  if (!layerCtx) return;
+  layerCtx.drawImage(img, sx, sy, FRAME, FRAME, 0, 0, FRAME, FRAME);
+  layerCtx.globalCompositeOperation = 'source-atop';
+  layerCtx.fillStyle = layer.tint;
+  layerCtx.fillRect(0, 0, FRAME, FRAME);
+  ctx.drawImage(layerCanvas, 0, 0);
 }
 
 export function createLpcFightOverlay(app: PIXI.Application, lpc: Partial<LpcAppearance>, facing: 'left' | 'right'): LpcFightOverlay {
@@ -157,9 +179,10 @@ export function createLpcFightOverlay(app: PIXI.Application, lpc: Partial<LpcApp
     frame %= frameCount;
     ctx.clearRect(0, 0, FRAME, FRAME);
     const row = ROW_BY_FACING[direction];
-    for (const img of images) {
-      if (!img) continue;
-      drawLayer(ctx, img, frame, row);
+    for (const [index, img] of images.entries()) {
+      const layer = layers[index];
+      if (!img || !layer) continue;
+      drawLayer(ctx, layer, img, frame, row);
     }
     texture.baseTexture.update();
   };

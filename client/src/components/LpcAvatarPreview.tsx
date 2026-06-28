@@ -19,7 +19,6 @@ import helmetArmetIdle from '@/assets/lpc-test/helmet-armet-idle.png?url';
 import helmetBarbutaIdle from '@/assets/lpc-test/helmet-barbuta-idle.png?url';
 import helmetGreathelmIdle from '@/assets/lpc-test/helmet-greathelm-idle.png?url';
 import helmetMaximusIdle from '@/assets/lpc-test/helmet-maximus-idle.png?url';
-import headwearMailIdle from '@/assets/lpc-test/ulpc-real/headwear-mail-idle.png?url';
 import armorLeatherIdle from '@/assets/lpc-test/armor-leather-idle.png?url';
 import armsArmorPlateIdle from '@/assets/lpc-test/arms-armor-plate-idle.png?url';
 import armsBracersIdle from '@/assets/lpc-test/arms-bracers-idle.png?url';
@@ -44,7 +43,7 @@ type Layer = { src: string; tint?: string };
 export type LpcHeadKey = 'humanMale' | 'humanGaunt' | 'humanPlump' | 'humanElder';
 export type LpcHairKey = 'bedhead' | 'bob' | 'afro' | 'buzzcut' | 'long' | 'curlyShort' | 'bangs' | 'none';
 export type LpcWingsKey = 'none' | 'monarchPurple' | 'pixiePurple';
-export type LpcHeadwearKey = 'none' | 'mail' | 'armet' | 'barbuta' | 'greathelm' | 'maximus';
+export type LpcHeadwearKey = 'none' | 'armet' | 'barbuta' | 'greathelm' | 'maximus';
 export type LpcArmorColorKey = 'steel' | 'yellow' | 'iron' | 'bronze' | 'copper' | 'pink' | 'purple' | 'silver' | 'black';
 export type LpcArmsArmorKey = 'none' | 'plate' | 'bracers';
 export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail';
@@ -102,7 +101,6 @@ export const LPC_WINGS_OPTIONS = [
 
 export const LPC_HEADWEAR_OPTIONS = [
   { key: 'none', label: 'No headwear' },
-  { key: 'mail', label: 'Mail coif', src: headwearMailIdle },
   { key: 'armet', label: 'Armet', src: helmetArmetIdle },
   { key: 'barbuta', label: 'Barbuta', src: helmetBarbutaIdle },
   { key: 'greathelm', label: 'Greathelm', src: helmetGreathelmIdle },

@@ -14,7 +14,6 @@ const LpcAppearanceSchema = z.object({
   wings: z.enum(['none', 'monarchPurple', 'pixiePurple']).default('monarchPurple'),
   headwear: z.enum([
     'none',
-    'mail',
     'armet',
     'barbuta',
     'greathelm',
