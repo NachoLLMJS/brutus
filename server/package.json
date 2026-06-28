@@ -2,7 +2,7 @@
   "name": "server",
   "version": "0.3.0",
   "private": true,
-  "description": "Brutus backend: Express + Prisma + SQLite. Persists brutes, runs deterministic combat server-side, exposes REST API.",
+  "description": "AFKFLAP backend: Express + Prisma + SQLite. Persists heroes, runs deterministic combat server-side, exposes REST API.",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
