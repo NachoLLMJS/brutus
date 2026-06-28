@@ -32,7 +32,7 @@ export const BRUTUS_BNB_TESTNET_CONTRACTS = {
   dailyActions: '0xecF5EA60D706c7D96Bbf1aaE19be8B40E149eB49',
   combatRewards: '0x22703D0153133450067C2A310D07d44f1Af7584a',
   arenaEscrow: '0x2415248C3adAEc3484E041A741C1BFE1AA9bBC14',
-  vaultFactory: '0x6A0C133eDA27204349CE924ac6FE6B3B4AdBA083',
+  vaultFactory: '0x1A641ca0aDeEc88817A5D9E0CCeD281d41AdaE49',
 } as const;
 
 export function getEthereumProvider(): EthereumProvider | null {

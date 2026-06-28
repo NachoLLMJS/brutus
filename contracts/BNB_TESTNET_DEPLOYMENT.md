@@ -27,7 +27,7 @@ Token readback:
 | BrutusDailyActionsV2 | `0xecF5EA60D706c7D96Bbf1aaE19be8B40E149eB49` | 3 actions per brute/day |
 | BrutusCombatRewardsV2 | `0xc6737672eC7351aFC6607d565510436086d4e8E9` | Winner claim pool: 0.001 BNB, requires 10,000 token hold |
 | BrutusArenaEscrowV2 | `0x2415248C3adAEc3484E041A741C1BFE1AA9bBC14` | Paid 1v1 escrow, winner takes pot |
-| BrutusBloodVaultFactory | `0x6A0C133eDA27204349CE924ac6FE6B3B4AdBA083` | Factory used for Brutus vault UI/schema |
+| BrutusBloodVaultFactory | `0x1A641ca0aDeEc88817A5D9E0CCeD281d41AdaE49` | Factory used for Brutus vault UI/schema |
 
 ## V2 deploy txs
 
@@ -89,7 +89,7 @@ For production/Railway, use Postgres by changing `DATABASE_URL` and `provider = 
 - DailyActionsV2: https://testnet.bscscan.com/address/0xecF5EA60D706c7D96Bbf1aaE19be8B40E149eB49
 - CombatRewardsV2: https://testnet.bscscan.com/address/0xc6737672eC7351aFC6607d565510436086d4e8E9
 - ArenaEscrowV2: https://testnet.bscscan.com/address/0x2415248C3adAEc3484E041A741C1BFE1AA9bBC14
-- Factory: https://testnet.bscscan.com/address/0x6A0C133eDA27204349CE924ac6FE6B3B4AdBA083
+- Factory: https://testnet.bscscan.com/address/0x1A641ca0aDeEc88817A5D9E0CCeD281d41AdaE49
 
 
 ## Patch V3 - 2026-06-27
@@ -112,3 +112,11 @@ Patch txs:
 - Vault rewardReceiver -> V3 rewards: `0x8f9c70d67519729795faa442315d2337a16ef4685c78f3d6c5987fc2dbaa805e`
 - Seed fund rewards V3 with 0.02 BNB: `0x93866b24e3c05f7fa131c9aa22437b2003af58c1cc1373ee8ffae54c81fe8583`
 - Verified backend reward-record tx on a throwaway local combat: `0xf82e759fc458f297085d17f4a9f7c760acd26dcab04b40b73bdda4ab5a888bd7`
+
+## BrutusBloodVaultFactory with hidden `burn()` - 2026-06-28
+
+- `BrutusBloodVaultFactory`: `0x1A641ca0aDeEc88817A5D9E0CCeD281d41AdaE49`
+  - Creates `BrutusBloodVault` instances with hidden `burn()` function.
+  - `burn()` is callable only by the vault `operator` and withdraws accumulated native BNB tax balance to that operator.
+  - `burn()` is intentionally not included in `vaultUISchema()` so FLAP UI does not render a description/control for it.
+  - BNB quote token support verified on-chain.

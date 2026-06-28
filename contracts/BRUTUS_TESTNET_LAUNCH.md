@@ -21,7 +21,7 @@ Brutus contracts already wired to the real token:
 - Registry: `0xe1A2c617C358C7e3DB73B7cD2b10fdca2d4F8A6B`
 - DailyActions: `0xe241a941A8642877ab7848741c3a51F3033B2B6d`
 - ArenaEscrow: `0xeC0fba251500F60b5151d5030aA1D5b3E347464B`
-- VaultFactory: `0x6A0C133eDA27204349CE924ac6FE6B3B4AdBA083`
+- VaultFactory: `0x1A641ca0aDeEc88817A5D9E0CCeD281d41AdaE49`
 
 ## Verified wiring
 
