@@ -1,73 +1,95 @@
 # Railway deployment notes for Brutus
 
-Brutus is a monorepo. Railway may auto-detect every workspace as a service, but only two deployable services are expected:
+Brutus is now prepared for a single Railway web service.
 
-- `server` — Express API
-- `client` — Vite static frontend
+The Express server serves both:
 
-Do not deploy these as web services:
+- `/api/*` — backend REST API
+- `/` and React routes — built frontend from `client/dist`
+- `/lpc-combat/*` — LPC combat sprites from `client/public/lpc-combat`
 
-- `core` — shared game logic package
-- `brutus-fla-parser` — local parser/assets package
+## Railway service settings
 
-## Server service
-
-Recommended Railway settings:
+Recommended settings:
 
 - Root directory: repository root (`/`)
-- Build command: `npm install && npm run build -w core && npm run build -w server`
-- Start command: `npm run start:railway -w server`
+- Build command: `npm ci && npm run build`
+- Start command: `npm run start:railway`
+- Healthcheck path: `/api/health`
 
-Required variables:
+These are also encoded in:
 
-- `NODE_ENV=production`
-- `HOST=0.0.0.0`
-- `PORT` — Railway provides this automatically
-- `DATABASE_URL` — use Railway Postgres for production
-- `CLIENT_ORIGIN=https://<client-service>.up.railway.app`
-- `JWT_SECRET=<real-long-random-secret>`
-- `BNB_TESTNET_RPC_URL=https://data-seed-prebsc-1-s1.binance.org:8545/`
-- `BRUTUS_COMBAT_REWARDS=0x22703D0153133450067C2A310D07d44f1Af7584a`
-- `BRUTUS_OPERATOR_PRIVATE_KEY=<operator-private-key>`
+`railway.json`
 
-Important: the on-chain UI currently targets BNB Testnet only (`0x61`). Do not use BNB mainnet while these contract addresses are testnet addresses.
+## Required Railway variables
 
-## Client service
+Set these in Railway variables. Do not commit real secrets.
 
-Recommended Railway settings:
+```bash
+NODE_ENV=production
+HOST=0.0.0.0
+# Railway provides PORT automatically.
 
-- Root directory: repository root (`/`)
-- Build command: `npm install && npm run build -w core && npm run build -w client`
-- Start command: `npm run start -w client`
-- Output directory after build: `client/dist`
+# SQLite demo/persistent volume mode:
+DATABASE_URL=file:/data/brutus.db
 
-Required variables:
+# Set this to the final Railway public domain after deploy.
+CLIENT_ORIGIN=https://<your-service>.up.railway.app
 
-- `VITE_API_BASE_URL=https://<server-service>.up.railway.app/api`
+# Generate with: openssl rand -base64 32
+JWT_SECRET=<real-long-random-secret>
 
-## Database warning
-
-The repo is still configured for local SQLite in `prisma/schema.prisma`:
-
-```prisma
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
+LOG_LEVEL=info
+WALLET_AUTH_ENABLED=false
+BNB_TESTNET_RPC_URL=https://data-seed-prebsc-1-s1.binance.org:8545/
+BRUTUS_COMBAT_REWARDS=0x22703D0153133450067C2A310D07d44f1Af7584a
+BRUTUS_OPERATOR_PRIVATE_KEY=<operator-private-key>
 ```
 
-For real Railway production, migrate this to PostgreSQL in a controlled step and attach Railway Postgres. SQLite can work only for temporary demos and should not be trusted for persistent production data.
+## SQLite warning
 
-## Deploy order
+For the current quick Railway deployment, SQLite can work if Railway has a persistent volume mounted at:
 
-1. Add Railway Postgres or decide demo-only SQLite.
-2. Deploy `server` first.
-3. Copy the server public URL into `client` as `VITE_API_BASE_URL`.
-4. Deploy `client`.
-5. Copy the client public URL into `server` as `CLIENT_ORIGIN`.
-6. Redeploy `server`.
-7. Verify:
-   - `https://<server>/api/health`
-   - client loads
-   - create paid brute on BNB Testnet
-   - fight win claim precheck / claim flow
+`/data`
+
+Use:
+
+`DATABASE_URL=file:/data/brutus.db`
+
+Without a volume, SQLite data is ephemeral and can disappear on redeploy/restart.
+
+For real production/mainnet, consider a controlled migration to Postgres before depending on persistent data.
+
+## Build/start validation already proven locally
+
+The Railway-style production smoke was tested locally with:
+
+```bash
+NODE_ENV=production \
+PORT=4187 \
+HOST=127.0.0.1 \
+DATABASE_URL=file:./railway-smoke.db \
+CLIENT_ORIGIN=http://127.0.0.1:4187 \
+JWT_SECRET=railway-smoke-secret-that-is-long-enough \
+npm run start
+```
+
+Verified:
+
+- `/` returns 200
+- `/api/health` returns 200
+- `/brute/test-route` returns 200 via SPA fallback
+- `/lpc-combat/body/male/halfslash.png` returns 200
+- Prisma migrations apply cleanly on a fresh SQLite DB
+
+## Important chain note
+
+The current on-chain addresses are BNB Testnet only (`0x61`). Do not use BNB mainnet while these contract addresses remain testnet addresses.
+
+Before mainnet:
+
+1. Decide final contract version.
+2. Deploy from `contracts/src` source.
+3. Update frontend/backend addresses/envs.
+4. Verify explorer source and constructor args.
+5. Test with tiny amounts.
