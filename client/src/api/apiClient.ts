@@ -1,6 +1,7 @@
 /**
  * Wrapper tipado del fetch al server Brutus.
  * - Base: /api (proxiado por Vite a http://127.0.0.1:3001 en dev).
+ * - Railway: same-origin /api from the client static service unless VITE_API_BASE_URL overrides it.
  * - Manejo de errores: si la respuesta es no-2xx, lanza ApiError con
  *   `code` recibido en el JSON ({ error: 'CODE', message? }).
  *
