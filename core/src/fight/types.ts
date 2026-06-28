@@ -55,7 +55,7 @@ export interface ArriveStep { a: StepType.Arrive; f: number; w?: WeaponId; }
 export interface TrashStep { a: StepType.Trash; b: number; w: WeaponId; }
 export interface StealStep { a: StepType.Steal; b: number; w: WeaponId; t: number; }
 export interface TrapStep { a: StepType.Trap; b: number; t: number; }
-export interface HealStep { a: StepType.Heal; b: number; h: number; c?: 1 | 0; }
+export interface HealStep { a: StepType.Heal; b: number; h: number; c?: 1 | 0; hp?: number; }
 export interface ResistStep { a: StepType.Resist; b: number; }
 export interface SurviveStep { a: StepType.Survive; b: number; }
 export interface HitStep {
@@ -64,6 +64,8 @@ export interface HitStep {
   t: number;
   w?: WeaponId;
   d: number;
+  /** HP absoluto del target tras aplicar este daño. */
+  hp?: number;
   s?: 1 | 0;
   c?: 1 | 0;
 }
@@ -137,6 +139,8 @@ export interface VampirismStep {
   t: number;
   d: number;
   h: number;
+  /** HP absoluto del bruto tras curarse. */
+  hp?: number;
 }
 export interface HasteStep {
   a: StepType.Haste;

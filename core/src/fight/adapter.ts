@@ -132,6 +132,11 @@ export function toFightLog(
     buildFighter('A', bruteA),
     buildFighter('B', bruteB),
   ];
+  const start = result.log.find((step): step is Extract<CombatStep, { type: 'start' }> => step.type === 'start');
+  if (start) {
+    fighters[0].maxHp = start.fighters.A.hpMax;
+    fighters[1].maxHp = start.fighters.B.hpMax;
+  }
   const pets = buildPets(bruteA, bruteB);
   const findPetId = buildPetIdLookup(pets);
   const steps: FightStep[] = [];
@@ -189,6 +194,7 @@ function pushStepsFor(
         t,
         w,
         d: step.damage,
+        hp: step.remainingHp,
         c: step.critical ? 1 : 0,
       };
       out.push(move, att, hit);
@@ -223,6 +229,7 @@ function pushStepsFor(
         t: fid(target),
         w: weaponOf[counterer],
         d: step.damage,
+        hp: step.remainingHp,
       };
       out.push(c, hit);
       return;
@@ -245,10 +252,11 @@ function pushStepsFor(
           t: fid(step.side === 'A' ? 'B' : 'A'),
           d: 0,
           h: step.amount,
+          hp: step.remainingHp,
         };
         out.push(v);
       } else {
-        const h: HealStep = { a: StepType.Heal, b: fid(step.side), h: step.amount };
+        const h: HealStep = { a: StepType.Heal, b: fid(step.side), h: step.amount, hp: step.remainingHp };
         out.push(h);
       }
       return;
@@ -273,6 +281,7 @@ function pushStepsFor(
         f: pid,
         t: target,
         d: step.damage,
+        hp: step.remainingHp,
       };
       out.push(move, att, hit);
       return;

@@ -506,7 +506,7 @@ export class FightStage {
     r.hp = newHp;
     const pct = r.maxHp > 0 ? newHp / r.maxHp : 0;
     drawHpFillSized(r.hpBarFg, pct, r.hpBarW, r.hpBarH);
-    const label = r.label.text.split(' ')[0] || r.label.text;
+    const label = r.isPet ? r.pet?.name ?? '' : r.fighter?.name ?? '';
     r.hpText.text = r.isPet ? `${label}` : `${label}  ${newHp}`;
     this.onHpChange?.(Number(id), newHp, r.maxHp);
     return newHp;
@@ -558,6 +558,9 @@ export class FightStage {
       const step = this.log.steps[i]!;
       this.onProgress?.(i, total);
       await this.dispatch(step);
+      if (step.a !== StepType.End && [...this.fighters.values()].some((f) => !f.isPet && f.hp <= 0)) {
+        break;
+      }
     }
     this.playing = false;
     if (this.skipped || this.destroyed) return;
@@ -956,7 +959,11 @@ export class FightStage {
   private async animVampirism(step: VampirismStep) {
     const attacker = this.get(step.b);
     if (!attacker) return this.wait(180);
-    this.applyHpDelta(step.b as FighterId, step.h);
+    if (typeof step.hp === 'number') {
+      this.setHp(step.b as FighterId, step.hp);
+    } else {
+      this.applyHpDelta(step.b as FighterId, step.h);
+    }
     void glow(attacker.display.container, 0xb91c1c, 480);
     void floatingText(
       this.stage,
