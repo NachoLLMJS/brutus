@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import {
   formatWallet,
   getEthereumProvider,
@@ -15,10 +14,12 @@ interface WalletState {
   connecting: boolean;
   error: string | null;
   connect: () => Promise<void>;
-  disconnect: () => void;
+  disconnect: () => Promise<void>;
   refresh: () => Promise<void>;
   switchToBnb: () => Promise<void>;
 }
+
+let manuallyDisconnected = false;
 
 async function readChainId(): Promise<string | null> {
   const provider = getEthereumProvider();
@@ -40,9 +41,7 @@ async function readAccounts(): Promise<string[]> {
   }
 }
 
-export const useWalletStore = create<WalletState>()(
-  persist(
-    (set, get) => ({
+export const useWalletStore = create<WalletState>()((set, get) => ({
       address: null,
       chainId: null,
       connected: false,
@@ -62,6 +61,7 @@ export const useWalletStore = create<WalletState>()(
 
         set({ connecting: true, error: null });
         try {
+          manuallyDisconnected = false;
           const accounts = await provider.request<string[]>({ method: 'eth_requestAccounts' });
           const chainId = await readChainId();
           const address = accounts[0] ?? null;
@@ -79,9 +79,25 @@ export const useWalletStore = create<WalletState>()(
         }
       },
 
-      disconnect: () => set({ address: null, chainId: null, connected: false, error: null }),
+      disconnect: async () => {
+        manuallyDisconnected = true;
+        const provider = getEthereumProvider();
+        try {
+          await provider?.request({
+            method: 'wallet_revokePermissions',
+            params: [{ eth_accounts: {} }],
+          });
+        } catch {
+          // MetaMask/provider may not support revoking permissions here.
+        }
+        set({ address: null, chainId: null, connected: false, connecting: false, error: null });
+      },
 
       refresh: async () => {
+        if (manuallyDisconnected) {
+          set({ address: null, chainId: null, connected: false });
+          return;
+        }
         const provider = getEthereumProvider();
         if (!provider || !isMetaMaskProvider(provider)) {
           set({ address: null, chainId: null, connected: false });
@@ -109,14 +125,7 @@ export const useWalletStore = create<WalletState>()(
           set({ connecting: false });
         }
       },
-    }),
-    {
-      name: 'brutus.wallet',
-      storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ address: s.address, chainId: s.chainId, connected: s.connected }),
-    },
-  ),
-);
+}));
 
 export function walletStatusLabel(address: string | null, chainId: string | null): string {
   if (!address) return 'Conectar MetaMask';

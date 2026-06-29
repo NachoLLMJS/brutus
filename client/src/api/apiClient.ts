@@ -154,7 +154,11 @@ export interface TournamentResponse {
 
 export const api = {
   brutes: {
-    list: (): Promise<Brute[]> => request('/brutes'),
+    list: async (walletAddress?: string): Promise<Brute[]> => {
+      const query = walletAddress ? `?walletAddress=${encodeURIComponent(walletAddress)}` : '';
+      const res = await request<{ brutes: Brute[] }>(`/brutes${query}`);
+      return res.brutes;
+    },
 
     create: (body: CreateBruteBody): Promise<Brute> =>
       request('/brutes', { method: 'POST', body: JSON.stringify(body) }),

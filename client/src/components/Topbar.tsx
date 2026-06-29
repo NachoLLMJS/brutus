@@ -4,7 +4,7 @@
 // bruto activo (si lo hay).
 // NOTA: Torneo está oculto — el route sigue existiendo pero sin entry points UI.
 
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { useGameStore } from '@/store/useGameStore';
 import { useWalletStore, walletStatusLabel } from '@/store/useWalletStore';
@@ -41,13 +41,16 @@ const NAV: NavItem[] = [
 
 export function Topbar() {
   const params = useParams();
+  const navigate = useNavigate();
   const { pathname } = useLocation();
   const recentBrutes = useGameStore((s) => s.recentBrutes);
   const currentBruteId = useGameStore((s) => s.currentBruteId);
+  const resetSession = useGameStore((s) => s.resetSession);
   const address = useWalletStore((s) => s.address);
   const chainId = useWalletStore((s) => s.chainId);
   const connecting = useWalletStore((s) => s.connecting);
   const connect = useWalletStore((s) => s.connect);
+  const disconnect = useWalletStore((s) => s.disconnect);
   const switchToBnb = useWalletStore((s) => s.switchToBnb);
 
   // Determinar el bruteId activo: prioridad URL → store currentBrute → primer
@@ -155,6 +158,34 @@ export function Topbar() {
         >
           {connecting ? 'Conectando…' : walletStatusLabel(address, chainId)}
         </button>
+        {address && (
+          <button
+            type="button"
+            onClick={() => {
+              void disconnect().finally(() => {
+                resetSession();
+                navigate('/');
+              });
+            }}
+            disabled={connecting}
+            title="Desconectar wallet y limpiar sesión actual"
+            style={{
+              minHeight: 28,
+              padding: '0 10px',
+              borderRadius: 3,
+              border: '1px solid rgba(190,55,55,0.55)',
+              background: 'rgba(190,55,55,0.12)',
+              color: '#f09a9a',
+              cursor: connecting ? 'wait' : 'pointer',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 11,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Disconnect
+          </button>
+        )}
       </div>
     </header>
   );
