@@ -13,9 +13,19 @@ const FIGHT_SCALE = 2.25;
 type LpcAction = 'combat_idle' | 'walk' | 'run' | 'slash' | 'halfslash' | 'thrust' | 'hurt' | 'death' | 'block' | 'evade' | 'win';
 type Layer = { src: string; tint?: string };
 
-// The LPC body sheet is a full nude base. In combat it must behave like a
-// dark undersuit under armor, otherwise attack frames expose naked limbs/body.
-const COMBAT_BODY_UNDERSUIT_TINT = 'rgba(40, 44, 52, 0.92)';
+const LPC_ACTION_FRAMES: Record<LpcAction, number> = {
+  combat_idle: 2,
+  walk: 9,
+  run: 9,
+  slash: 6,
+  halfslash: 6,
+  thrust: 8,
+  hurt: 6,
+  death: 6,
+  block: 6,
+  evade: 6,
+  win: 2,
+};
 
 const ARMOR_TINTS: Record<string, string> = {
   steel: 'rgba(185, 196, 202, 0.28)',
@@ -69,6 +79,11 @@ function actionFor(animation: string): LpcAction {
 
 function fileAction(action: LpcAction): string {
   if (action === 'win') return 'combat_idle';
+  // Our current armor/legs/feet run sheets are copied from walk (9 frames),
+  // while the body run is a real 8-frame LPC run. Mixing them makes the legs
+  // visibly drift. Use the 9-frame walk sheet for LPC displacement and play it
+  // at run speed so all equipment layers stay phase-aligned.
+  if (action === 'run') return 'walk';
   return action;
 }
 
@@ -92,23 +107,16 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
     : 'none';
   const cedricHeadSkin = headwear === 'cedricHelmet';
   const wings = value(lpc.wings, ['none', 'monarchPurple', 'pixiePurple'] as const, 'none');
-  const rawArmsArmor = value(lpc.armsArmor, ['none', 'plate', 'bracers'] as const, 'none');
-  const rawTorsoArmor = value(lpc.torsoArmor, ['none', 'trenchCoat', 'plate', 'legion', 'chainmail'] as const, 'trenchCoat');
-  const rawLegsArmor = value(lpc.legsArmor, ['none', 'plate'] as const, 'plate');
-  const rawFeetArmor = value(lpc.feetArmor, ['none', 'plate'] as const, 'plate');
-  // Combat-only safety: the naked LPC base body is always drawn underneath.
-  // If saved appearance has `none` pieces, attack frames expose the nude body
-  // as a ghost/full-body layer. Use minimal plate fallbacks in combat only.
-  const armsArmor = rawArmsArmor === 'none' ? 'plate' : rawArmsArmor;
-  const torsoArmor = rawTorsoArmor === 'none' ? 'plate' : rawTorsoArmor;
-  const legsArmor = rawLegsArmor === 'none' ? 'plate' : rawLegsArmor;
-  const feetArmor = rawFeetArmor === 'none' ? 'plate' : rawFeetArmor;
+  const armsArmor = value(lpc.armsArmor, ['none', 'plate', 'bracers'] as const, 'none');
+  const torsoArmor = value(lpc.torsoArmor, ['none', 'trenchCoat', 'plate', 'legion', 'chainmail'] as const, 'trenchCoat');
+  const legsArmor = value(lpc.legsArmor, ['none', 'plate'] as const, 'plate');
+  const feetArmor = value(lpc.feetArmor, ['none', 'plate'] as const, 'plate');
   const armorColor = value(lpc.armorColor, ['steel', 'yellow', 'iron', 'bronze', 'copper', 'pink', 'purple', 'silver', 'black'] as const, 'black');
   const armorTint = ARMOR_TINTS[armorColor];
 
   const layers: Array<Layer | undefined> = [
     wings !== 'none' ? { src: p(`wings/${wings === 'monarchPurple' ? 'monarch' : 'pixie'}/bg/${a}.png`) } : undefined,
-    { src: p(`body/male/${a}.png`), tint: COMBAT_BODY_UNDERSUIT_TINT },
+    { src: p(`body/male/${a}.png`) },
     legsArmor === 'plate' ? { src: p(`armor/legsPlate/${a}.png`), tint: armorTint } : undefined,
     feetArmor === 'plate' ? { src: p(`armor/feetPlate/steel/${a}.png`), tint: armorTint } : undefined,
     torsoArmor === 'trenchCoat' ? { src: p(`armor/trenchCoat/${a}.png`), tint: armorTint } : undefined,
@@ -125,8 +133,17 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
   return layers.filter(Boolean) as Layer[];
 }
 
-function drawLayer(ctx: CanvasRenderingContext2D, layer: Layer, img: HTMLImageElement, frame: number, row: number) {
-  const sx = Math.min(frame, Math.floor(img.width / FRAME) - 1) * FRAME;
+function layerFrame(img: HTMLImageElement, frame: number, frameCount: number): number {
+  const available = Math.max(1, Math.floor(img.width / FRAME));
+  if (available === frameCount) return Math.min(frame, available - 1);
+  if (frameCount <= 1 || available <= 1) return 0;
+  // Some LPC sheets include expanded/alternate frame columns. Keep layers in
+  // the same animation phase instead of blindly taking the same column index.
+  return Math.min(available - 1, Math.round((frame / (frameCount - 1)) * (available - 1)));
+}
+
+function drawLayer(ctx: CanvasRenderingContext2D, layer: Layer, img: HTMLImageElement, frame: number, frameCount: number, row: number) {
+  const sx = layerFrame(img, frame, frameCount) * FRAME;
   const sy = Math.min(row, Math.floor(img.height / FRAME) - 1) * FRAME;
   if (!layer.tint) {
     ctx.drawImage(img, sx, sy, FRAME, FRAME, 0, 0, FRAME, FRAME);
@@ -184,18 +201,22 @@ export function createLpcFightOverlay(app: PIXI.Application, lpc: Partial<LpcApp
     const layers = layerList(lpc, action);
     const images = await Promise.all(layers.map((layer) => loadImage(layer.src)));
     if (disposed || token !== drawToken) return;
+    const expectedFrames = LPC_ACTION_FRAMES[action];
     const counts = images
       .filter((img): img is HTMLImageElement => Boolean(img))
-      .map((img) => Math.max(1, Math.floor(img.width / FRAME)));
-    // Use the shortest loaded layer so body/armour/weapon stay in sync.
-    frameCount = counts.length > 0 ? Math.max(1, Math.min(...counts)) : 1;
+      .map((img) => Math.max(1, Math.floor(img.width / FRAME)))
+      .filter((count) => count >= expectedFrames || expectedFrames % count === 0);
+    // Use the LPC layout frame count for each action. Some generated sheets
+    // contain extra columns/rows for alternates (weapon/front-back variants),
+    // so blindly using min/max loaded image width makes layers drift.
+    frameCount = counts.includes(expectedFrames) ? expectedFrames : Math.max(1, Math.min(expectedFrames, ...counts));
     frame %= frameCount;
     ctx.clearRect(0, 0, FRAME, FRAME);
     const row = ROW_BY_FACING[direction];
     for (const [index, img] of images.entries()) {
       const layer = layers[index];
       if (!img || !layer) continue;
-      drawLayer(ctx, layer, img, frame, row);
+      drawLayer(ctx, layer, img, frame, frameCount, row);
     }
     texture.baseTexture.update();
   };
