@@ -1,8 +1,7 @@
-// Settings persistidos del Landing (Forja la Leyenda).
-// Controlados desde el TweaksPanel del Landing.
+// Settings del Landing (Forja la Leyenda).
+// No se persisten: nada del juego queda guardado en localStorage.
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type HeroLayout = 'centered' | 'asym';
 export type AccentIntensity = 'subdued' | 'balanced' | 'infernal';
@@ -20,19 +19,11 @@ interface LandingSettingsState {
   setShowClock: (v: boolean) => void;
 }
 
-export const useLandingSettings = create<LandingSettingsState>()(
-  persist(
-    (set) => ({
-      heroLayout: 'centered',
-      accentIntensity: 'balanced',
-      showClock: true,
-      setHeroLayout: (v) => set({ heroLayout: v }),
-      setAccentIntensity: (v) => set({ accentIntensity: v }),
-      setShowClock: (v) => set({ showClock: v }),
-    }),
-    {
-      name: 'brutus.landing.settings',
-      storage: createJSONStorage(() => localStorage),
-    },
-  ),
-);
+export const useLandingSettings = create<LandingSettingsState>()((set) => ({
+  heroLayout: 'centered',
+  accentIntensity: 'balanced',
+  showClock: true,
+  setHeroLayout: (v) => set({ heroLayout: v }),
+  setAccentIntensity: (v) => set({ accentIntensity: v }),
+  setShowClock: (v) => set({ showClock: v }),
+}));

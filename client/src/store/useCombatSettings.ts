@@ -1,8 +1,7 @@
-// Settings persistidos del Combat (FightViewer).
-// Controlados desde el TweaksPanel del Combat.
+// Settings del Combat (FightViewer).
+// No se persisten: nada del juego queda guardado en localStorage.
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface CombatSettingsState {
   /** Si está activo, banners DOM "¡CRÍTICO!"/"¡BLOQUEO!"/"¡ESQUIVA!" sobre el canvas. */
@@ -14,17 +13,9 @@ interface CombatSettingsState {
   setLogLength: (n: number) => void;
 }
 
-export const useCombatSettings = create<CombatSettingsState>()(
-  persist(
-    (set) => ({
-      showActionBanner: true,
-      logLength: 14,
-      setShowActionBanner: (v) => set({ showActionBanner: v }),
-      setLogLength: (n) => set({ logLength: Math.max(5, Math.min(30, Math.round(n))) }),
-    }),
-    {
-      name: 'brutus.combat.settings',
-      storage: createJSONStorage(() => localStorage),
-    },
-  ),
-);
+export const useCombatSettings = create<CombatSettingsState>()((set) => ({
+  showActionBanner: true,
+  logLength: 14,
+  setShowActionBanner: (v) => set({ showActionBanner: v }),
+  setLogLength: (n) => set({ logLength: Math.max(5, Math.min(30, Math.round(n))) }),
+}));

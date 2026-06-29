@@ -17,6 +17,7 @@ import type { Brute } from 'core';
 import { xpToNext, WEAPONS, SKILLS, getSkill, getWeapon } from 'core';
 import { skillAsset, weaponAsset } from '@/lib/assets';
 import { useGameStore } from '@/store/useGameStore';
+import { useWalletStore } from '@/store/useWalletStore';
 import { useToastStore } from '@/store/useToastStore';
 import { useProfileSettings } from '@/store/useProfileSettings';
 import { useLobbySettings } from '@/store/useLobbySettings';
@@ -43,6 +44,7 @@ export function Profile() {
   const navigate = useNavigate();
   const rememberBrute = useGameStore((s) => s.rememberBrute);
   const forgetBrute = useGameStore((s) => s.forgetBrute);
+  const walletAddress = useWalletStore((s) => s.address);
   const pushToast = useToastStore((s) => s.push);
   const setTrainingMode = useLobbySettings((s) => s.setTrainingMode);
 
@@ -70,10 +72,10 @@ export function Profile() {
   }, [error, id, forgetBrute, navigate]);
 
   useEffect(() => {
-    if (brute) {
+    if (brute && walletAddress && brute.ownerWallet?.toLowerCase() === walletAddress.toLowerCase()) {
       rememberBrute({ id: brute.id, name: brute.name, level: brute.level });
     }
-  }, [brute, rememberBrute]);
+  }, [brute, rememberBrute, walletAddress]);
 
   // Default selection: primer skill/weapon equipado.
   useEffect(() => {

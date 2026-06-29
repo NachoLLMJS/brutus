@@ -36,6 +36,7 @@ export interface Appearance {
 
 export interface Brute {
   id: string;
+  ownerWallet?: string | null;
   name: string;
   seed: number;
   level: number;

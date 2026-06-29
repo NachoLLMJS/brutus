@@ -17,6 +17,7 @@ export type Appearance = CoreAppearance;
  */
 export interface BruteSnapshot extends CoreBrute {
   userId: string | null;
+  ownerWallet: string | null;
 }
 
 export type { Stats };
@@ -34,6 +35,7 @@ export function deserializeBrute(row: PrismaBrute): BruteSnapshot {
   return {
     id: row.id,
     userId: row.userId,
+    ownerWallet: row.ownerWallet,
     name: row.name,
     seed: row.seed,
     level: row.level,

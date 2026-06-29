@@ -1,9 +1,7 @@
-// Settings persistidos del Lobby (Tablón de la fosa).
-// Controlados desde el TweaksPanel. Se persisten en localStorage para que
-// la preferencia del usuario sobreviva refrescos/cierres.
+// Settings del Lobby (Tablón de la fosa).
+// No se persisten: nada del juego queda guardado en localStorage.
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type LobbyFilter = 'all' | 'near' | 'easy' | 'tough' | 'online';
 
@@ -20,19 +18,11 @@ interface LobbySettingsState {
   setShowSidebar: (v: boolean) => void;
 }
 
-export const useLobbySettings = create<LobbySettingsState>()(
-  persist(
-    (set) => ({
-      trainingMode: false,
-      defaultFilter: 'all',
-      showSidebar: true,
-      setTrainingMode: (v) => set({ trainingMode: v }),
-      setDefaultFilter: (f) => set({ defaultFilter: f }),
-      setShowSidebar: (v) => set({ showSidebar: v }),
-    }),
-    {
-      name: 'brutus.lobby.settings',
-      storage: createJSONStorage(() => localStorage),
-    },
-  ),
-);
+export const useLobbySettings = create<LobbySettingsState>()((set) => ({
+  trainingMode: false,
+  defaultFilter: 'all',
+  showSidebar: true,
+  setTrainingMode: (v) => set({ trainingMode: v }),
+  setDefaultFilter: (f) => set({ defaultFilter: f }),
+  setShowSidebar: (v) => set({ showSidebar: v }),
+}));
