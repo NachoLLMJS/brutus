@@ -61,7 +61,6 @@ export const ListBrutesQuery = z.object({
     .optional()
     .transform((v) => (v === undefined ? undefined : Number.parseInt(v, 10)))
     .pipe(z.number().int().positive().max(100).optional()),
-  walletAddress: z.string().regex(WALLET_REGEX, 'invalid_wallet').optional(),
 });
 
 export const createBrute: RequestHandler = async (req, res, next) => {
@@ -77,7 +76,7 @@ export const createBrute: RequestHandler = async (req, res, next) => {
 export const listBrutes: RequestHandler = async (req, res, next) => {
   try {
     const q = req.query as z.infer<typeof ListBrutesQuery>;
-    const list = await BruteService.listBrutes(q.limit, q.walletAddress);
+    const list = await BruteService.listBrutes(q.limit);
     res.json({ brutes: list });
   } catch (err) {
     next(err);

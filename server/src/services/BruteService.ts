@@ -132,10 +132,8 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
   return deserializeBrute(created);
 }
 
-export async function listBrutes(limit = 50, walletAddress?: string): Promise<BruteSnapshot[]> {
-  const ownerWallet = walletAddress ? normalizeWallet(walletAddress) : undefined;
+export async function listBrutes(limit = 50): Promise<BruteSnapshot[]> {
   const rows = await prisma.brute.findMany({
-    where: ownerWallet ? { ownerWallet } : undefined,
     orderBy: { createdAt: 'desc' },
     take: Math.min(limit, 100),
   });
