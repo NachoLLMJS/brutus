@@ -60,6 +60,16 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
     throw new HttpError(400, 'invalid_create_tx_hash');
   }
 
+  if (input.createTxHash) {
+    const alreadyImportedTx = await prisma.brute.findUnique({ where: { createTxHash: input.createTxHash } });
+    if (alreadyImportedTx) {
+      if (alreadyImportedTx.ownerWallet !== ownerWallet) {
+        throw new HttpError(409, 'onchain_tx_already_imported_by_another_wallet');
+      }
+      return deserializeBrute(alreadyImportedTx);
+    }
+  }
+
   const taken = await prisma.brute.findUnique({ where: { name: input.name } });
   if (taken) {
     throw new HttpError(409, 'name_taken');
@@ -75,8 +85,6 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
     if (!input.onChainBruteId || !input.createTxHash) {
       throw new HttpError(402, 'base_brute_limit_reached_extra_requires_onchain_payment');
     }
-    const duplicateOnChain = await prisma.brute.findUnique({ where: { onChainBruteId: input.onChainBruteId } });
-    if (duplicateOnChain) throw new HttpError(409, 'onchain_brute_already_imported');
   }
 
   const stats = generateInitialStats(input.name, {

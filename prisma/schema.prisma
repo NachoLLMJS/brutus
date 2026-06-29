@@ -26,8 +26,8 @@ model Brute {
   user                    User?    @relation(fields: [userId], references: [id])
   name                    String   @unique
   ownerWallet             String?
-  onChainBruteId          Int?     @unique
-  createTxHash            String?
+  onChainBruteId          Int?
+  createTxHash            String?  @unique
   seed                    Int
   level                   Int      @default(1)
   xp                      Int      @default(0)
@@ -59,6 +59,7 @@ model Brute {
 
   @@index([userId])
   @@index([ownerWallet])
+  @@index([onChainBruteId])
   @@index([masterId])
 }
 

@@ -81,10 +81,12 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
     'barbuta',
     'greathelm',
     'maximus',
+    'cedricHelmet',
   ] as const, 'none');
   const hair = headwear === 'none'
     ? value(lpc.hair, ['none', 'bedhead', 'bob', 'afro', 'buzzcut', 'long', 'curlyShort', 'bangs'] as const, 'bedhead')
     : 'none';
+  const cedricHeadSkin = headwear === 'cedricHelmet';
   const wings = value(lpc.wings, ['none', 'monarchPurple', 'pixiePurple'] as const, 'none');
   const armsArmor = value(lpc.armsArmor, ['none', 'plate', 'bracers'] as const, 'none');
   const torsoArmor = value(lpc.torsoArmor, ['none', 'trenchCoat', 'plate', 'legion', 'chainmail'] as const, 'trenchCoat');
@@ -104,9 +106,9 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
     torsoArmor === 'chainmail' ? { src: p(`armor/torsoChainmail/${a}.png`), tint: armorTint } : undefined,
     armsArmor === 'plate' ? { src: p(`armor/armsPlate/${a}.png`), tint: armorTint } : undefined,
     armsArmor === 'bracers' ? { src: p(`armor/armsBracers/${a}.png`), tint: armorTint } : undefined,
-    { src: p(`head/${head}/${a}.png`) },
+    cedricHeadSkin ? undefined : { src: p(`head/${head}/${a}.png`) },
     hair !== 'none' ? { src: p(`hair/${hair}/${a}.png`) } : undefined,
-    headwear !== 'none' ? { src: p(`helmet/${headwear}/${a}.png`), tint: armorTint } : undefined,
+    headwear !== 'none' ? { src: p(`helmet/${headwear}/${a}.png`), tint: headwear === 'cedricHelmet' ? undefined : armorTint } : undefined,
     wings !== 'none' ? { src: p(`wings/${wings === 'monarchPurple' ? 'monarch' : 'pixie'}/fg/${a}.png`) } : undefined,
   ];
   return layers.filter(Boolean) as Layer[];

@@ -17,6 +17,7 @@ import wingsPixiePurpleBgWalk from '@/assets/lpc-test/wings-pixie-purple-bg-walk
 import wingsPixiePurpleFgWalk from '@/assets/lpc-test/wings-pixie-purple-fg-walk.png?url';
 import helmetArmetIdle from '@/assets/lpc-test/helmet-armet-idle.png?url';
 import helmetBarbutaIdle from '@/assets/lpc-test/helmet-barbuta-idle.png?url';
+import helmetCedricIdle from '@/assets/lpc-test/helmet-cedric-idle.png?url';
 import helmetGreathelmIdle from '@/assets/lpc-test/helmet-greathelm-idle.png?url';
 import helmetMaximusIdle from '@/assets/lpc-test/helmet-maximus-idle.png?url';
 import trenchCoatOfficialWalk from '@/assets/lpc-test/torso-jacket-trench-gray-walk.png?url';
@@ -43,7 +44,7 @@ type Layer = { src: string; tint?: string };
 export type LpcHeadKey = 'humanMale' | 'humanGaunt' | 'humanPlump' | 'humanElder';
 export type LpcHairKey = 'bedhead' | 'bob' | 'afro' | 'buzzcut' | 'long' | 'curlyShort' | 'bangs' | 'none';
 export type LpcWingsKey = 'none' | 'monarchPurple' | 'pixiePurple';
-export type LpcHeadwearKey = 'none' | 'armet' | 'barbuta' | 'greathelm' | 'maximus';
+export type LpcHeadwearKey = 'none' | 'armet' | 'barbuta' | 'greathelm' | 'maximus' | 'cedricHelmet';
 export type LpcArmorColorKey = 'steel' | 'yellow' | 'iron' | 'bronze' | 'copper' | 'pink' | 'purple' | 'silver' | 'black';
 export type LpcArmsArmorKey = 'none' | 'plate' | 'bracers';
 export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail';
@@ -103,6 +104,7 @@ export const LPC_HEADWEAR_OPTIONS = [
   { key: 'none', label: 'No headwear' },
   { key: 'armet', label: 'Armet', src: helmetArmetIdle },
   { key: 'barbuta', label: 'Barbuta', src: helmetBarbutaIdle },
+  { key: 'cedricHelmet', label: 'Cedric helmet', src: helmetCedricIdle },
   { key: 'greathelm', label: 'Greathelm', src: helmetGreathelmIdle },
   { key: 'maximus', label: 'Maximus', src: helmetMaximusIdle },
 ] as const satisfies ReadonlyArray<LpcOption<LpcHeadwearKey>>;
@@ -162,11 +164,15 @@ function tintLayer(option: LpcOption<string> | undefined, tint: string): Layer |
   return option?.src ? { src: option.src, tint } : undefined;
 }
 
+function isFixedColorHeadwear(headwear: LpcHeadwearKey): boolean {
+  return headwear === 'cedricHelmet';
+}
+
 function layerPaths(props: Required<Omit<LpcAvatarPreviewProps, 'scale' | 'compact'>>) {
   const wings = pick(LPC_WINGS_OPTIONS, props.wings);
   const armorTint = ARMOR_TINTS[props.armorColor];
   const headwear = pick(LPC_HEADWEAR_OPTIONS, props.headwear);
-  const headwearLayer = tintLayer(headwear, armorTint);
+  const headwearLayer = isFixedColorHeadwear(props.headwear) ? toLayer(headwear) : tintLayer(headwear, armorTint);
   return [
     wings?.bgSrc ? { src: wings.bgSrc } : undefined,
     { src: bodyMaleIdle },

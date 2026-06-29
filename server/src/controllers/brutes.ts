@@ -18,6 +18,7 @@ const LpcAppearanceSchema = z.object({
     'barbuta',
     'greathelm',
     'maximus',
+    'cedricHelmet',
   ]),
   armsArmor: z.enum(['none', 'plate', 'bracers']),
   gloves: z.literal('none').optional(),
