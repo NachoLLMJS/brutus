@@ -172,16 +172,17 @@ function layerPaths(props: Required<Omit<LpcAvatarPreviewProps, 'scale' | 'compa
   const wings = pick(LPC_WINGS_OPTIONS, props.wings);
   const armorTint = ARMOR_TINTS[props.armorColor];
   const headwear = pick(LPC_HEADWEAR_OPTIONS, props.headwear);
+  const cedricHeadSkin = props.headwear === 'cedricHelmet';
   const headwearLayer = isFixedColorHeadwear(props.headwear) ? toLayer(headwear) : tintLayer(headwear, armorTint);
   return [
     wings?.bgSrc ? { src: wings.bgSrc } : undefined,
     { src: bodyMaleIdle },
-    toLayer(pick(LPC_HEAD_OPTIONS, props.head)),
+    cedricHeadSkin ? undefined : toLayer(pick(LPC_HEAD_OPTIONS, props.head)),
     tintLayer(pick(LPC_LEGS_ARMOR_OPTIONS, props.legsArmor), armorTint),
     tintLayer(pick(LPC_FEET_ARMOR_OPTIONS, props.feetArmor), armorTint),
     tintLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor), armorTint),
     tintLayer(pick(LPC_ARMS_ARMOR_OPTIONS, props.armsArmor), armorTint),
-    toLayer(pick(LPC_HAIR_OPTIONS, props.hair)),
+    cedricHeadSkin ? undefined : toLayer(pick(LPC_HAIR_OPTIONS, props.hair)),
     headwearLayer,
     toLayer(pick(LPC_WEAPON_OPTIONS, props.weapon)),
     wings?.fgSrc ? { src: wings.fgSrc } : undefined,
