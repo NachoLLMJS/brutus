@@ -171,9 +171,6 @@ export function FightViewer() {
   const exit = () => {
     navigate(`/brute/${id}`);
   };
-  const retry = () => {
-    navigate(`/brute/${id}/arena`);
-  };
   const goLevelUp = () => {
     navigate(`/brute/${id}/levelup`);
   };
@@ -350,11 +347,7 @@ export function FightViewer() {
               Saltar ▶▶
             </button>
           </div>
-          <div className="cb-center">
-            <button type="button" className="cb-btn gold" onClick={retry} disabled={winnerId === null}>
-              ↺ Repetir
-            </button>
-          </div>
+          <div className="cb-center" />
           <div className="cb-side right">
             <div className="cb-rewards">
               <span className="label">En juego</span>
@@ -383,7 +376,6 @@ export function FightViewer() {
           streak={Math.abs(streak)}
           xpAwarded={undefined /* server no expone xpAwarded en FightResponse aún */}
           hasLevelUp={lastFight.leveledUp}
-          onRetry={retry}
           onProfile={() => {
             navigate(`/brute/${id}`);
             pushToast('info', isPlayerWinner ? 'Victoria.' : 'Derrota.');

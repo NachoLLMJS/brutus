@@ -15,7 +15,6 @@ interface EndOverlayProps {
   xpAwarded?: number;
   /** Racha de victorias (determinístico). */
   streak: number;
-  onRetry: () => void;
   onProfile: () => void;
   /** Si hay levelup pendiente, redirige al level-up en lugar de profile. */
   hasLevelUp?: boolean;
@@ -33,7 +32,6 @@ export function EndOverlay({
   totalSteps,
   xpAwarded,
   streak,
-  onRetry,
   onProfile,
   hasLevelUp,
   onLevelUp,
@@ -64,9 +62,6 @@ export function EndOverlay({
         </div>
         {claimRewardButton}
         <div className="end-actions">
-          <button type="button" className="cb-btn" onClick={onRetry}>
-            ↺ Volver
-          </button>
           {hasLevelUp && onLevelUp ? (
             <button type="button" className="cb-btn gold" onClick={onLevelUp}>
               ★ Elegir mejora
