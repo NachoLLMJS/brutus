@@ -102,8 +102,8 @@ interface HypnotiseStep {
 const ARENA_W = 800;
 const ARENA_H = 360;
 const GROUND_Y = 320;
-const POS_LEFT_X = 220;
-const POS_RIGHT_X = 580;
+const POS_LEFT_X = 280;
+const POS_RIGHT_X = 520;
 const ATTACK_OFFSET = 130;
 const STEP_BASE_MS = 220;
 const FIGHTER_SCALE = 1.8;

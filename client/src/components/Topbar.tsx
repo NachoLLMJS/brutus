@@ -85,7 +85,13 @@ export function Topbar() {
       {/* Nav */}
       <nav
         className="hidden md:flex items-center gap-7 font-display uppercase"
-        style={{ fontSize: 13, letterSpacing: '0.18em' }}
+        style={{
+          fontSize: 13,
+          letterSpacing: '0.18em',
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }}
       >
         {NAV.map((item) => {
           const target = item.to(bruteId);

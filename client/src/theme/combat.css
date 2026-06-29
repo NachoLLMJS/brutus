@@ -826,3 +826,186 @@
   gap: 10px;
   justify-content: center;
 }
+
+
+/* ============== COMPACT SHIP-BATTLE PASS ============== */
+.combat-stage {
+  grid-template-rows: 178px minmax(0, 1fr) 86px;
+  background:
+    radial-gradient(ellipse at 50% 22%, rgba(42, 25, 13, 0.55), transparent 46%),
+    radial-gradient(ellipse at 50% 70%, #120d18 0%, #050507 76%),
+    var(--bg-default);
+}
+.combat-stage::before {
+  background:
+    linear-gradient(90deg, rgba(230, 180, 80, 0.08), transparent 22%, transparent 78%, rgba(230, 180, 80, 0.08)),
+    radial-gradient(ellipse 45% 90% at 0% 30%, rgba(196, 26, 26, 0.10), transparent 58%),
+    radial-gradient(ellipse 45% 90% at 100% 30%, rgba(95, 176, 74, 0.09), transparent 58%);
+}
+.combat-top {
+  gap: 20px;
+  padding: 16px 22px 12px;
+  background: linear-gradient(180deg, rgba(5, 6, 10, 0.98), rgba(10, 7, 14, 0.72));
+  border-bottom: 2px solid rgba(143, 84, 25, 0.55);
+}
+.fighter-card {
+  min-height: 136px;
+  padding: 12px 18px 10px;
+  background:
+    linear-gradient(180deg, rgba(8, 9, 13, 0.92), rgba(17, 10, 15, 0.92)),
+    radial-gradient(circle at 10% 20%, rgba(230,180,80,0.13), transparent 38%);
+  border: 2px solid rgba(143, 84, 25, 0.82);
+  border-radius: 10px 4px 10px 4px;
+  box-shadow:
+    0 0 0 1px rgba(230, 180, 80, 0.22) inset,
+    0 8px 24px rgba(0, 0, 0, 0.55);
+}
+.fighter-card.left { border-left: 4px solid rgba(50, 156, 255, 0.95); }
+.fighter-card.right { border-right: 4px solid rgba(255, 67, 60, 0.92); }
+.fighter-card .fc-row { gap: 14px; }
+.fc-bust {
+  width: 92px;
+  height: 92px;
+  border-width: 3px;
+  background: radial-gradient(circle, rgba(37, 22, 37, 0.95), rgba(3, 4, 7, 1));
+}
+.fc-name {
+  font-size: clamp(20px, 2vw, 30px);
+  line-height: 1;
+}
+.fc-top { margin-bottom: 8px; }
+.fc-rank {
+  color: #9fed63;
+  border-color: rgba(159, 237, 99, 0.75);
+  background: rgba(35, 76, 18, 0.18);
+}
+.fighter-card.right .fc-rank { color: #f4c064; border-color: rgba(244, 192, 100, 0.78); }
+.hpbar { position: relative; }
+.hpbar-track {
+  height: 26px;
+  border-color: rgba(143, 84, 25, 0.9);
+  background: rgba(5, 6, 10, 0.92);
+}
+.hpbar-fill {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--hp-color) 82%, #fff 18%), var(--hp-color) 54%, color-mix(in srgb, var(--hp-color) 62%, #000 38%));
+}
+.hpbar-num {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff7dc;
+  text-shadow: 0 2px 2px #000, 0 0 8px rgba(0,0,0,0.9);
+  font-size: 15px;
+  z-index: 2;
+}
+.hpbar-cur, .hpbar-sep, .hpbar-max { color: #fff7dc; }
+.fc-skills { margin-top: 9px; gap: 7px; }
+.fc-weapon, .fc-skill { width: 24px; height: 24px; padding: 3px; }
+.combat-top-center { min-width: 310px; padding: 0; }
+.streak-badge {
+  width: 100%;
+  min-height: 122px;
+  justify-content: center;
+  gap: 5px;
+  padding: 13px 22px;
+  background:
+    linear-gradient(180deg, rgba(9, 10, 13, 0.94), rgba(4, 5, 8, 0.92)),
+    radial-gradient(ellipse at 50% 0%, rgba(230, 180, 80, 0.20), transparent 62%);
+  border: 2px solid rgba(143, 84, 25, 0.82);
+  border-radius: 18px 18px 48px 48px / 12px 12px 28px 28px;
+  box-shadow: 0 0 0 1px rgba(230,180,80,0.20) inset, 0 8px 26px rgba(0,0,0,0.68);
+}
+.streak-badge .battle-state {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+}
+.streak-badge .battle-title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-strong);
+  text-shadow: 0 2px 0 #000, 0 0 14px rgba(230,180,80,0.38);
+}
+.streak-badge .label { margin-top: 4px; color: var(--accent-gold); }
+.streak-badge .num { font-size: 22px; }
+.streak-badge .sub { display: none; }
+.combat-arena {
+  grid-template-columns: minmax(0, 1fr) 312px;
+  gap: 14px;
+  padding: 12px 18px 10px;
+}
+.canvas-frame {
+  border: 2px solid rgba(143, 84, 25, 0.95);
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px rgba(230,180,80,0.20) inset,
+    0 0 0 4px rgba(5, 5, 8, 0.96),
+    0 0 0 5px rgba(143, 84, 25, 0.62),
+    0 12px 36px rgba(0, 0, 0, 0.72);
+}
+.turn-strip {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-color: rgba(143, 84, 25, 0.72);
+  background: linear-gradient(180deg, rgba(10, 10, 13, 0.92), rgba(19, 11, 15, 0.88));
+}
+.tp {
+  height: 10px;
+  flex: 0 1 18px;
+  transform: rotate(45deg);
+  border-color: rgba(143, 84, 25, 0.72);
+}
+.tp.done, .tp.now { background: linear-gradient(180deg, #fff3b5, var(--accent-gold)); }
+.log-panel {
+  border-color: rgba(143, 84, 25, 0.86);
+  border-radius: 7px;
+  background: rgba(7, 8, 12, 0.90);
+  box-shadow: 0 0 0 1px rgba(230,180,80,0.18) inset, 0 8px 26px rgba(0,0,0,0.55);
+}
+.log-head {
+  padding: 12px 14px;
+  background: linear-gradient(180deg, rgba(12, 12, 16, 0.98), rgba(19, 10, 14, 0.92));
+  border-bottom-color: rgba(143, 84, 25, 0.68);
+}
+.log-row { padding: 7px 13px; font-size: 12px; }
+.combat-bottom {
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  padding: 10px 18px 16px;
+  background: linear-gradient(0deg, rgba(5, 6, 10, 0.98), rgba(9, 8, 12, 0.62));
+  border-top: 2px solid rgba(143, 84, 25, 0.52);
+}
+.cb-btn {
+  min-height: 48px;
+  padding: 10px 24px;
+  border-color: rgba(143, 84, 25, 0.88);
+  background: linear-gradient(180deg, rgba(26,19,27,0.96), rgba(8,9,13,0.98));
+  box-shadow: 0 0 0 1px rgba(230,180,80,0.18) inset, 0 3px 0 rgba(45,24,12,0.92);
+}
+.cb-btn.gold, .cb-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffe08b, #d39224 48%, #70410e);
+  color: #21120a;
+  border-color: #ffd47a;
+}
+.cb-rewards {
+  min-width: 160px;
+  padding: 10px 14px;
+  border: 1px solid rgba(143, 84, 25, 0.78);
+  border-radius: 5px;
+  background: rgba(8, 8, 12, 0.84);
+}
+@media (max-width: 1200px) {
+  .combat-stage { grid-template-rows: auto minmax(0, 1fr) auto; }
+  .combat-top { grid-template-columns: 1fr; }
+  .combat-top-center { order: -1; min-width: 0; }
+  .streak-badge { min-height: 90px; border-radius: 10px; }
+  .streak-badge .battle-title { font-size: 24px; }
+  .fc-bust { width: 72px; height: 72px; }
+  .combat-arena { grid-template-columns: 1fr; }
+}

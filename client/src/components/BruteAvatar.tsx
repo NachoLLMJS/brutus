@@ -56,13 +56,13 @@ interface BruteAvatarProps {
 }
 
 const SIZE_PX: Record<AvatarSize, number> = {
-  sm: 64,
+  sm: 122,
   md: 120,
   lg: 200,
 };
 
 const LPC_SCALE: Record<AvatarSize, number> = {
-  sm: 2,
+  sm: 1.9,
   md: 3,
   lg: 4,
 };

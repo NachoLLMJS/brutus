@@ -10,7 +10,6 @@ import clsx from 'clsx';
 import { useBrute } from '@/hooks/useBrute';
 import { BruteCard } from '@/components/BruteCard';
 import { BgPortrait } from '@/components/BgPortrait';
-import { TweaksPanel, TweakSection, TweakToggle, TweakSlider } from '@/components/TweaksPanel';
 import { PaperPanel } from '@/components/PaperPanel';
 import { api } from '@/api/apiClient';
 import type { Brute } from 'core';
@@ -52,13 +51,10 @@ export function Profile() {
   const pendingLevelUp = useGameStore((s) => s.pendingLevelUp);
   const hasPendingLevelUp = pendingLevelUp?.bruteId === id;
 
-  // Tweaks (persistidos)
+  // Visual settings de sesión.
   const portraitGlow = useProfileSettings((s) => s.portraitGlow);
-  const setPortraitGlow = useProfileSettings((s) => s.setPortraitGlow);
   const beastCount = useProfileSettings((s) => s.beastCount);
-  const setBeastCount = useProfileSettings((s) => s.setBeastCount);
   const showLineage = useProfileSettings((s) => s.showLineage);
-  const setShowLineage = useProfileSettings((s) => s.setShowLineage);
 
   // Selected skill/weapon for detail strip
   const [selSkillId, setSelSkillId] = useState<string | null>(null);
@@ -380,17 +376,6 @@ export function Profile() {
         )}
       </main>
 
-      <TweaksPanel title="Tweaks">
-        <TweakSection title="Retrato">
-          <TweakToggle label="Glow rojo de fondo" value={portraitGlow} onChange={setPortraitGlow} />
-        </TweakSection>
-        <TweakSection title="Bestias">
-          <TweakSlider label="Cantidad" min={0} max={3} step={1} value={beastCount} onChange={setBeastCount} />
-        </TweakSection>
-        <TweakSection title="Lore">
-          <TweakToggle label="Mostrar Linaje" value={showLineage} onChange={setShowLineage} />
-        </TweakSection>
-      </TweaksPanel>
     </div>
   );
 }

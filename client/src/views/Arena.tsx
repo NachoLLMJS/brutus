@@ -6,10 +6,8 @@
 // - Datos: api.brutes.opponents() (real)
 // - Flavor (rumor, streak, lastFight, status, glyphs): generado
 //   determinísticamente desde brute.id en `lib/lobbyFlavor.ts`
-// - Settings (training, defaultFilter, showSidebar): zustand persistido
-//   en localStorage via `useLobbySettings`
+// - Settings (training, defaultFilter, showSidebar): sesión en memoria via `useLobbySettings`
 // - Avatares: BruteAvatar real (sprites Pixi del juego)
-// - Tweaks panel: TweaksPanel reusable
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -17,7 +15,6 @@ import clsx from 'clsx';
 import { api, ApiError } from '@/api/apiClient';
 import { useBrute } from '@/hooks/useBrute';
 import { BruteAvatar } from '@/components/BruteAvatar';
-import { TweaksPanel, TweakSection, TweakToggle, TweakSelect } from '@/components/TweaksPanel';
 import { useToastStore } from '@/store/useToastStore';
 import { useGameStore } from '@/store/useGameStore';
 import { useLobbySettings, type LobbyFilter } from '@/store/useLobbySettings';
@@ -38,13 +35,11 @@ export function Arena() {
   const navigate = useNavigate();
   const pushToast = useToastStore((s) => s.push);
 
-  // Settings persistidos (training, filter, sidebar).
+  // Settings de sesión (training, filter, sidebar).
   const trainingMode = useLobbySettings((s) => s.trainingMode);
   const setTrainingMode = useLobbySettings((s) => s.setTrainingMode);
   const defaultFilter = useLobbySettings((s) => s.defaultFilter);
-  const setDefaultFilter = useLobbySettings((s) => s.setDefaultFilter);
   const showSidebar = useLobbySettings((s) => s.showSidebar);
-  const setShowSidebar = useLobbySettings((s) => s.setShowSidebar);
 
   // Estado local: filtro activo, oponentes cargados, toast.
   const [filter, setFilter] = useState<LobbyFilter>(defaultFilter);
@@ -184,34 +179,6 @@ export function Arena() {
       </main>
 
       {localToast && <div className="lobby-toast">{localToast}</div>}
-
-      <TweaksPanel title="Tweaks">
-        <TweakSection title="Modo">
-          <TweakToggle
-            label="Entrenamiento (sparring)"
-            value={trainingMode}
-            onChange={setTrainingMode}
-          />
-        </TweakSection>
-        <TweakSection title="Filtro inicial">
-          <TweakSelect<LobbyFilter>
-            label="Por defecto"
-            value={defaultFilter}
-            options={FILTERS.map((f) => ({ label: f.label, value: f.id }))}
-            onChange={(v) => {
-              setDefaultFilter(v);
-              setFilter(v);
-            }}
-          />
-        </TweakSection>
-        <TweakSection title="Layout">
-          <TweakToggle
-            label="Mostrar tu bruto (sidebar)"
-            value={showSidebar}
-            onChange={setShowSidebar}
-          />
-        </TweakSection>
-      </TweaksPanel>
     </>
   );
 }

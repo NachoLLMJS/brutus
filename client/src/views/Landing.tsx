@@ -8,8 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '@/store/useGameStore';
 import { BruteAvatar } from '@/components/BruteAvatar';
-import { TweaksPanel, TweakSection, TweakSelect } from '@/components/TweaksPanel';
-import { useLandingSettings, type AccentIntensity, type HeroLayout } from '@/store/useLandingSettings';
+import { useLandingSettings, type AccentIntensity } from '@/store/useLandingSettings';
 import { rankName } from '@/lib/profileFlavor';
 import { api } from '@/api/apiClient';
 import type { Brute } from 'core';
@@ -27,9 +26,7 @@ export function Landing() {
   const navigate = useNavigate();
 
   const heroLayout = useLandingSettings((s) => s.heroLayout);
-  const setHeroLayout = useLandingSettings((s) => s.setHeroLayout);
   const accentIntensity = useLandingSettings((s) => s.accentIntensity);
-  const setAccentIntensity = useLandingSettings((s) => s.setAccentIntensity);
 
   const [bruteInfo, setBruteInfo] = useState<Record<string, Brute>>({});
   const [toast, setToast] = useState<string | null>(null);
@@ -109,32 +106,6 @@ export function Landing() {
       </footer>
 
       {toast && <div className="landing-toast">{toast}</div>}
-
-      <TweaksPanel title="Tweaks">
-        <TweakSection title="Hero">
-          <TweakSelect<HeroLayout>
-            label="Layout"
-            value={heroLayout}
-            options={[
-              { value: 'centered', label: 'Centrado' },
-              { value: 'asym', label: 'Asimétrico' },
-            ]}
-            onChange={setHeroLayout}
-          />
-        </TweakSection>
-        <TweakSection title="Atmósfera">
-          <TweakSelect<AccentIntensity>
-            label="Intensidad de glow"
-            value={accentIntensity}
-            options={[
-              { value: 'subdued', label: 'Sutil' },
-              { value: 'balanced', label: 'Equilibrio' },
-              { value: 'infernal', label: 'Infernal' },
-            ]}
-            onChange={setAccentIntensity}
-          />
-        </TweakSection>
-      </TweaksPanel>
     </div>
   );
 }

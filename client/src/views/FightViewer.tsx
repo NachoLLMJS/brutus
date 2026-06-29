@@ -18,7 +18,6 @@ import { TurnPips } from '@/components/combat/TurnPips';
 import { ActionBanner } from '@/components/combat/ActionBanner';
 import { VSOverlayV2 } from '@/components/combat/VSOverlayV2';
 import { EndOverlay } from '@/components/combat/EndOverlay';
-import { TweaksPanel, TweakSection, TweakToggle, TweakSlider } from '@/components/TweaksPanel';
 import { useCombatSettings } from '@/store/useCombatSettings';
 import { useBrute } from '@/hooks/useBrute';
 import { api } from '@/api/apiClient';
@@ -67,9 +66,7 @@ export function FightViewer() {
   const [claimInfoLoading, setClaimInfoLoading] = useState(false);
 
   const showActionBanner = useCombatSettings((s) => s.showActionBanner);
-  const setShowActionBanner = useCombatSettings((s) => s.setShowActionBanner);
   const logLength = useCombatSettings((s) => s.logLength);
-  const setLogLength = useCombatSettings((s) => s.setLogLength);
 
   const fightLog: FightLog | undefined = lastFight?.combat.fightLog;
   const opponentBruteId = lastFight?.combat.opponent?.id;
@@ -287,6 +284,8 @@ export function FightViewer() {
           />
           <div className="combat-top-center">
             <div className="streak-badge">
+              <span className="battle-state">Batalla en curso</span>
+              <span className="battle-title">AFK Arena</span>
               <span className="label">Racha</span>
               <span className="num">×{Math.abs(streak)}</span>
               <span className="sub">{streak >= 0 ? 'Victorias' : 'Derrotas'}</span>
@@ -430,26 +429,6 @@ export function FightViewer() {
           ) : undefined}
         />
       )}
-
-      <TweaksPanel title="Tweaks">
-        <TweakSection title="Efectos">
-          <TweakToggle
-            label="Banner de acción (CRIT/BLOQUEO/ESQUIVA)"
-            value={showActionBanner}
-            onChange={setShowActionBanner}
-          />
-        </TweakSection>
-        <TweakSection title="Bitácora">
-          <TweakSlider
-            label="Largo del log"
-            min={5}
-            max={30}
-            step={1}
-            value={logLength}
-            onChange={setLogLength}
-          />
-        </TweakSection>
-      </TweaksPanel>
     </>
   );
 }
