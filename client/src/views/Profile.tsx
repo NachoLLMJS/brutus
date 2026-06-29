@@ -14,7 +14,7 @@ import { BgPortrait } from '@/components/BgPortrait';
 import { PaperPanel } from '@/components/PaperPanel';
 import { api } from '@/api/apiClient';
 import type { Brute } from 'core';
-import { xpToNext, WEAPONS, SKILLS, getSkill, getWeapon } from 'core';
+import { applySkillStatBonuses, xpToNext, WEAPONS, SKILLS, getSkill, getWeapon } from 'core';
 import { skillAsset, weaponAsset } from '@/lib/assets';
 import { useGameStore } from '@/store/useGameStore';
 import { useWalletStore } from '@/store/useWalletStore';
@@ -148,6 +148,16 @@ export function Profile() {
 
   const ownedSkills = new Set(brute.skills);
   const ownedWeapons = new Set(brute.weapons);
+  const effectiveStats = applySkillStatBonuses(brute.stats, brute.skills);
+  const statSub = (key: keyof typeof brute.stats, fallback: string) => {
+    const base = brute.stats[key];
+    const effective = effectiveStats[key];
+    if (effective !== base) {
+      const delta = effective - base;
+      return `Base ${base} · habilidades ${delta > 0 ? '+' : ''}${delta}`;
+    }
+    return fallback;
+  };
   const allSkillIds = SKILLS.map((s) => s.id);
   const allWeaponIds = WEAPONS.map((w) => w.id);
 
@@ -203,10 +213,10 @@ export function Profile() {
             <div className="temple-xp-bar"><span style={{ width: `${xpPct}%` }} /></div>
 
             <div className="temple-card-stats">
-              <BigStat label="Vitalidad" value={brute.stats.hp} max={MAX_HP} color="#5fb04a" sub={`+${Math.max(1, Math.floor(brute.stats.hp / 12))} al subir nivel`} />
-              <BigStat label="Fuerza" value={brute.stats.strength} max={MAX_STAT} color="#c41a1a" sub={`Daño base ${Math.floor(brute.stats.strength * 0.4) + 4}`} />
-              <BigStat label="Agilidad" value={brute.stats.agility} max={MAX_STAT} color="#e6b450" sub={`Esquiva ${Math.min(50, Math.floor(brute.stats.agility * 0.3))}%`} />
-              <BigStat label="Velocidad" value={brute.stats.speed} max={MAX_STAT} color="#9b5cc9" sub={brute.stats.speed > 50 ? 'Inicia primero' : 'Iniciativa media'} />
+              <BigStat label="Vitalidad" value={effectiveStats.hp} max={Math.max(MAX_HP, effectiveStats.hp)} color="#5fb04a" sub={statSub('hp', `+${Math.max(1, Math.floor(effectiveStats.hp / 12))} al subir nivel`)} />
+              <BigStat label="Fuerza" value={effectiveStats.strength} max={Math.max(MAX_STAT, effectiveStats.strength)} color="#c41a1a" sub={statSub('strength', `Daño base ${Math.floor(effectiveStats.strength * 0.4) + 4}`)} />
+              <BigStat label="Agilidad" value={effectiveStats.agility} max={Math.max(MAX_STAT, effectiveStats.agility)} color="#e6b450" sub={statSub('agility', `Esquiva ${Math.min(50, Math.floor(effectiveStats.agility * 0.3))}%`)} />
+              <BigStat label="Velocidad" value={effectiveStats.speed} max={Math.max(MAX_STAT, effectiveStats.speed)} color="#9b5cc9" sub={statSub('speed', effectiveStats.speed > 50 ? 'Inicia primero' : 'Iniciativa media')} />
             </div>
 
             <div className="temple-action-row">
