@@ -9,6 +9,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { useBrute } from '@/hooks/useBrute';
 import { BruteCard } from '@/components/BruteCard';
+import { BruteAvatar } from '@/components/BruteAvatar';
 import { BgPortrait } from '@/components/BgPortrait';
 import { PaperPanel } from '@/components/PaperPanel';
 import { api } from '@/api/apiClient';
@@ -17,7 +18,6 @@ import { xpToNext, WEAPONS, SKILLS, getSkill, getWeapon } from 'core';
 import { skillAsset, weaponAsset } from '@/lib/assets';
 import { useGameStore } from '@/store/useGameStore';
 import { useWalletStore } from '@/store/useWalletStore';
-import { useToastStore } from '@/store/useToastStore';
 import { useProfileSettings } from '@/store/useProfileSettings';
 import { useLobbySettings } from '@/store/useLobbySettings';
 import { battleHistoryFor, lineageFor, rankName } from '@/lib/profileFlavor';
@@ -44,7 +44,6 @@ export function Profile() {
   const rememberBrute = useGameStore((s) => s.rememberBrute);
   const forgetBrute = useGameStore((s) => s.forgetBrute);
   const walletAddress = useWalletStore((s) => s.address);
-  const pushToast = useToastStore((s) => s.push);
   const setTrainingMode = useLobbySettings((s) => s.setTrainingMode);
 
   const [pupils, setPupils] = useState<Brute[]>([]);
@@ -146,7 +145,6 @@ export function Profile() {
   const fightsRemaining = Math.max(0, Math.min(fightsTotal, brute.fightsRemaining));
 
   const skill = selSkillId ? getSkill(selSkillId) : null;
-  const weapon = selWeaponId ? getWeapon(selWeaponId) : null;
 
   const ownedSkills = new Set(brute.skills);
   const ownedWeapons = new Set(brute.weapons);
@@ -157,16 +155,6 @@ export function Profile() {
     .map((id) => ({ id, meta: PET_META[id] ?? FALLBACK_PET }))
     .slice(0, beastCount);
   const beastsEmptyCount = Math.max(0, 3 - beasts.length);
-
-  const copyMasterLink = async () => {
-    const url = `${window.location.origin}/create?master=${brute.id}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      pushToast('success', 'Enlace de discípulo copiado.');
-    } catch {
-      pushToast('error', 'No se pudo copiar.');
-    }
-  };
 
   const goFight = () => {
     setTrainingMode(false);
@@ -197,46 +185,44 @@ export function Profile() {
           </button>
         )}
 
-        <section className="profile-hero">
-          <div className="eyebrow"><span>Templo personal</span></div>
-          <h1>
-            {nameParts[0]}
-            <span className="accent">{nameParts[1]}</span>
-          </h1>
-          <div className="meta">
-            <span className="rank">{rankName(brute.rank)}</span>
-            <span className="lvl">Nivel <b>{brute.level}</b> · {xpPct}% al {brute.level + 1}</span>
-          </div>
-          <div className="profile-hero-actions">
-            <button type="button" className="btn-hero gold" onClick={goTrain}>
-              Entrenar
-            </button>
-            <button type="button" className="btn-hero primary" onClick={goFight} disabled={noNormalFights}>
-              <span aria-hidden>⚔</span>
-              <span>Pelear</span>
-            </button>
-            <div className="fights-pill">
-              <span>{fightsRemaining}/{fightsTotal} hoy</span>
-              <span className="fights-pips">
-                {Array.from({ length: fightsTotal }).map((_, i) => (
-                  <span key={i} className={clsx('p', i < fightsRemaining && 'on')} />
-                ))}
-              </span>
+        <section className="temple-rpg-layout">
+          <aside className="temple-warrior-card">
+            <div className="temple-card-kicker">◇ Perfil del guerrero ◇</div>
+            <div className="temple-avatar-stage" aria-label={`Guerrero ${brute.name}`}>
+              <BruteAvatar brute={brute} size="sm" />
             </div>
-          </div>
-        </section>
+            <h1 className="temple-warrior-name">
+              {nameParts[0]}
+              <span>{nameParts[1]}</span>
+            </h1>
+            <div className="temple-rank-row">
+              <span>{rankName(brute.rank)}</span>
+              <b>Nivel {brute.level}</b>
+            </div>
+            <div className="temple-xp-label">{xpPct}% al nivel {brute.level + 1}</div>
+            <div className="temple-xp-bar"><span style={{ width: `${xpPct}%` }} /></div>
 
-        <section className="profile-bigstats">
-          <BigStat label="Vitalidad" value={brute.stats.hp} max={MAX_HP} color="#5fb04a" sub={`+${Math.max(1, Math.floor(brute.stats.hp / 12))} al subir nivel`} />
-          <BigStat label="Fuerza" value={brute.stats.strength} max={MAX_STAT} color="#c41a1a" sub={`Daño base ${Math.floor(brute.stats.strength * 0.4) + 4}`} />
-          <BigStat label="Agilidad" value={brute.stats.agility} max={MAX_STAT} color="#e6b450" sub={`Esquiva ${Math.min(50, Math.floor(brute.stats.agility * 0.3))}%`} />
-          <BigStat label="Velocidad" value={brute.stats.speed} max={MAX_STAT} color="#8a6038" sub={brute.stats.speed > 50 ? 'Inicia primero' : 'Iniciativa media'} />
-        </section>
+            <div className="temple-card-stats">
+              <BigStat label="Vitalidad" value={brute.stats.hp} max={MAX_HP} color="#5fb04a" sub={`+${Math.max(1, Math.floor(brute.stats.hp / 12))} al subir nivel`} />
+              <BigStat label="Fuerza" value={brute.stats.strength} max={MAX_STAT} color="#c41a1a" sub={`Daño base ${Math.floor(brute.stats.strength * 0.4) + 4}`} />
+              <BigStat label="Agilidad" value={brute.stats.agility} max={MAX_STAT} color="#e6b450" sub={`Esquiva ${Math.min(50, Math.floor(brute.stats.agility * 0.3))}%`} />
+              <BigStat label="Velocidad" value={brute.stats.speed} max={MAX_STAT} color="#9b5cc9" sub={brute.stats.speed > 50 ? 'Inicia primero' : 'Iniciativa media'} />
+            </div>
 
-        <section className="profile-dual">
-          <div className="profile-col-left">
-            <Glass num="— I" title="Habilidades" meta={`${ownedSkills.size}/${allSkillIds.length} aprendidas · ${ownedSkills.size} activas`}>
-              <div className="invv2">
+            <div className="temple-action-row">
+              <button type="button" className="btn-hero gold" onClick={goTrain}>Entrenar</button>
+              <button type="button" className="btn-hero primary" onClick={goFight} disabled={noNormalFights}>Pelear</button>
+            </div>
+            <div className="temple-card-footer">
+              <span>{fightsRemaining}/{fightsTotal} hoy</span>
+              <span>Derrotas {brute.defeatsToday}/3</span>
+              <Link to="/">Cambiar bruto</Link>
+            </div>
+          </aside>
+
+          <section className="temple-main-stack">
+            <Glass num="◇" title="Habilidades activas" meta={`${ownedSkills.size}/${allSkillIds.length} aprendidas`}>
+              <div className="invv2 temple-skills-grid">
                 {allSkillIds.map((sid) => {
                   const owned = ownedSkills.has(sid);
                   const active = selSkillId === sid;
@@ -255,21 +241,10 @@ export function Profile() {
                   );
                 })}
               </div>
-              {skill && (
-                <div className="detail-strip">
-                  <div className="icon">
-                    <img src={skillAsset(skill.id)} alt={skill.name} />
-                  </div>
-                  <div>
-                    <div className="name">{skill.name} {ownedSkills.has(skill.id) && '· activa'}</div>
-                    <div className="desc">{skill.description}</div>
-                  </div>
-                </div>
-              )}
             </Glass>
 
-            <Glass num="— II" title="Armas" meta={`${ownedWeapons.size} en pool · ${ownedWeapons.size}/${allWeaponIds.length} forjadas`}>
-              <div className="invv2">
+            <Glass num="◇" title="Armas" meta={`${ownedWeapons.size}/${allWeaponIds.length} forjadas`}>
+              <div className="invv2 temple-weapons-grid">
                 {allWeaponIds.map((wid) => {
                   const owned = ownedWeapons.has(wid);
                   const active = selWeaponId === wid;
@@ -288,23 +263,24 @@ export function Profile() {
                   );
                 })}
               </div>
-              {weapon && (
-                <div className="detail-strip">
-                  <div className="icon">
-                    <img src={weaponAsset(weapon.id)} alt={weapon.name} />
-                  </div>
+            </Glass>
+
+            {skill && (
+              <Glass num="◇" title="Mejora activa">
+                <div className="detail-strip temple-active-detail">
+                  <div className="icon"><img src={skillAsset(skill.id)} alt={skill.name} /></div>
                   <div>
-                    <div className="name">{weapon.name} {ownedWeapons.has(weapon.id) && '· en pool'}</div>
-                    <div className="desc">{weapon.description}</div>
+                    <div className="name">{skill.name} · activa</div>
+                    <div className="desc">{skill.description}</div>
                   </div>
                 </div>
-              )}
-            </Glass>
-          </div>
+              </Glass>
+            )}
+          </section>
 
-          <div className="profile-col-right">
-            <Glass num="— III" title="Bestias" meta={`${beasts.length}/3`}>
-              <div className="beastsv2">
+          <aside className="temple-side-stack">
+            <Glass num="◇" title="Bestias" meta={`${beasts.length}/3`}>
+              <div className="beastsv2 temple-beasts-compact">
                 {beasts.map((b) => (
                   <BeastV2 key={b.id} kind={b.meta.kind} name={capitalize(b.id)} hp={b.meta.hp} dmg={b.meta.dmg} />
                 ))}
@@ -314,15 +290,13 @@ export function Profile() {
               </div>
             </Glass>
 
-            <Glass num="— IV" title="Bitácora" meta="5 últimas">
-              <div className="battlesv2">
+            <Glass num="◇" title="Bitácora" meta="5 últimas">
+              <div className="battlesv2 temple-battle-log">
                 {history.map((b, i) => (
                   <div key={i} className={clsx('battlev2', b.result)}>
                     <div className="battlev2-r">{b.result === 'win' ? 'V' : 'D'}</div>
                     <div>
-                      <div className="battlev2-foe">
-                        {b.foe} <span className="lvl">N{b.level}</span>
-                      </div>
+                      <div className="battlev2-foe">{b.foe} <span className="lvl">N{b.level}</span></div>
                       <div className="battlev2-when">{b.when}</div>
                     </div>
                     <div className="battlev2-xp">{b.xp >= 0 ? '+' : ''}{b.xp}</div>
@@ -330,38 +304,12 @@ export function Profile() {
                 ))}
               </div>
             </Glass>
-
-            {showLineage && (
-              <Glass num="— V" title="Linaje">
-                <p className="lineage-v2">
-                  {(() => {
-                    const idx = lineage.indexOf(brute.name);
-                    if (idx === -1) return lineage;
-                    return (
-                      <>
-                        {lineage.slice(0, idx)}
-                        <strong>{brute.name}</strong>
-                        {lineage.slice(idx + brute.name.length)}
-                      </>
-                    );
-                  })()}
-                </p>
-              </Glass>
-            )}
-
-            <Glass num="— VI" title="Acciones">
-              <div className="flex flex-col gap-3">
-                <button type="button" onClick={copyMasterLink} className="btn">
-                  Compartir enlace de discípulo
-                </button>
-                <Link to="/" className="btn">Cambiar bruto</Link>
-                <div className="text-xs text-center" style={{ color: 'var(--text-secondary)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>
-                  Derrotas hoy: {brute.defeatsToday}/3
-                </div>
-              </div>
-            </Glass>
-          </div>
+          </aside>
         </section>
+
+        {showLineage && (
+          <p className="temple-bottom-lineage">{lineage}</p>
+        )}
 
         {pupils.length > 0 && (
           <section className="mt-8">

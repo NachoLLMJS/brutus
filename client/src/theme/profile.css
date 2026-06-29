@@ -652,3 +652,410 @@
   from { opacity: 0; transform: translate(-50%, 12px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* Compact temple/profile pass: keep the full warrior temple visible on one main viewport. */
+.profile-v2 {
+  max-width: 1380px;
+  padding: 16px 28px 44px;
+}
+.profile-hero {
+  margin: 8px 0 14px;
+}
+.profile-hero .eyebrow {
+  margin-bottom: 6px;
+}
+.profile-hero h1 {
+  font-size: clamp(44px, 7.2vw, 92px);
+  letter-spacing: 0.035em;
+}
+.profile-hero .meta {
+  margin-top: 8px;
+  gap: 12px;
+}
+.profile-hero-actions {
+  margin-top: 14px;
+}
+.profile-hero-actions .btn-hero {
+  padding: 12px 24px;
+}
+.profile-hero-actions .btn-hero.primary {
+  padding: 14px 38px;
+  font-size: 20px;
+}
+.fights-pill {
+  padding: 8px 14px;
+}
+.profile-temple-overview {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 14px;
+}
+.profile-idle-card {
+  min-height: 168px;
+  background: rgba(26, 16, 20, 0.82);
+  border: 1px solid var(--border-main);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 0 1px var(--border-outer) inset, 0 12px 28px rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: center;
+}
+.profile-idle-card::before {
+  content: '';
+  position: absolute;
+  inset: 16px 34px 44px;
+  border: 1px solid rgba(230, 180, 80, 0.3);
+  border-radius: 50%;
+  box-shadow: 0 0 34px rgba(196, 26, 26, 0.22) inset, 0 0 22px rgba(230, 180, 80, 0.16);
+}
+.profile-idle-aura {
+  position: relative;
+  z-index: 1;
+  transform: translateY(-6px) scale(0.82);
+  image-rendering: pixelated;
+}
+.profile-idle-caption {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+.profile-idle-caption strong {
+  color: var(--accent-gold);
+  font-weight: 400;
+}
+.profile-bigstats.compact {
+  margin-top: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.profile-bigstats.compact .bigstat {
+  padding: 12px 14px 10px;
+}
+.profile-bigstats.compact .bigstat-value {
+  font-size: clamp(30px, 3.2vw, 44px);
+  margin-bottom: 7px;
+}
+.profile-bigstats.compact .bigstat-label {
+  margin-bottom: 4px;
+}
+.profile-dual {
+  margin-top: 14px;
+  gap: 14px;
+}
+.profile-glass {
+  padding: 14px;
+}
+.profile-glass-head {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+}
+.profile-col-left,
+.profile-col-right {
+  gap: 14px;
+}
+.invv2 {
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 6px;
+}
+.slotv2 {
+  padding: 5px;
+}
+.detail-strip {
+  margin-top: 10px;
+  padding: 9px 11px;
+}
+.detail-strip .icon {
+  width: 44px;
+  height: 44px;
+}
+.beastsv2 {
+  gap: 8px;
+}
+.beastv2 {
+  grid-template-columns: 70px 1fr;
+}
+.beastv2-art {
+  height: 54px;
+}
+.beast-empty {
+  padding: 10px 12px;
+}
+.battlev2 {
+  padding: 7px 8px;
+}
+@media (max-width: 900px) {
+  .profile-temple-overview {
+    grid-template-columns: 1fr;
+  }
+  .profile-idle-card {
+    min-height: 190px;
+  }
+}
+
+/* RPG temple profile layout — 3 columns, full viewport fit. */
+.profile-v2 {
+  max-width: min(1680px, calc(100vw - 32px));
+  padding: 16px 16px 12px;
+}
+.temple-rpg-layout {
+  display: grid;
+  grid-template-columns: 420px minmax(560px, 1fr) 400px;
+  gap: 18px;
+  align-items: start;
+  min-height: calc(100vh - 96px);
+}
+.temple-warrior-card,
+.temple-main-stack > .profile-glass,
+.temple-side-stack > .profile-glass {
+  background: rgba(22, 15, 22, 0.84);
+  border: 1px solid var(--border-main);
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(230, 180, 80, 0.12) inset, 0 18px 40px rgba(0, 0, 0, 0.42);
+}
+.temple-warrior-card {
+  position: sticky;
+  top: 74px;
+  padding: 18px 20px;
+  min-height: calc(100vh - 116px);
+  display: flex;
+  flex-direction: column;
+}
+.temple-card-kicker {
+  font-family: var(--font-display);
+  color: var(--text-strong);
+  font-size: 18px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.temple-avatar-stage {
+  height: 150px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.temple-avatar-stage::before {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 96px;
+  border: 1px solid rgba(230, 180, 80, 0.24);
+  border-radius: 50%;
+  bottom: 14px;
+  box-shadow: 0 0 34px rgba(230, 180, 80, 0.12) inset, 0 0 28px rgba(196, 26, 26, 0.15);
+}
+.temple-avatar-stage > * {
+  position: relative;
+  z-index: 1;
+  transform: translateY(2px);
+  image-rendering: pixelated;
+}
+.temple-warrior-name {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 3.4vw, 64px);
+  line-height: 0.92;
+  letter-spacing: 0.04em;
+  color: var(--text-strong);
+  text-align: center;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+  text-shadow: 0 0 22px rgba(230, 180, 80, 0.24), 0 3px 0 rgba(0,0,0,.75);
+}
+.temple-warrior-name span { color: var(--primary); }
+.temple-rank-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.temple-rank-row span {
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold);
+  padding: 4px 13px;
+  border-radius: 3px;
+}
+.temple-rank-row b {
+  color: var(--text-strong);
+  font-weight: 400;
+}
+.temple-xp-label {
+  text-align: center;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 5px;
+}
+.temple-xp-bar {
+  height: 7px;
+  background: var(--paper-dark);
+  border: 1px solid var(--border-outer);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.temple-xp-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-gold), #f3e2b2);
+  box-shadow: 0 0 10px rgba(230, 180, 80, 0.55);
+}
+.temple-card-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.temple-card-stats .bigstat {
+  padding: 12px 10px 10px;
+  min-height: 96px;
+  text-align: center;
+}
+.temple-card-stats .bigstat-label {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+}
+.temple-card-stats .bigstat-value {
+  font-size: 34px;
+  margin-bottom: 7px;
+}
+.temple-card-stats .bigstat-max { font-size: 15px; }
+.temple-card-stats .bigstat-sub { font-size: 10px; }
+.temple-action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: auto;
+}
+.temple-action-row .btn-hero {
+  appearance: none;
+  border: 2px solid var(--border-inner);
+  border-radius: 4px;
+  background: rgba(26, 16, 20, 0.85);
+  color: var(--text-strong);
+  padding: 10px 12px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.temple-action-row .btn-hero.gold { color: var(--accent-gold); border-color: var(--accent-gold); }
+.temple-action-row .btn-hero.primary { background: var(--btn-primary-bg); border-color: #5a0a0a; }
+.temple-action-row .btn-hero:disabled { opacity: .45; }
+.temple-card-footer {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.temple-card-footer a {
+  grid-column: 1 / -1;
+  color: var(--accent-gold);
+  border: 1px solid var(--border-shadow);
+  border-radius: 3px;
+  padding: 6px;
+  text-decoration: none;
+}
+.temple-main-stack,
+.temple-side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.temple-main-stack {
+  padding-top: 0;
+}
+.temple-main-stack .profile-glass,
+.temple-side-stack .profile-glass {
+  padding: 16px 18px;
+}
+.temple-main-stack .profile-glass-head,
+.temple-side-stack .profile-glass-head {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+}
+.profile-glass-head .title { font-size: 17px; }
+.profile-glass-head .meta { font-size: 11px; }
+.temple-skills-grid {
+  grid-template-columns: repeat(10, minmax(42px, 1fr));
+  gap: 9px;
+}
+.temple-weapons-grid {
+  grid-template-columns: repeat(10, minmax(42px, 1fr));
+  gap: 9px;
+}
+.temple-skills-grid .slotv2,
+.temple-weapons-grid .slotv2 {
+  min-height: 46px;
+  border-width: 1px;
+  padding: 5px;
+}
+.temple-active-detail {
+  margin-top: 0;
+}
+.temple-active-detail .name { font-size: 16px; }
+.temple-active-detail .desc { font-size: 12px; }
+.temple-side-stack .profile-glass {
+  padding: 16px 18px;
+}
+.temple-beasts-compact { gap: 8px; }
+.temple-beasts-compact .beast-empty {
+  padding: 15px 12px;
+  font-size: 11px;
+}
+.temple-battle-log .battlev2 {
+  padding: 10px 8px;
+}
+.temple-battle-log .battlev2-foe { font-size: 14px; }
+.temple-battle-log .battlev2-when { font-size: 10px; }
+.temple-bottom-lineage {
+  max-width: 900px;
+  margin: 10px auto 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  font-style: italic;
+}
+@media (max-width: 1450px) {
+  .temple-rpg-layout { grid-template-columns: 360px minmax(480px, 1fr) 360px; gap: 12px; }
+  .temple-avatar-stage { height: 130px; }
+  .temple-avatar-stage > * { transform: translateY(2px); }
+  .temple-warrior-name { font-size: clamp(38px, 3vw, 54px); }
+  .temple-card-stats .bigstat { min-height: 82px; padding: 9px 8px 8px; }
+  .temple-card-stats .bigstat-value { font-size: 28px; }
+  .temple-skills-grid, .temple-weapons-grid { grid-template-columns: repeat(9, minmax(36px, 1fr)); gap: 7px; }
+}
+@media (max-width: 1120px) {
+  .temple-rpg-layout { grid-template-columns: 1fr; }
+  .temple-warrior-card { position: static; min-height: auto; }
+}
