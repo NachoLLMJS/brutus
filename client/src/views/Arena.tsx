@@ -45,6 +45,7 @@ export function Arena() {
   const [filter, setFilter] = useState<LobbyFilter>(defaultFilter);
   const [opponents, setOpponents] = useState<Brute[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshNonce, setRefreshNonce] = useState(0);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [localToast, setLocalToast] = useState<string | null>(null);
 
@@ -70,7 +71,7 @@ export function Arena() {
     return () => {
       cancelled = true;
     };
-  }, [id, trainingMode, pushToast]);
+  }, [id, trainingMode, refreshNonce, pushToast]);
 
   // Filtrar por nivel/online relativo al bruto actual.
   const myLevel = brute?.level ?? 1;
@@ -133,7 +134,10 @@ export function Arena() {
           <LobbyFilters
             current={filter}
             onChange={setFilter}
-            onReroll={() => showToast('Tablón renovado · 8 nuevas almas')}
+            onReroll={() => {
+              setRefreshNonce((n) => n + 1);
+              showToast('Tablón renovado · rivales actualizados');
+            }}
           />
 
           {loading ? (

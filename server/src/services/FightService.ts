@@ -56,31 +56,66 @@ const XP_WIN_NORMAL = 2;
 const XP_WIN_TRAINING = 1;
 const XP_LOSS = 0;
 const DAILY_DEFEAT_LIMIT = 3;
+const OPPONENT_SUGGESTION_LIMIT = 8;
 
 /**
- * Returns up to 3 random opponents within +/- 2 levels of the player.
- * Excludes self. If pool is too small, widens silently.
- * Returns full Brute snapshots (matching `core.Brute`) so the client can
- * render BruteCards directly.
+ * Returns visible lobby opponents from real saved brutes.
+ * Prefer close-level brutes from other wallets and order newest first so newly
+ * created skins appear on the board immediately. If the pool is too small,
+ * widen progressively and only then allow same-wallet fallbacks.
  */
 export async function suggestOpponents(playerId: string): Promise<BruteSnapshot[]> {
   const found = await prisma.brute.findUnique({ where: { id: playerId } });
   if (!found) throw new HttpError(404, 'brute_not_found');
   const player = await maybeResetDaily(found);
 
-  const close = await prisma.brute.findMany({
-    where: {
-      id: { not: playerId },
-      level: { gte: Math.max(1, player.level - 2), lte: player.level + 2 },
-    },
-    take: 30,
-  });
-  const pool = close.length >= 3
-    ? close
-    : await prisma.brute.findMany({ where: { id: { not: playerId } }, take: 30 });
+  const closeLevel = { gte: Math.max(1, player.level - 2), lte: player.level + 2 };
+  const newest = { createdAt: 'desc' as const };
+  const otherWallet = player.ownerWallet ? { ownerWallet: { not: player.ownerWallet } } : {};
 
-  const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
-  return shuffled.map((row) => deserializeBrute(row));
+  const pools = [
+    await prisma.brute.findMany({
+      where: {
+        id: { not: playerId },
+        level: closeLevel,
+        ...otherWallet,
+      },
+      orderBy: newest,
+      take: 50,
+    }),
+    await prisma.brute.findMany({
+      where: {
+        id: { not: playerId },
+        ...otherWallet,
+      },
+      orderBy: newest,
+      take: 50,
+    }),
+    await prisma.brute.findMany({
+      where: {
+        id: { not: playerId },
+        level: closeLevel,
+      },
+      orderBy: newest,
+      take: 50,
+    }),
+    await prisma.brute.findMany({
+      where: { id: { not: playerId } },
+      orderBy: newest,
+      take: 50,
+    }),
+  ];
+
+  const byId = new Map<string, (typeof pools)[number][number]>();
+  for (const pool of pools) {
+    for (const row of pool) {
+      if (!byId.has(row.id)) byId.set(row.id, row);
+      if (byId.size >= OPPONENT_SUGGESTION_LIMIT) break;
+    }
+    if (byId.size >= OPPONENT_SUGGESTION_LIMIT) break;
+  }
+
+  return [...byId.values()].slice(0, OPPONENT_SUGGESTION_LIMIT).map((row) => deserializeBrute(row));
 }
 
 export interface FightInput {
