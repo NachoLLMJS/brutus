@@ -121,8 +121,6 @@ export function Arena() {
       <div className="lobby-bg" />
 
       <main className={clsx('lobby anim-fade-up', !showSidebar && 'no-sidebar')}>
-        <BoardHeader fightsDisplay={fightsDisplay} fightsRemaining={fightsRemaining} fightsTotal={fightsTotal} fightsLabel={fightsLabel} />
-
         {showSidebar && (
           <aside className="lobby-side">
             {brute && <YourBrawlerCard brute={brute} />}
@@ -182,6 +180,8 @@ export function Arena() {
         </section>
       </main>
 
+      <BoardHeader fightsDisplay={fightsDisplay} fightsRemaining={fightsRemaining} fightsTotal={fightsTotal} fightsLabel={fightsLabel} />
+
       {localToast && <div className="lobby-toast">{localToast}</div>}
     </>
   );
@@ -201,18 +201,7 @@ function BoardHeader({
   fightsLabel: string;
 }) {
   return (
-    <section className="board-header">
-      <div>
-        <div className="board-eyebrow">
-          <span>Tablón de la fosa</span>
-        </div>
-      </div>
-      <div className="board-title-wrap">
-        <h1 className="board-title">
-          A QUIÉN <span className="acc">SANGRAR</span>
-        </h1>
-        <div className="board-sub">Ocho almas dispuestas. Elegí la primera.</div>
-      </div>
+    <section className="board-header board-header-compact">
       <div className="fights-counter">
         <span className="lbl">{fightsLabel}</span>
         <span className="val">{fightsDisplay}</span>

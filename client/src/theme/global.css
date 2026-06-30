@@ -22,13 +22,15 @@
     background-color: var(--bg-default);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    /* Gradiente abismal vertical: negro abismal → púrpura profundo */
-    background-image: linear-gradient(
-      180deg,
-      var(--bg-default) 0%,
-      var(--bg-light) 100%
-    );
+    /* VAULT_BRAWL_PURPLE_BG_TEST_START: local-only comic purple background */
+    background-image:
+      linear-gradient(180deg, rgba(5, 3, 8, 0.66) 0%, rgba(5, 3, 8, 0.82) 100%),
+      url('/backgrounds/vaultbrawl-purple-comic-bg-test.png');
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
     background-attachment: fixed;
+    /* VAULT_BRAWL_PURPLE_BG_TEST_END */
   }
 
   h1,
@@ -438,4 +440,67 @@
 }
 .fc-bust > div {
   overflow: hidden !important;
+}
+
+.twitter-floating-button {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px 10px 12px;
+  border: 1.5px solid rgba(230, 180, 80, 0.78);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(42, 31, 36, 0.94), rgba(13, 10, 20, 0.94));
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow:
+    0 0 0 1px rgba(26, 15, 20, 0.9) inset,
+    0 8px 22px rgba(0, 0, 0, 0.48),
+    0 0 18px rgba(230, 180, 80, 0.16);
+  backdrop-filter: blur(6px);
+  transition: transform 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+}
+.twitter-floating-button:hover {
+  transform: translateY(-2px);
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+  background:
+    linear-gradient(180deg, rgba(61, 37, 48, 0.97), rgba(26, 16, 20, 0.97));
+  box-shadow:
+    0 0 0 1px rgba(26, 15, 20, 0.95) inset,
+    0 10px 26px rgba(0, 0, 0, 0.58),
+    0 0 26px rgba(230, 180, 80, 0.28);
+}
+.twitter-floating-button__icon {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #050308;
+  border: 1px solid rgba(230, 180, 80, 0.62);
+  color: var(--accent-gold);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+}
+@media (max-width: 640px) {
+  .twitter-floating-button {
+    right: 14px;
+    bottom: 14px;
+    padding: 10px;
+  }
+  .twitter-floating-button__text {
+    display: none;
+  }
 }

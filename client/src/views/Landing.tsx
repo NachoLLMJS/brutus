@@ -141,35 +141,7 @@ function SkullSigil({ side }: { side: 'left' | 'right' }) {
   return (
     <div className={`sigil ${side}`} aria-hidden>
       <div className="sigil-glow" />
-      <svg viewBox="0 0 100 100" width="100%" height="100%">
-        <defs>
-          <radialGradient id={`skull-bg-${side}`} cx="50%" cy="45%" r="55%">
-            <stop offset="0" stopColor="#3d2530" stopOpacity="0.9" />
-            <stop offset="1" stopColor="#0d0a14" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <circle cx="50" cy="50" r="44" fill={`url(#skull-bg-${side})`} />
-        <circle cx="50" cy="50" r="44" fill="none" stroke="#6a4528" strokeWidth="1" opacity="0.6" />
-        <circle cx="50" cy="50" r="40" fill="none" stroke="#e6b450" strokeWidth="0.8" strokeDasharray="2 4" opacity="0.45" />
-        <g transform="translate(50 52)">
-          <path
-            d="M-18 -16 C-18 -28 -10 -34 0 -34 C10 -34 18 -28 18 -16 L18 -2 C18 4 14 6 12 8 L12 14 C12 16 10 18 8 18 L4 18 L4 14 L-4 14 L-4 18 L-8 18 C-10 18 -12 16 -12 14 L-12 8 C-14 6 -18 4 -18 -2 Z"
-            fill="#0d0a14"
-            stroke="#8a6038"
-            strokeWidth="1.2"
-          />
-          <ellipse cx="-8" cy="-12" rx="4" ry="5" fill="#050308" />
-          <ellipse cx="8" cy="-12" rx="4" ry="5" fill="#050308" />
-          <circle cx="-8" cy="-11" r="1.6" fill="#c41a1a" opacity="0.95" />
-          <circle cx="8" cy="-11" r="1.6" fill="#c41a1a" opacity="0.95" />
-          <path d="M-2 -4 L0 2 L2 -4 Z" fill="#050308" />
-          <line x1="-10" y1="6" x2="-10" y2="14" stroke="#1a1014" strokeWidth="1.5" />
-          <line x1="-5" y1="6" x2="-5" y2="14" stroke="#1a1014" strokeWidth="1.5" />
-          <line x1="0" y1="6" x2="0" y2="14" stroke="#1a1014" strokeWidth="1.5" />
-          <line x1="5" y1="6" x2="5" y2="14" stroke="#1a1014" strokeWidth="1.5" />
-          <line x1="10" y1="6" x2="10" y2="14" stroke="#1a1014" strokeWidth="1.5" />
-        </g>
-      </svg>
+      <img src="/logos/vaultbrawl-retro-parchment-banner.png" alt="" draggable={false} />
     </div>
   );
 }

@@ -65,11 +65,28 @@ function WalletBootstrap() {
   return null;
 }
 
+function TwitterFloatingButton() {
+  return (
+    <a
+      className="twitter-floating-button"
+      href="https://x.com/VaultBrawl"
+      target="_blank"
+      rel="noreferrer noopener"
+      aria-label="Abrir Vault Brawl en X/Twitter"
+      title="Vault Brawl en X"
+    >
+      <span className="twitter-floating-button__icon" aria-hidden>X</span>
+      <span className="twitter-floating-button__text">Twitter</span>
+    </a>
+  );
+}
+
 export function App() {
   return (
     <RendererProvider>
       <WalletBootstrap />
       <RouterProvider router={router} />
+      <TwitterFloatingButton />
       <ToastContainer />
     </RendererProvider>
   );

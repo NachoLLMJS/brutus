@@ -9,7 +9,12 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at 50% 30%, #1f1530 0%, #0d0a14 70%);
+  /* VAULT_BRAWL_PURPLE_BG_TEST_START: local-only comic purple background */
+  background:
+    linear-gradient(180deg, rgba(5, 3, 8, 0.58) 0%, rgba(5, 3, 8, 0.84) 100%),
+    url('/backgrounds/vaultbrawl-purple-comic-bg-test.png') center top / cover fixed no-repeat,
+    var(--bg-default);
+  /* VAULT_BRAWL_PURPLE_BG_TEST_END */
 }
 .bg-portrait svg {
   width: 100%;

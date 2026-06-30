@@ -80,6 +80,15 @@
   width: 82px;
   height: 82px;
   z-index: 1;
+  display: grid;
+  place-items: center;
+}
+.landing-shell .sigil img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 0 12px rgba(230, 180, 80, 0.32)) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.72));
 }
 .landing-shell .sigil.left { left: 30px; }
 .landing-shell .sigil.right { right: 30px; }

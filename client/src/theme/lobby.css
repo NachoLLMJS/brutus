@@ -9,11 +9,13 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  /* VAULT_BRAWL_PURPLE_BG_TEST_START: local-only comic purple background */
   background:
-    radial-gradient(ellipse at 30% 20%, rgba(196, 26, 26, 0.10), transparent 60%),
-    radial-gradient(ellipse at 80% 90%, rgba(95, 176, 74, 0.06), transparent 60%),
-    repeating-linear-gradient(180deg, #1a1014 0 80px, #221720 80px 81px, #1a1014 81px 160px),
+    linear-gradient(180deg, rgba(5, 3, 8, 0.62) 0%, rgba(5, 3, 8, 0.84) 100%),
+    radial-gradient(ellipse at 30% 20%, rgba(196, 26, 26, 0.08), transparent 58%),
+    url('/backgrounds/vaultbrawl-purple-comic-bg-test.png') center top / cover fixed no-repeat,
     var(--bg-default);
+  /* VAULT_BRAWL_PURPLE_BG_TEST_END */
 }
 .lobby-bg::after {
   content: '';
@@ -58,6 +60,17 @@
     margin-bottom: 16px;
   }
   .board-header .fights-counter { justify-self: stretch; align-items: center; }
+  .board-header.board-header-compact {
+    position: fixed;
+    top: 68px;
+    right: 12px;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .board-header.board-header-compact .fights-counter {
+    align-items: center;
+  }
   .op-grid {
     grid-template-columns: 1fr;
   }
@@ -79,6 +92,22 @@
   padding: 22px 0 28px;
   border-bottom: 1px dashed var(--border-shadow);
   margin-bottom: 28px;
+}
+.board-header.board-header-compact {
+  position: fixed;
+  top: 76px;
+  right: 28px;
+  z-index: 45;
+  display: block;
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border-bottom: 0;
+  pointer-events: none;
+}
+.board-header.board-header-compact .fights-counter {
+  pointer-events: auto;
 }
 .board-eyebrow {
   font-family: var(--font-display);
