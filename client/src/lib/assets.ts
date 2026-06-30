@@ -44,36 +44,36 @@ const WEAPON_FILE: Record<string, string> = {
 };
 
 const SKILL_FILE: Record<string, string> = {
-  herculean_strength: 'herculeanStrength.svg',
-  feline_agility: 'felineAgility.svg',
-  lightning_bolt: 'lightningBolt.svg',
-  vitality: 'vitality.svg',
-  immortal: 'immortality.svg',
-  untouchable: 'untouchable.svg',
-  vampirism: 'vampirism.svg',
-  regeneration: 'regeneration.svg',
-  hammer: 'hammer.svg',
-  fierce_brute: 'fierceBrute.svg',
-  tragic_potion: 'tragicPotion.svg',
-  cry_of_the_damned: 'cryOfTheDamned.svg',
-  shock: 'shock.svg',
-  thief: 'thief.svg',
-  monk: 'monk.svg',
-  weapons_master: 'weaponsMaster.svg',
-  martial_arts: 'martialArts.svg',
-  survival: 'survival.svg',
-  counter: 'counterAttack.svg',
-  iron_skin: 'toughenedSkin.svg',
-  swift_wind: 'haste.svg',
-  bomb: 'bomb.svg',
-  net: 'net.svg',
-  reckless: 'hostility.svg',
-  precision: 'sixthSense.svg',
-  berserk: 'fistsOfFury.svg',
-  acrobat: 'balletShoes.svg',
-  treachery: 'spy.svg',
-  stoic: 'resistant.svg',
-  tactician: 'reconnaissance.svg',
+  herculean_strength: 'herculeanStrength.png',
+  feline_agility: 'felineAgility.png',
+  lightning_bolt: 'lightningBolt.png',
+  vitality: 'vitality.png',
+  immortal: 'immortality.png',
+  untouchable: 'untouchable.png',
+  vampirism: 'vampirism.png',
+  regeneration: 'regeneration.png',
+  hammer: 'hammer.png',
+  fierce_brute: 'fierceBrute.png',
+  tragic_potion: 'tragicPotion.png',
+  cry_of_the_damned: 'cryOfTheDamned.png',
+  shock: 'shock.png',
+  thief: 'thief.png',
+  monk: 'monk.png',
+  weapons_master: 'weaponsMaster.png',
+  martial_arts: 'martialArts.png',
+  survival: 'survival.png',
+  counter: 'counterAttack.png',
+  iron_skin: 'toughenedSkin.png',
+  swift_wind: 'haste.png',
+  bomb: 'bomb.png',
+  net: 'net.png',
+  reckless: 'hostility.png',
+  precision: 'sixthSense.png',
+  berserk: 'fistsOfFury.png',
+  acrobat: 'balletShoes.png',
+  treachery: 'spy.png',
+  stoic: 'resistant.png',
+  tactician: 'tactician.png',
 };
 
 const PET_FILE: Record<string, string> = {
@@ -84,7 +84,7 @@ const PET_FILE: Record<string, string> = {
 };
 
 export const FALLBACK_WEAPON = `${W}/knife.png`;
-export const FALLBACK_SKILL = `${S}/herculeanStrength.svg`;
+export const FALLBACK_SKILL = `${S}/herculeanStrength.png`;
 export const FALLBACK_PET = `${P}/dog.svg`;
 
 export function weaponAsset(id: string): string {
