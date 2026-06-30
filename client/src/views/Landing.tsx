@@ -74,7 +74,7 @@ export function Landing() {
 
       <Forge
         onForge={({ name, gender }) => {
-          setToast(`${name} entra a la fragua…`);
+          setToast(`${name} entra al Vault…`);
           window.setTimeout(() => setToast(null), 1800);
           // Pre-populate name + gender in CharacterCreator via URL params.
           navigate(`/create?name=${encodeURIComponent(name)}&gender=${gender === 'M' ? 'male' : 'female'}`);
@@ -90,8 +90,8 @@ export function Landing() {
         }}
         onForget={(id) => {
           const stub = recent.find((b) => b.id === id);
-          const name = stub?.name ?? 'este personaje';
-          const ok = window.confirm(`¿Estás seguro de que quieres eliminar a ${name} de guerreros recientes?`);
+          const name = stub?.name ?? 'este Vault Brawler';
+          const ok = window.confirm(`¿Estás seguro de que quieres eliminar a ${name} de Vault Brawlers recientes?`);
           if (!ok) return;
           forget(id);
         }}
@@ -100,7 +100,7 @@ export function Landing() {
       <footer className="landing-footer">
         <div className="footer-mark">
           <span className="pip" />
-          <span>AFKFLAP · MMXXVI · Forjado en sangre</span>
+          <span>Vault Brawl · MMXXVI · Forjado en el Vault</span>
         </div>
         <a href="#how">Cómo se juega</a>
       </footer>
@@ -126,12 +126,12 @@ function Hero({ asym }: { asym: boolean }) {
 
       <div className="hero-content">
         <div className="hero-eyebrow">
-          <span>Donde la sangre forja leyendas</span>
+          <span>Donde el Vault forja leyendas</span>
         </div>
         <h1 className="hero-title">
-          AFK<span className="v">F</span>LAP
+          Vault<span className="v"> B</span>rawl
         </h1>
-        <div className="hero-sub">Forja tu campeón en la arena</div>
+        <div className="hero-sub">Crea tu Vault Brawler y domina la arena</div>
       </div>
     </header>
   );
@@ -196,10 +196,10 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
       <aside className="forge-aside">
         <div>
           <h2>
-            Forja tu primer <em>guerrero</em>
+            Crea tu primer <em>Vault Brawler</em>
           </h2>
           <p>
-            Cada bruto que sale de la fragua es <strong>único</strong>. Su nombre invoca un destino
+            Cada Vault Brawler que sale del Vault es <strong>único</strong>. Su nombre invoca un destino
             forjado en sangre y acero. Lo que pasa en la arena, queda escrito en su carne.
           </p>
         </div>
@@ -212,7 +212,7 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
       <form className="forge-form" onSubmit={submit} noValidate>
         <div>
           <div className="field-label">
-            <span>Nombre del guerrero</span>
+            <span>Nombre del Vault Brawler</span>
             {error && <span className="err">{error}</span>}
           </div>
           <input
@@ -230,11 +230,11 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
         </div>
 
         <button type="submit" className="btn-forge" disabled={!name.trim()}>
-          <span>Forjar guerrero</span>
+          <span>Crear Vault Brawler</span>
           <span className="arrow">›</span>
         </button>
 
-        <div className="fine">Cada guerrero es único e irrepetible</div>
+        <div className="fine">Cada Vault Brawler es único e irrepetible</div>
       </form>
     </section>
   );
@@ -289,14 +289,14 @@ function RecentWarriorsSection({
     <section>
       <div className="section-head">
         <span className="num">— II</span>
-        <span className="title">Guerreros recientes</span>
+        <span className="title">Vault Brawlers recientes</span>
         <span className="rule" />
       </div>
       <div className="warriors-grid">
         {brutes.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-mark">Aún no invocaste ningún guerrero</div>
-            <div className="empty-sub">Empezá forjando el primero en la fragua de arriba.</div>
+            <div className="empty-mark">Aún no creaste ningún Vault Brawler</div>
+            <div className="empty-sub">Empezá creando el primero en el Vault de arriba.</div>
           </div>
         ) : (
           brutes.map((b) => {
@@ -353,7 +353,7 @@ function WarriorCard({
         type="button"
         className="warrior-forget"
         aria-label={`Olvidar a ${stub.name}`}
-        title="Olvidar este guerrero"
+        title="Olvidar este Vault Brawler"
         onClick={(e) => {
           e.stopPropagation();
           onForget();

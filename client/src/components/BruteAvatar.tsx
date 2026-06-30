@@ -140,7 +140,7 @@ export function BruteAvatar({ brute, size = 'md', anim, className }: BruteAvatar
         className,
       )}
       style={{ width: px, height: px }}
-      aria-label="Avatar del bruto"
+      aria-label="Avatar del Vault Brawler"
     >
       {lpc ? (
         <div

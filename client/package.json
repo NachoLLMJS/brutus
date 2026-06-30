@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Brutus v3 frontend (Vite + React + TypeScript + Tailwind, dark fantasy theme).",
+  "description": "Vault Brawl frontend (Vite + React + TypeScript + Tailwind, dark fantasy theme).",
   "scripts": {
     "dev": "vite",
     "build": "npm run build -w core && tsc --noEmit && vite build",

@@ -285,7 +285,7 @@ export function FightViewer() {
           <div className="combat-top-center">
             <div className="streak-badge">
               <span className="battle-state">Batalla en curso</span>
-              <span className="battle-title">AFK Arena</span>
+              <span className="battle-title">Vault Brawl Arena</span>
               <span className="label">Racha</span>
               <span className="num">×{Math.abs(streak)}</span>
               <span className="sub">{streak >= 0 ? 'Victorias' : 'Derrotas'}</span>

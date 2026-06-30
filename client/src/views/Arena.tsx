@@ -125,7 +125,7 @@ export function Arena() {
 
         {showSidebar && (
           <aside className="lobby-side">
-            {brute && <YourBrutoCard brute={brute} />}
+            {brute && <YourBrawlerCard brute={brute} />}
             <TrainingLever value={trainingMode} onChange={setTrainingMode} />
           </aside>
         )}
@@ -226,14 +226,14 @@ function BoardHeader({
   );
 }
 
-function YourBrutoCard({ brute }: { brute: Brute }) {
+function YourBrawlerCard({ brute }: { brute: Brute }) {
   const xpPct = Math.min(100, Math.floor((brute.xp / Math.max(1, brute.xp + 100)) * 100));
   const flavor = flavorFor(brute);
   return (
     <div className="glass your-bruto">
       <div className="glass-head">
         <span className="num">— I</span>
-        <span className="title">Tu bruto</span>
+        <span className="title">Tu Vault Brawler</span>
       </div>
       <div className="your-bust">
         <BruteAvatar brute={brute} size="md" />
@@ -267,7 +267,7 @@ function YourBrutoCard({ brute }: { brute: Brute }) {
         </div>
       </div>
       <Link className="side-link" to={`/brute/${brute.id}`}>
-        Ir al templo →
+        Ir al perfil →
       </Link>
     </div>
   );

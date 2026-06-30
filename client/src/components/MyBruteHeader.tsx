@@ -62,7 +62,7 @@ export function MyBruteHeader() {
             className="text-ink-strong tracking-widest text-xs sm:text-sm"
             style={{ letterSpacing: '0.18em' }}
           >
-            FORJA TU CAMPEÓN EN LA ARENA
+            VAULT BRAWL · CREA TU BRAWLER
           </div>
           <div className="text-ink mt-0.5 text-xs flex items-center justify-center gap-1">
             <span aria-hidden>⌛</span>

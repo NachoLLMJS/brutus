@@ -91,7 +91,7 @@ const RANK_NAMES: readonly string[] = [
 const RUMORS: readonly string[] = [
   'Dicen que cuelga los cráneos de sus víctimas en el cinturón. Lleva siete.',
   'Pelea descalzo. Las losas de la fosa lo recuerdan.',
-  'Doce brutos han entrado a la fosa contra él. Doce no salieron caminando.',
+  'Doce Vault Brawlers han entrado a la fosa contra él. Doce no salieron caminando.',
   'Su armadura nunca se quita. Algunos dicen que ya no puede.',
   'Le hablan los muertos. A veces les hace caso.',
   'Vino del desierto a buscar oro. Encontró sangre. Se quedó.',

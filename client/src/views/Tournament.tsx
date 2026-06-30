@@ -274,7 +274,7 @@ export function Tournament() {
         )}
         {phase === 'bracket' && (
           <p className="mt-4 text-xs text-ink italic text-center">
-            8 brutos. 7 matches. Click "Iniciar torneo" para reproducir cada pelea.
+            8 Vault Brawlers. 7 matches. Click "Iniciar torneo" para reproducir cada pelea.
           </p>
         )}
       </PaperPanel>
@@ -488,7 +488,7 @@ function ChampionCard({
       </div>
       {revealed && highlight && (
         <div className="text-xs text-blood font-display mt-1 uppercase tracking-wider">
-          ¡Tu bruto!
+          ¡Tu Brawler!
         </div>
       )}
     </div>

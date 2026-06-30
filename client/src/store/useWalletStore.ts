@@ -55,7 +55,7 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
       return;
     }
     if (!isMetaMaskProvider(provider)) {
-      set({ error: 'AFKFLAP solo acepta MetaMask como provider.' });
+      set({ error: 'Vault Brawl solo acepta MetaMask como provider.' });
       return;
     }
 

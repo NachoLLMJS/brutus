@@ -79,7 +79,7 @@ export function Topbar() {
           color: 'var(--text-strong)',
         }}
       >
-        AFK<span style={{ color: 'var(--primary)' }}>F</span>LAP
+        Vault<span style={{ color: 'var(--primary)' }}> Brawl</span>
       </Link>
 
       {/* Nav */}
@@ -136,7 +136,7 @@ export function Topbar() {
         }}
       >
         <span className="hidden sm:inline">
-          {activeBrute?.name ?? 'Sin bruto'}
+          {activeBrute?.name ?? 'Sin Brawler'}
         </span>
         <button
           type="button"

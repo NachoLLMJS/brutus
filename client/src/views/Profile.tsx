@@ -179,6 +179,8 @@ export function Profile() {
   const nameParts = brute.name.length > 1
     ? [brute.name.slice(0, -1), brute.name.slice(-1)]
     : [brute.name, ''];
+  const warriorNameLength = Array.from(brute.name).length;
+  const warriorNameFontSize = Math.max(22, Math.min(54, Math.floor(500 / Math.max(9, warriorNameLength))));
 
   return (
     <div className="profile-v2-shell">
@@ -197,11 +199,17 @@ export function Profile() {
 
         <section className="temple-rpg-layout">
           <aside className="temple-warrior-card">
-            <div className="temple-card-kicker">◇ Perfil del guerrero ◇</div>
-            <div className="temple-avatar-stage" aria-label={`Guerrero ${brute.name}`}>
+            <div className="temple-card-kicker">◇ Perfil del Vault Brawler ◇</div>
+            <div className="temple-avatar-stage" aria-label={`Vault Brawler ${brute.name}`}>
               <BruteAvatar brute={brute} size="sm" />
             </div>
-            <h1 className="temple-warrior-name">
+            <h1
+              className="temple-warrior-name"
+              style={{
+                fontSize: warriorNameFontSize,
+                letterSpacing: warriorNameLength > 11 ? '0.01em' : '0.035em',
+              }}
+            >
               {nameParts[0]}
               <span>{nameParts[1]}</span>
             </h1>
@@ -226,7 +234,7 @@ export function Profile() {
             <div className="temple-card-footer">
               <span>{fightsRemaining}/{fightsTotal} hoy</span>
               <span>Derrotas {brute.defeatsToday}/3</span>
-              <Link to="/">Cambiar bruto</Link>
+              <Link to="/">Cambiar Brawler</Link>
             </div>
           </aside>
 
@@ -323,7 +331,7 @@ export function Profile() {
 
         {pupils.length > 0 && (
           <section className="mt-8">
-            <Glass num="— VII" title="Discípulos" meta={`${pupils.length} forjados`}>
+            <Glass num="— VII" title="Vault Brawlers vinculados" meta={`${pupils.length} creados`}>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {pupils.map((p) => (
                   <BruteCard key={p.id} brute={p} onClick={() => navigate(`/brute/${p.id}`)} />

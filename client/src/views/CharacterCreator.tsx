@@ -179,7 +179,7 @@ export function CharacterCreator() {
             setPaidForgePrice(null);
           }
         }
-        pushToast('info', 'Ya tienes 3 AFK HEROES. Puedes crear otro pagando BNB.');
+        pushToast('info', 'Ya tienes 3 Vault Brawlers base. Puedes crear otro pagando BNB.');
       } else {
         pushToast('error', `No se pudo crear: ${code}`);
       }
@@ -219,7 +219,7 @@ export function CharacterCreator() {
       rememberBrute({ id: brute.id, name: brute.name, level: brute.level });
       setPaidForgeNeeded(false);
       setCurrent(brute.id);
-      pushToast('success', 'AFK HERO extra creado pagando BNB.');
+      pushToast('success', 'Vault Brawler extra creado pagando BNB.');
       navigate(`/brute/${brute.id}`);
     } catch (e) {
       const code = e instanceof ApiError ? e.code : e instanceof Error ? e.message : 'paid_forge_failed';
@@ -236,14 +236,14 @@ export function CharacterCreator() {
           <span>Forja tu destino</span>
         </div>
         <h1>
-          Invocar <em>AFK HERO</em>
+          Crear <em>Vault Brawler</em>
         </h1>
-        <div className="sub">Elegí su forma, su nombre, libéralo en la arena</div>
+        <div className="sub">Elegí su forma, su nombre y libéralo en la arena</div>
       </header>
 
       {master && (
         <div className="creator-pupil-banner">
-          Vas a ser discípulo de <b>{master.name}</b> · Nivel {master.level}
+          Nuevo Vault Brawler vinculado a <b>{master.name}</b> · Nivel {master.level}
         </div>
       )}
 
@@ -274,7 +274,7 @@ export function CharacterCreator() {
               {name || 'Sin nombre'}
             </div>
             <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginTop: 10 }}>
-              Equipamiento LPC editable para creator y combate.
+              Equipamiento editable para creación y combate.
             </div>
           </div>
 
@@ -282,7 +282,7 @@ export function CharacterCreator() {
           <div className="creator-form">
             <div>
               <div className="creator-field-label">
-                <span>Nombre del guerrero</span>
+                <span>Nombre del Vault Brawler</span>
                 {name.length > 0 && !nameValid && <span className="err">3-20 alfanuméricos</span>}
               </div>
               <input
@@ -314,7 +314,7 @@ export function CharacterCreator() {
               onClick={submit}
               disabled={forgeDisabled}
             >
-              <span>{submitting ? 'Forjando…' : walletReady ? 'Invocar AFK HERO' : 'Wallet requerida'}</span>
+              <span>{submitting ? 'Creando…' : walletReady ? 'Crear Vault Brawler' : 'Wallet requerida'}</span>
               {!submitting && <span className="arrow">›</span>}
             </button>
             {paidForgeNeeded && walletReady && (
@@ -328,9 +328,9 @@ export function CharacterCreator() {
                   background: 'rgba(230,180,80,0.08)',
                 }}
               >
-                <b>Ya tienes 3 AFK HEROES base.</b>
+                <b>Ya tienes 3 Vault Brawlers base.</b>
                 <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                  Puedes invocar este AFK HERO extra pagando {paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}.
+                  Puedes crear este Vault Brawler extra pagando {paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}.
                   El contrato reparte 50% al vault y 50% a burn.
                 </span>
                 <button
@@ -339,7 +339,7 @@ export function CharacterCreator() {
                   onClick={() => void submitPaidExtra()}
                   disabled={paidForgeBusy || !nameValid}
                 >
-                  <span>{paidForgeBusy ? 'Esperando MetaMask…' : `Crear AFK HERO extra pagando ${paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}`}</span>
+                  <span>{paidForgeBusy ? 'Esperando MetaMask…' : `Crear Vault Brawler extra pagando ${paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}`}</span>
                   {!paidForgeBusy && <span className="arrow">›</span>}
                 </button>
               </div>
@@ -348,9 +348,9 @@ export function CharacterCreator() {
               {!walletReady
                 ? 'Primero conecta MetaMask en BNB Chain/Testnet'
                 : name.length === 0
-                  ? 'Cada guerrero quedará ligado a tu wallet BNB'
+                  ? 'Cada Vault Brawler quedará ligado a tu wallet BNB'
                   : nameValid
-                    ? 'Listo para forjar'
+                    ? 'Listo para crear'
                     : 'Nombre debe tener entre 3 y 20 caracteres alfanuméricos'}
             </div>
           </div>
