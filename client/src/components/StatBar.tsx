@@ -7,7 +7,7 @@ interface StatBarProps {
   value: number;
   /** Total de cuadritos para representar el rango (default 10). */
   cells?: number;
-  /** Valor que llena la barra al 100%. Default 10. */
+  /** Valor que llena la barra to 100%. Default 10. */
   max?: number;
   className?: string;
 }

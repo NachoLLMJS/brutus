@@ -9,7 +9,7 @@ interface TurnPipsProps {
 }
 
 export function TurnPips({ total, current }: TurnPipsProps) {
-  // Limitar pips a 60 max para no romper layout en peleas largas.
+  // Limitar pips a 60 max para no romper layout en fights largas.
   const visibleTotal = Math.min(total, 60);
   const ratio = total > 0 ? visibleTotal / total : 1;
   const visibleCurrent = Math.floor(current * ratio);

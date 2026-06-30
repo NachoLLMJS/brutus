@@ -136,11 +136,11 @@ export function BrutePartsViewer() {
   return (
     <div style={{ padding: 24, color: 'var(--text-primary)' }}>
       <h1 style={{ color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-        Visor de SVGs de cara, cabeza, pelo y cuerpo
+        Face, head, hair, and body SVG viewer
       </h1>
       <p style={{ color: 'var(--text-secondary)', maxWidth: 980, lineHeight: 1.55 }}>
-        No estoy reemplazando nada. Esto enseña los SVG inline reales que componen el bruto. No hay PNG/JPEG separados.
-        Si quieres ver todos los símbolos sueltos, también existe <code>/debug/symbols</code>.
+        I am not replacing anything. This shows the real inline SVGs that compose the brawler. There are no separate PNG/JPEG files.
+        If you want to see all loose symbols, there is also <code>/debug/symbols</code>.
       </p>
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '18px 0' }}>
@@ -151,7 +151,7 @@ export function BrutePartsViewer() {
         ))}
         {(['head', 'body'] as Filter[]).map((f) => (
           <button type="button" key={f} className="btn" onClick={() => selectFilter(f)} style={{ borderColor: filter === f ? 'var(--accent-gold)' : undefined }}>
-            {f === 'head' ? 'Cabeza/cara/pelo' : 'Cuerpo/ropa'}
+            {f === 'head' ? 'Head/face/hair' : 'Body/clothes'}
           </button>
         ))}
       </div>
@@ -167,7 +167,7 @@ export function BrutePartsViewer() {
       <section style={{ background: 'rgba(21, 12, 18, 0.82)', border: '1px solid var(--border-inner)', padding: 16, boxShadow: 'inset 0 0 0 1px var(--border-outer)' }}>
         <h2 style={{ color: 'var(--accent-gold)', margin: '0 0 4px', textTransform: 'uppercase' }}>{activePart.title}</h2>
         <div style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 12 }}>
-          {activePart.note}. Parte real del árbol <b>{activePart.symbolKey}</b>. Variantes encontradas: <b>{previews.length}</b>.
+          {activePart.note}. Real tree part <b>{activePart.symbolKey}</b>. Variants found: <b>{previews.length}</b>.
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 12 }}>
           {previews.map((preview) => (
@@ -182,11 +182,11 @@ export function BrutePartsViewer() {
                   />
                 ))}
               </div>
-              <div style={{ color: 'var(--accent-gold)', fontSize: 13 }}>variante {preview.idx}</div>
+              <div style={{ color: 'var(--accent-gold)', fontSize: 13 }}>variant {preview.idx}</div>
               <code style={{ color: 'var(--text-secondary)', fontSize: 10, wordBreak: 'break-all' }}>{preview.svgNames.join(', ')}</code>
             </div>
           ))}
-          {previews.length === 0 && <div style={{ color: 'var(--text-secondary)' }}>No se encontraron SVGs para esta parte.</div>}
+          {previews.length === 0 && <div style={{ color: 'var(--text-secondary)' }}>No SVGs found for this part.</div>}
         </div>
       </section>
     </div>

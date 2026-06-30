@@ -1,4 +1,4 @@
-// Arena = Tablón de la Fosa.
+// Arena = Board de la Fosa.
 // Lobby de selección de oponente con la dirección visual dark fantasy
 // generada por Claude Design.
 //
@@ -22,11 +22,11 @@ import { flavorFor, type WeaponIcon, type BeastIcon, type FlavorStatus } from '@
 import type { Brute } from 'core';
 
 const FILTERS: { id: LobbyFilter; label: string }[] = [
-  { id: 'all', label: 'Todos' },
-  { id: 'near', label: 'Tu nivel' },
-  { id: 'easy', label: 'Más débiles' },
-  { id: 'tough', label: 'Más fuertes' },
-  { id: 'online', label: 'En la fosa' },
+  { id: 'all', label: 'All' },
+  { id: 'near', label: 'Your level' },
+  { id: 'easy', label: 'Weaker' },
+  { id: 'tough', label: 'Stronger' },
+  { id: 'online', label: 'In the pit' },
 ];
 
 export function Arena() {
@@ -63,7 +63,7 @@ export function Arena() {
         if (!cancelled) setOpponents(list);
       } catch (e) {
         const code = e instanceof ApiError ? e.code : 'NETWORK_ERROR';
-        pushToast('error', `No se pudieron cargar oponentes: ${code}`);
+        pushToast('error', `Could not load opponents: ${code}`);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -73,7 +73,7 @@ export function Arena() {
     };
   }, [id, trainingMode, refreshNonce, pushToast]);
 
-  // Filtrar por nivel/online relativo al bruto actual.
+  // Filter por nivel/online relativo to bruto actual.
   const myLevel = brute?.level ?? 1;
   const filtered = useMemo(() => {
     return opponents.filter((op) => {
@@ -100,11 +100,11 @@ export function Arena() {
       if (res.leveledUp && res.levelUpChoices) {
         setPendingLevelUp({ bruteId: id, offer: res.levelUpChoices });
       }
-      showToast(trainingMode ? `Sparring contra ${op.name}` : `Desafío enviado · ${op.name}`);
+      showToast(trainingMode ? `Sparring against ${op.name}` : `Challenge sent · ${op.name}`);
       window.setTimeout(() => navigate(`/brute/${id}/fight/${res.combat.id}`), 500);
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'NETWORK_ERROR';
-      pushToast('error', `Pelea fallida: ${code}`);
+      pushToast('error', `Fight failed: ${code}`);
       setSubmittingId(null);
     }
   };
@@ -114,7 +114,7 @@ export function Arena() {
     ? fightsTotal
     : brute?.fightsRemaining ?? 0;
   const fightsDisplay = trainingMode ? '∞' : `${fightsRemaining}/${fightsTotal}`;
-  const fightsLabel = trainingMode ? 'Sparring' : 'Peleas hoy';
+  const fightsLabel = trainingMode ? 'Sparring' : 'Fights today';
 
   return (
     <>
@@ -134,7 +134,7 @@ export function Arena() {
             onChange={setFilter}
             onReroll={() => {
               setRefreshNonce((n) => n + 1);
-              showToast('Tablón renovado · rivales actualizados');
+              showToast('Board refreshed · rivals updated');
             }}
           />
 
@@ -148,7 +148,7 @@ export function Arena() {
                 borderRadius: 4,
               }}
             >
-              Buscando rivales en la fosa…
+              Searching for rivals in the pit…
             </div>
           ) : filtered.length === 0 ? (
             <div
@@ -160,7 +160,7 @@ export function Arena() {
                 borderRadius: 4,
               }}
             >
-              Nadie cumple ese filtro hoy
+              No one matches that filter today
             </div>
           ) : (
             <div className="op-grid">
@@ -219,10 +219,10 @@ function YourBrawlerCard({ brute }: { brute: Brute }) {
   const xpPct = Math.min(100, Math.floor((brute.xp / Math.max(1, brute.xp + 100)) * 100));
   const flavor = flavorFor(brute);
   return (
-    <div className="glass your-bruto">
+    <div className="glass your-brawler">
       <div className="glass-head">
         <span className="num">— I</span>
-        <span className="title">Tu Vault Brawler</span>
+        <span className="title">Your Vault Brawler</span>
       </div>
       <div className="your-bust">
         <BruteAvatar brute={brute} size="md" />
@@ -232,7 +232,7 @@ function YourBrawlerCard({ brute }: { brute: Brute }) {
         <span className="your-rank">{flavor.rankName}</span>
       </div>
       <div className="your-lvl">
-        Nivel <b>{brute.level}</b> · {xpPct}% al {brute.level + 1}
+        Level <b>{brute.level}</b> · {xpPct}% to {brute.level + 1}
       </div>
       <div className="xp-bar">
         <div style={{ width: `${xpPct}%` }} />
@@ -243,7 +243,7 @@ function YourBrawlerCard({ brute }: { brute: Brute }) {
           <div className="v">{brute.stats.hp}</div>
         </div>
         <div className="ys-cell str">
-          <div className="l">FUE</div>
+          <div className="l">STR</div>
           <div className="v">{brute.stats.strength}</div>
         </div>
         <div className="ys-cell agi">
@@ -251,12 +251,12 @@ function YourBrawlerCard({ brute }: { brute: Brute }) {
           <div className="v">{brute.stats.agility}</div>
         </div>
         <div className="ys-cell spd">
-          <div className="l">VEL</div>
+          <div className="l">SPD</div>
           <div className="v">{brute.stats.speed}</div>
         </div>
       </div>
       <Link className="side-link" to={`/brute/${brute.id}`}>
-        Ir al perfil →
+        Ir to perfil →
       </Link>
     </div>
   );
@@ -265,8 +265,8 @@ function YourBrawlerCard({ brute }: { brute: Brute }) {
 function TrainingLever({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className={clsx('training', value && 'on')}>
-      <div className="t-head">Modo entrenamiento</div>
-      <div className="t-sub">No consume peleas. Sin recompensa de oro ni rachas.</div>
+      <div className="t-head">Training mode</div>
+      <div className="t-sub">Does not consume fights. No gold rewards or streaks.</div>
       <button
         type="button"
         className={clsx('lever', value && 'on')}
@@ -278,10 +278,10 @@ function TrainingLever({ value, onChange }: { value: boolean; onChange: (v: bool
         <span className="handle">
           <span className="knob" />
         </span>
-        <span className="label bot">Sangre real</span>
+        <span className="label bot">Real blood</span>
       </button>
       <div className="t-state">
-        {value ? 'Sparring activo · sin coste' : 'Pelea oficial · cuenta hoy'}
+        {value ? 'Sparring active · no cost' : 'Official fight · counts today'}
       </div>
     </div>
   );
@@ -298,7 +298,7 @@ function LobbyFilters({
 }) {
   return (
     <div className="lobby-filters">
-      <span className="lbl">Filtrar</span>
+      <span className="lbl">Filter</span>
       {FILTERS.map((f) => (
         <button
           key={f.id}
@@ -311,7 +311,7 @@ function LobbyFilters({
       ))}
       <span className="spacer" />
       <button type="button" className="reroll" onClick={onReroll}>
-        ↻ Re-rollear
+        ↻ Re-roll
       </button>
     </div>
   );
@@ -389,7 +389,7 @@ function OpponentCard({
 
         <div className="op-foot">
           <span className="op-meta">
-            <span className="last">Última pelea</span>
+            <span className="last">Last fight</span>
             <span className="last-when">{flavor.lastFight}</span>
           </span>
           <button
@@ -399,7 +399,7 @@ function OpponentCard({
             disabled={disabled || isSubmitting}
           >
             {isSubmitting ? (
-              <span>Enviando…</span>
+              <span>Sending…</span>
             ) : isTraining ? (
               <>
                 <span aria-hidden>⛨</span>
@@ -408,7 +408,7 @@ function OpponentCard({
             ) : (
               <>
                 <span aria-hidden>⚔</span>
-                <span>Desafiar</span>
+                <span>Challenge</span>
               </>
             )}
           </button>

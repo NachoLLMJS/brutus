@@ -51,7 +51,7 @@ export async function loadWeaponAtlas(): Promise<PIXI.Spritesheet | null> {
 }
 
 /**
- * Mapeo de los ids snake_case de Brutus al frame del atlas thrown-weapons
+ * Mapeo de los ids snake_case de Brutus to frame del atlas thrown-weapons
  * (que usa camelCase). Mismo enfoque que `client/src/lib/assets.ts`.
  */
 export const WEAPON_FRAME_NAME: Record<string, string> = {

@@ -42,29 +42,29 @@ const FOE_NAMES: readonly string[] = [
 ];
 
 const WHEN_LABELS: readonly string[] = [
-  'Hace 12m', 'Hace 38m', 'Hace 1h', 'Hace 2h', 'Hace 4h',
-  'Hace 5h', 'Hace 8h', 'Ayer', 'Hace 2 días', 'Hace 3 días',
+  '12m ago', '38m ago', '1h ago', '2h ago', '4h ago',
+  '5h ago', '8h ago', 'Yesterday', '2 days ago', '3 days ago',
 ];
 
 const LINEAGE_TEMPLATES: readonly ((name: string) => string)[] = [
   (n) =>
-    `${n} nació en una fragua bajo la tierra, donde los herreros templan el acero con sangre de prisioneros. Su primer recuerdo es el martillo cayendo sobre su yelmo recién forjado. Aún no se lo quita.`,
+    `${n} was born in a forge beneath the earth, where smiths temper steel with prisoner blood. His first memory is the hammer falling on his freshly forged helm. He still has not taken it off.`,
   (n) =>
-    `${n} fue arrancado de los pantanos negros antes de poder hablar. Aprendió a luchar entre lobos. Sus primeras palabras las pronunció el día que mató a uno con las manos.`,
+    `${n} was dragged from the black swamps before he could speak. He learned to fight among wolves. His first words came the day he killed one with his bare hands.`,
   (n) =>
-    `Dicen que ${n} nunca lloró al nacer. Solo apretó los puños. La partera lo soltó en el suelo y juró que la miró como si la conociera. La encontraron muerta tres noches después.`,
+    `They say ${n} never cried at birth. He only clenched his fists. The midwife dropped him on the floor and swore he looked at her as if he knew her. They found her dead three nights later.`,
   (n) =>
-    `${n} fue el último superviviente de un pueblo que ardió en una sola noche. Caminó dos semanas por las cenizas hasta llegar a la fosa. Llegó con un cuchillo de hueso y un odio que aún no se apaga.`,
+    `${n} was the last survivor of a village that burned in a single night. He walked two weeks through ash until he reached the pit. He arrived with a bone knife and a hatred that still has not gone out.`,
   (n) =>
-    `Los monjes de la abadía recogieron a ${n} de un pozo. No tenía nombre. Le pusieron uno y le enseñaron a sangrar. Cuando salió de allí, había siete tumbas frescas en el claustro.`,
+    `The abbey monks pulled ${n} from a well. He had no name. They gave him one and taught him to bleed. When he left, there were seven fresh graves in the cloister.`,
   (n) =>
-    `${n} luchó en las legiones del sur antes de desertar. Vendió su armadura, su nombre y su lengua. Solo le quedó el filo. Lo afila cada noche. No por costumbre. Por placer.`,
+    `${n} fought in the southern legions before deserting. He sold his armor, his name, and his tongue. Only the edge remained. He sharpens it every night. Not out of habit. For pleasure.`,
 ];
 
 const RANK_NAMES: readonly string[] = [
-  'Iniciado', 'Mercenario', 'Soldado', 'Cazador',
-  'Hechicero', 'Gladiador', 'Verdugo', 'Carnicero',
-  'Caballero Negro', 'Señor de la Sangre',
+  'Initiate', 'Mercenary', 'Soldier', 'Hunter',
+  'Sorcerer', 'Gladiator', 'Executioner', 'Butcher',
+  'Black Knight', 'Blood Lord',
 ];
 export function rankName(rank: number): string {
   const idx = Math.min(RANK_NAMES.length - 1, Math.max(0, rank));

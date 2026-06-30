@@ -108,7 +108,7 @@ export const LPC_HEAD_OPTIONS = [
 ] as const satisfies ReadonlyArray<LpcOption<LpcHeadKey>>;
 
 export const LPC_HAIR_OPTIONS = [
-  { key: 'none', label: 'Sin pelo' },
+  { key: 'none', label: 'No pelo' },
   { key: 'bedhead', label: 'Bedhead', src: hairBedheadIdle },
   { key: 'bob', label: 'Bob', src: hairBobIdle },
   { key: 'afro', label: 'Afro', src: hairAfroIdle },
@@ -119,7 +119,7 @@ export const LPC_HAIR_OPTIONS = [
 ] as const satisfies ReadonlyArray<LpcOption<LpcHairKey>>;
 
 export const LPC_WINGS_OPTIONS = [
-  { key: 'none', label: 'Sin wings' },
+  { key: 'none', label: 'No wings' },
   { key: 'monarchPurple', label: 'Monarch wings moradas', bgSrc: wingsMonarchPurpleBgWalk, fgSrc: wingsMonarchPurpleFgWalk },
   { key: 'pixiePurple', label: 'Pixie wings moradas', bgSrc: wingsPixiePurpleBgWalk, fgSrc: wingsPixiePurpleFgWalk },
 ] as const satisfies ReadonlyArray<LpcOption<LpcWingsKey>>;
@@ -149,17 +149,17 @@ export const LPC_TORSO_ARMOR_OPTIONS = [
 ] as const satisfies ReadonlyArray<LpcOption<LpcTorsoArmorKey>>;
 
 export const LPC_LEGS_ARMOR_OPTIONS = [
-  { key: 'none', label: 'Sin legs armour' },
+  { key: 'none', label: 'No legs armour' },
   { key: 'plate', label: 'Legs armour plate', src: legsArmorPlateIdle },
 ] as const satisfies ReadonlyArray<LpcOption<LpcLegsArmorKey>>;
 
 export const LPC_FEET_ARMOR_OPTIONS = [
-  { key: 'none', label: 'Sin feet armour' },
+  { key: 'none', label: 'No feet armour' },
   { key: 'plate', label: 'Feet armour plate', src: feetArmorPlateSteelIdle },
 ] as const satisfies ReadonlyArray<LpcOption<LpcFeetArmorKey>>;
 
 export const LPC_WEAPON_OPTIONS = [
-  { key: 'none', label: 'Sin weapon' },
+  { key: 'none', label: 'No weapon' },
 ] as const satisfies ReadonlyArray<LpcOption<LpcWeaponKey>>;
 
 interface LpcAvatarPreviewProps {

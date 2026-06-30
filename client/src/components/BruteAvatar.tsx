@@ -102,7 +102,7 @@ function normalizeLpc(raw: Partial<LpcAppearance> | undefined) {
 
 /**
  * Avatar real. Si el bruto tiene `appearance.lpc`, usa el modelo LPC nuevo.
- * Si no, cae al renderer clásico Pixi/LaBrute para datos legacy.
+ * Si no, cae to renderer clásico Pixi/LaBrute para datos legacy.
  */
 export function BruteAvatar({ brute, size = 'md', anim, className }: BruteAvatarProps) {
   const lpc = normalizeLpc(brute?.appearance?.lpc ?? brute?.lpc);

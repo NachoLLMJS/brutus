@@ -85,7 +85,7 @@ export function Tournament() {
       speed: 1.2,
       onComplete: () => {
         setRevealedUntil(matchIdx);
-        // Avanzar al próximo match tras una pausa breve.
+        // Avanzar to próximo match tras una pausa breve.
         window.setTimeout(() => {
           if (matchIdx + 1 < flatMatches.length) {
             setMatchIdx(matchIdx + 1);
@@ -133,9 +133,9 @@ export function Tournament() {
     return (
       <div className="max-w-[957px] mx-auto py-4">
         <PaperPanel>
-          <p className="text-blood font-display">No se pudo iniciar el torneo: {error}</p>
+          <p className="text-blood font-display">Could not start the tournament: {error}</p>
           <button className="btn mt-4" onClick={() => navigate(`/brute/${id}`)}>
-            Volver
+            Back
           </button>
         </PaperPanel>
       </div>
@@ -191,12 +191,12 @@ export function Tournament() {
               Torneo
             </h1>
             <p className="text-sm text-ink italic mt-1">
-              {bruteName} se enfrenta a 7 rivales en bracket de eliminación.
+              {bruteName} faces 7 rivals in an elimination bracket.
             </p>
           </div>
           {phase === 'bracket' && (
             <button className="btn-arena" onClick={startTournament}>
-              Iniciar torneo
+              Start tournament
             </button>
           )}
           {phase === 'playing' && (
@@ -211,7 +211,7 @@ export function Tournament() {
           )}
           {phase === 'finished' && (
             <button className="btn" onClick={() => navigate(`/brute/${id}`)}>
-              Volver
+              Back
             </button>
           )}
         </header>
@@ -253,10 +253,10 @@ export function Tournament() {
               />
             ))}
 
-            {/* Columna de campeón al final */}
+            {/* Columna de campeón to final */}
             <div className="flex flex-col justify-center min-w-[180px]">
               <div className="text-xs text-ink uppercase tracking-wider text-center mb-2 font-display">
-                Campeón
+                Champion
               </div>
               <ChampionCard
                 name={tour.champion.name}
@@ -274,7 +274,7 @@ export function Tournament() {
         )}
         {phase === 'bracket' && (
           <p className="mt-4 text-xs text-ink italic text-center">
-            8 Vault Brawlers. 7 matches. Click "Iniciar torneo" para reproducir cada pelea.
+            8 Vault Brawlers. 7 matches. Click "Start tournament" para reproducir cada fight.
           </p>
         )}
       </PaperPanel>
@@ -283,7 +283,7 @@ export function Tournament() {
 }
 
 function labelForRound(matchIdx: number, totalRounds: number, rounds: TournamentResponse['rounds']): string {
-  // Encuentra qué ronda corresponde al matchIdx.
+  // Encuentra qué ronda corresponde to matchIdx.
   let cum = 0;
   for (let ri = 0; ri < rounds.length; ri++) {
     const len = rounds[ri]!.matches.length;
@@ -406,7 +406,7 @@ function MatchCard({
             playerWon ? 'text-ink-strong' : 'text-blood',
           )}
         >
-          {playerWon ? 'Victoria' : 'Eliminado'}
+          {playerWon ? 'Victory' : 'Eliminado'}
         </div>
       )}
       {current && (
@@ -488,7 +488,7 @@ function ChampionCard({
       </div>
       {revealed && highlight && (
         <div className="text-xs text-blood font-display mt-1 uppercase tracking-wider">
-          ¡Tu Brawler!
+          ¡Your Brawler!
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-/* Brutus — CharacterCreator (Forjar un Bruto) styles.
+/* Brutus — CharacterCreator (Forge a Brawler) styles.
  * Coherente con el design system (forge panel + corner pins + glow accents).
  * Self-contained bajo `.creator-shell` para no chocar con Landing/Profile.
  */
@@ -367,7 +367,7 @@
     0 0 14px rgba(230, 180, 80, 0.6);
 }
 
-/* ── CTA "Crear Vault Brawler" ── */
+/* ── CTA "Create Vault Brawler" ── */
 .creator-cta {
   margin-top: 4px;
   appearance: none;

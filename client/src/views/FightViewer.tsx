@@ -78,7 +78,7 @@ export function FightViewer() {
     return () => window.clearTimeout(t);
   }, [fightLog]);
 
-  // Inicializar HP full al cargar el log.
+  // Inicializar HP full to cargar el log.
   useEffect(() => {
     if (!fightLog) return;
     const initial: Record<number, number> = {};
@@ -185,7 +185,7 @@ export function FightViewer() {
     }
     const provider = getEthereumProvider();
     if (!provider) {
-      pushToast('error', 'MetaMask no está disponible.');
+      pushToast('error', 'MetaMask is not available.');
       return;
     }
     setClaimingReward(true);
@@ -195,7 +195,7 @@ export function FightViewer() {
       if (!info.canHoldClaim) {
         pushToast(
           'error',
-          `No puedes claimear todavía: necesitas holdear ${formatTokenUnits(info.minimumHold)} tokens y ahora tienes ${formatTokenUnits(info.walletBalance)}.`,
+          `You cannot claim yet: you need to hold ${formatTokenUnits(info.minimumHold)} tokens and you currently have ${formatTokenUnits(info.walletBalance)}.`,
         );
         return;
       }
@@ -203,20 +203,20 @@ export function FightViewer() {
       if (!canClaim.ok) {
         const reason = canClaim.reason || 'claim_not_available';
         const readable = reason === 'needs 10000 tokens'
-          ? `No puedes claimear todavía: necesitas holdear ${formatTokenUnits(info.minimumHold)} tokens y ahora tienes ${formatTokenUnits(info.walletBalance)}.`
-          : `No puedes claimear todavía: ${reason}.`;
+          ? `You cannot claim yet: you need to hold ${formatTokenUnits(info.minimumHold)} tokens and you currently have ${formatTokenUnits(info.walletBalance)}.`
+          : `You cannot claim yet: ${reason}.`;
         pushToast('error', readable);
         return;
       }
       const tx = await claimCombatRewardOnChain(provider, walletAddress, reward.fightId);
       setClaimedRewardTx(tx.txHash);
-      pushToast('success', `Claim enviado: ${formatBnbWei(info.claimAmount)} BNB testnet.`);
+      pushToast('success', `Claim sent: ${formatBnbWei(info.claimAmount)} BNB testnet.`);
     } catch (e) {
       const raw = e instanceof Error ? e.message : 'claim_failed';
       const msg = raw.toLowerCase().includes('minimum token hold')
-        ? 'No puedes claimear todavía: necesitas holdear 10,000 tokens para cobrar la victoria.'
+        ? 'You cannot claim yet: you need to hold 10,000 tokens to claim the victory.'
         : raw;
-      pushToast('error', `No se pudo claimear: ${msg}`);
+      pushToast('error', `Could not claim: ${msg}`);
     } finally {
       setClaimingReward(false);
     }
@@ -233,9 +233,9 @@ export function FightViewer() {
     return (
       <div className="combat-stage">
         <div className="m-auto text-blood font-display text-xl uppercase tracking-widest p-6">
-          No hay combate activo.
+          No activates fight.
           <button className="cb-btn ml-3" onClick={() => navigate(`/brute/${id}`)}>
-            Volver al perfil
+            Back to profile
           </button>
         </div>
       </div>
@@ -245,7 +245,7 @@ export function FightViewer() {
     return (
       <div className="combat-stage">
         <div className="m-auto text-muted font-display p-6 uppercase tracking-widest">
-          Convocando el combate…
+          Summoning the fight…
         </div>
       </div>
     );
@@ -284,11 +284,11 @@ export function FightViewer() {
           />
           <div className="combat-top-center">
             <div className="streak-badge">
-              <span className="battle-state">Batalla en curso</span>
+              <span className="battle-state">Battle in progress</span>
               <span className="battle-title">Vault Brawl Arena</span>
-              <span className="label">Racha</span>
+              <span className="label">Streak</span>
               <span className="num">×{Math.abs(streak)}</span>
-              <span className="sub">{streak >= 0 ? 'Victorias' : 'Derrotas'}</span>
+              <span className="sub">{streak >= 0 ? 'Victories' : 'Defeats'}</span>
             </div>
           </div>
           <FighterCard
@@ -319,7 +319,7 @@ export function FightViewer() {
             </div>
 
             <div className="turn-strip">
-              <span className="ts-label">Turno</span>
+              <span className="ts-label">Turn</span>
               <TurnPips total={progress.total || fightLog.steps.length} current={progress.done} />
               <span className="ts-num">
                 {Math.min(progress.done, progress.total || fightLog.steps.length)}/
@@ -335,7 +335,7 @@ export function FightViewer() {
         <footer className="combat-bottom">
           <div className="cb-side">
             <button type="button" className="cb-btn" onClick={exit}>
-              ← Salir
+              ← Exit
             </button>
             <button
               type="button"
@@ -343,14 +343,14 @@ export function FightViewer() {
               onClick={skip}
               disabled={winnerId !== null}
             >
-              Saltar ▶▶
+              Skip ▶▶
             </button>
           </div>
           <div className="cb-center" />
           <div className="cb-side right">
             <div className="cb-rewards">
-              <span className="label">En juego</span>
-              <span className="val">+XP por victoria</span>
+              <span className="label">At stake</span>
+              <span className="val">+XP for victory</span>
             </div>
           </div>
         </footer>
@@ -377,7 +377,7 @@ export function FightViewer() {
           hasLevelUp={lastFight.leveledUp}
           onProfile={() => {
             navigate(`/brute/${id}`);
-            pushToast('info', isPlayerWinner ? 'Victoria.' : 'Derrota.');
+            pushToast('info', isPlayerWinner ? 'Victory.' : 'Defeat.');
           }}
           onLevelUp={goLevelUp}
           claimRewardButton={isPlayerWinner ? (
@@ -391,38 +391,38 @@ export function FightViewer() {
                     disabled={claimingReward || Boolean(claimedRewardTx) || Boolean(claimInfo && !claimInfo.canHoldClaim)}
                   >
                     {claimedRewardTx
-                      ? `✓ ${claimInfo ? formatBnbWei(claimInfo.claimAmount) : '0.001'} BNB claimeado`
+                      ? `✓ ${claimInfo ? formatBnbWei(claimInfo.claimAmount) : '0.001'} BNB claimed`
                       : claimingReward
-                        ? 'Claimeando…'
+                        ? 'Claiming…'
                         : claimInfo
                           ? `Claim ${formatBnbWei(claimInfo.claimAmount)} BNB testnet`
                           : 'Claim BNB testnet'}
                   </button>
                   {claimInfoLoading && !claimInfo && !claimedRewardTx && (
                     <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                      Comprobando hold on-chain…
+                      Checking on-chain hold…
                     </span>
                   )}
                   {claimInfo && !claimInfo.canHoldClaim && !claimedRewardTx && (
                     <span style={{ color: 'var(--primary)', fontSize: 12, maxWidth: 360, textAlign: 'center' }}>
-                      No puedes claimear todavía: necesitas holdear {formatTokenUnits(claimInfo.minimumHold)} tokens.
-                      Ahora tienes {formatTokenUnits(claimInfo.walletBalance)}.
+                      You cannot claim yet: you need to hold {formatTokenUnits(claimInfo.minimumHold)} tokens.
+                      You currently have {formatTokenUnits(claimInfo.walletBalance)}.
                     </span>
                   )}
                   {claimInfo?.canHoldClaim && !claimedRewardTx && (
                     <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                      Hold verificado on-chain: puedes cobrar.
+                      On-chain hold verified: you can claim.
                     </span>
                   )}
                   {!walletReady && !claimedRewardTx && (
                     <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                      Conecta MetaMask en BNB Testnet para cobrar desde el vault.
+                      Connect MetaMask on BNB Testnet to claim from the vault.
                     </span>
                   )}
                 </>
               ) : (
                 <span style={{ color: 'var(--primary)', fontSize: 12, maxWidth: 380, textAlign: 'center' }}>
-                  Claim no disponible: {rewardReasonLabel(lastFight.combat.reward?.reason)}
+                  Claim not available: {rewardReasonLabel(lastFight.combat.reward?.reason)}
                 </span>
               )}
             </div>
@@ -447,40 +447,40 @@ function findInitialWeapon(log: FightLog, fighterId: number): string | null {
 function rewardReasonLabel(reason?: string): string {
   switch (reason) {
     case 'operator_private_key_missing':
-      return 'falta configurar BRUTUS_OPERATOR_PRIVATE_KEY en Railway.';
+      return 'BRUTUS_OPERATOR_PRIVATE_KEY is missing in Railway.';
     case 'record_combat_reward_failed':
-      return 'el contrato no pudo registrar esta victoria.';
+      return 'the contract could not record this victory.';
     case 'reward_contract_missing':
-      return 'la dirección del contrato de rewards no tiene contrato desplegado en BNB Testnet.';
+      return 'the rewards contract address has no deployed contract on BNB Testnet.';
     case 'operator_not_authorized':
-      return 'la wallet operadora del servidor no es el operator del contrato de rewards.';
+      return 'the server operator wallet is not the rewards contract operator.';
     case 'operator_bnb_missing':
-      return 'la wallet operadora del servidor no tiene BNB testnet para pagar gas.';
+      return 'the server operator wallet has no testnet BNB for gas.';
     case 'reward_rpc_failed':
-      return 'falló el RPC de BNB Testnet al registrar la victoria.';
+      return 'the BNB Testnet RPC failed while recording the victory.';
     case 'fight_already_recorded':
-      return 'esta pelea ya estaba registrada on-chain.';
+      return 'this fight was already recorded on-chain.';
     case 'winner_wallet_missing':
-      return 'este bruto no tiene wallet owner asociada.';
+      return 'this brawler has no associated owner wallet.';
     case 'training_fight_no_bnb_reward':
-      return 'las peleas de entrenamiento no tienen reward BNB.';
+      return 'training fights have no BNB reward.';
     case 'player_lost':
-      return 'solo se puede claimear si ganas.';
+      return 'you can only claim if you win.';
     case 'recording_unavailable':
-      return 'registro on-chain no disponible.';
+      return 'on-chain recording unavailable.';
     default:
-      return reason || 'registro on-chain no disponible.';
+      return reason || 'on-chain recording unavailable.';
   }
 }
 
 function stepToBanner(step: FightStep): string | null {
   switch (step.a) {
     case StepType.Hit:
-      return step.c === 1 ? '¡CRÍTICO!' : null;
+      return step.c === 1 ? 'CRITICAL!' : null;
     case StepType.Block:
-      return '¡BLOQUEO!';
+      return 'BLOCK!';
     case StepType.Evade:
-      return '¡ESQUIVA!';
+      return 'DODGE!';
     default:
       return null;
   }

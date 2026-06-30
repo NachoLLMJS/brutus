@@ -19,7 +19,7 @@ export function Modal({ open, onClose, children, title, className }: ModalProps)
       if (e.key === 'Escape') onClose?.();
     };
     window.addEventListener('keydown', onKey);
-    // foco al abrir
+    // foco to abrir
     ref.current?.focus();
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
@@ -30,7 +30,7 @@ export function Modal({ open, onClose, children, title, className }: ModalProps)
       className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
       role="dialog"
       aria-modal="true"
-      aria-label={title ?? 'Diálogo'}
+      aria-label={title ?? 'Dialog'}
     >
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"

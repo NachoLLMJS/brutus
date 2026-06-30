@@ -1,8 +1,8 @@
 // Topbar global — reemplazo de MyBruteHeader.
 // Fixed-feeling navbar dark fantasy con logo BRUTUS, navegación entre secciones
-// (Templo / Tablón / Forja) y user chip a la derecha que muestra el
+// (Temple / Board / Forge) y user chip a la derecha que muestra el
 // bruto activo (si lo hay).
-// NOTA: Torneo está oculto — el route sigue existiendo pero sin entry points UI.
+// NOTA: Torneo is oculto — el route sigue existiendo pero sin entry points UI.
 
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
@@ -20,19 +20,19 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   {
-    label: 'Templo',
+    label: 'Temple',
     to: (id) => (id ? `/brute/${id}` : null),
     matches: (p) => /^\/brute\/[^/]+$/.test(p) || p.startsWith('/brute/') && p.endsWith('/levelup'),
   },
   {
-    label: 'Tablón',
+    label: 'Board',
     to: (id) => (id ? `/brute/${id}/arena` : null),
     matches: (p) => p.includes('/arena') || p.includes('/fight/'),
   },
   // 'Torneo' oculto — feature paused; route sigue existiendo pero sin entry.
   {
-    label: 'Forja',
-    // La "Forja" lleva al creator si no hay bruto, o al level-up si lo hay
+    label: 'Forge',
+    // La "Forge" lleva to creator si no hay bruto, o to level-up si lo hay
     // pendiente. Si no, queda inerte.
     to: (id) => (id ? `/brute/${id}/levelup` : '/create'),
     matches: (p) => p === '/create' || p.endsWith('/levelup'),
@@ -136,7 +136,7 @@ export function Topbar() {
         }}
       >
         <span className="hidden sm:inline">
-          {activeBrute?.name ?? 'Sin Brawler'}
+          {activeBrute?.name ?? 'No Brawler'}
         </span>
         <button
           type="button"
@@ -162,7 +162,7 @@ export function Topbar() {
             textTransform: 'uppercase',
           }}
         >
-          {connecting ? 'Conectando…' : walletStatusLabel(address, chainId)}
+          {connecting ? 'Connecting…' : walletStatusLabel(address, chainId)}
         </button>
         {address && (
           <button
@@ -174,7 +174,7 @@ export function Topbar() {
               });
             }}
             disabled={connecting}
-            title="Desconectar wallet y limpiar sesión actual"
+            title="Disconnect wallet and clear current session"
             style={{
               minHeight: 28,
               padding: '0 10px',

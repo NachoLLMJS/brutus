@@ -1,10 +1,10 @@
-// Settings del Profile v2 (Templo personal).
+// Settings del Profile v2 (Temple personal).
 // No se persisten: nada del juego queda guardado en localStorage.
 
 import { create } from 'zustand';
 
 interface ProfileSettingsState {
-  /** Si está activo, el background portrait emite glow rojo. */
+  /** Si is activo, el background portrait emite glow rojo. */
   portraitGlow: boolean;
   /** Cuántas bestias mostrar (0..3). */
   beastCount: number;

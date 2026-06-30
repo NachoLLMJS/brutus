@@ -1,4 +1,4 @@
-// Landing — "Forja la leyenda".
+// Landing — "Forge the legend".
 // Visual del bundle Claude Design (hero con skull sigils, forge form con
 // anvil + splatter, warrior cards rich, footer ornamental, glow accent
 // dynamic via Tweaks). Lógica preservada: useGameStore para recentBrutes,
@@ -74,7 +74,7 @@ export function Landing() {
 
       <Forge
         onForge={({ name, gender }) => {
-          setToast(`${name} entra al Vault…`);
+          setToast(`${name} enters the Vault…`);
           window.setTimeout(() => setToast(null), 1800);
           // Pre-populate name + gender in CharacterCreator via URL params.
           navigate(`/create?name=${encodeURIComponent(name)}&gender=${gender === 'M' ? 'male' : 'female'}`);
@@ -90,8 +90,8 @@ export function Landing() {
         }}
         onForget={(id) => {
           const stub = recent.find((b) => b.id === id);
-          const name = stub?.name ?? 'este Vault Brawler';
-          const ok = window.confirm(`¿Estás seguro de que quieres eliminar a ${name} de Vault Brawlers recientes?`);
+          const name = stub?.name ?? 'this Vault Brawler';
+          const ok = window.confirm(`Are you sure you want to remove ${name} from recent Vault Brawlers?`);
           if (!ok) return;
           forget(id);
         }}
@@ -100,9 +100,9 @@ export function Landing() {
       <footer className="landing-footer">
         <div className="footer-mark">
           <span className="pip" />
-          <span>Vault Brawl · MMXXVI · Forjado en el Vault</span>
+          <span>Vault Brawl · MMXXVI · Forged in the Vault</span>
         </div>
-        <a href="#how">Cómo se juega</a>
+        <a href="#how">How to play</a>
       </footer>
 
       {toast && <div className="landing-toast">{toast}</div>}
@@ -126,12 +126,12 @@ function Hero({ asym }: { asym: boolean }) {
 
       <div className="hero-content">
         <div className="hero-eyebrow">
-          <span>Donde el Vault forja leyendas</span>
+          <span>Where the Vault forges legends</span>
         </div>
         <h1 className="hero-title">
           Vault<span className="v"> B</span>rawl
         </h1>
-        <div className="hero-sub">Crea tu Vault Brawler y domina la arena</div>
+        <div className="hero-sub">Create your Vault Brawler and dominate the arena</div>
       </div>
     </header>
   );
@@ -156,7 +156,7 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
     e.preventDefault();
     const trimmed = name.trim();
     if (trimmed.length < 3) {
-      setError('Mínimo 3 runas');
+      setError('Minimum 3 runes');
       return;
     }
     setError('');
@@ -168,11 +168,10 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
       <aside className="forge-aside">
         <div>
           <h2>
-            Crea tu primer <em>Vault Brawler</em>
+            Create your first <em>Vault Brawler</em>
           </h2>
           <p>
-            Cada Vault Brawler que sale del Vault es <strong>único</strong>. Su nombre invoca un destino
-            forjado en sangre y acero. Lo que pasa en la arena, queda escrito en su carne.
+            Every Vault Brawler that leaves the Vault is <strong>unique</strong>. Its name summons a destiny forged in blood and steel. What happens in the arena is carved into its flesh.
           </p>
         </div>
         <div className="anvil-art">
@@ -184,7 +183,7 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
       <form className="forge-form" onSubmit={submit} noValidate>
         <div>
           <div className="field-label">
-            <span>Nombre del Vault Brawler</span>
+            <span>Vault Brawler name</span>
             {error && <span className="err">{error}</span>}
           </div>
           <input
@@ -202,11 +201,11 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
         </div>
 
         <button type="submit" className="btn-forge" disabled={!name.trim()}>
-          <span>Crear Vault Brawler</span>
+          <span>Create Vault Brawler</span>
           <span className="arrow">›</span>
         </button>
 
-        <div className="fine">Cada Vault Brawler es único e irrepetible</div>
+        <div className="fine">Cada Vault Brawler es unique e irrepetible</div>
       </form>
     </section>
   );
@@ -261,14 +260,14 @@ function RecentWarriorsSection({
     <section>
       <div className="section-head">
         <span className="num">— II</span>
-        <span className="title">Vault Brawlers recientes</span>
+        <span className="title">Recent Vault Brawlers</span>
         <span className="rule" />
       </div>
       <div className="warriors-grid">
         {brutes.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-mark">Aún no creaste ningún Vault Brawler</div>
-            <div className="empty-sub">Empezá creando el primero en el Vault de arriba.</div>
+            <div className="empty-mark">You have not created any Vault Brawler yet</div>
+            <div className="empty-sub">Start by creating the first one in the Vault above.</div>
           </div>
         ) : (
           brutes.map((b) => {
@@ -324,8 +323,8 @@ function WarriorCard({
       <button
         type="button"
         className="warrior-forget"
-        aria-label={`Olvidar a ${stub.name}`}
-        title="Olvidar este Vault Brawler"
+        aria-label={`Forget ${stub.name}`}
+        title="Olvidar this Vault Brawler"
         onClick={(e) => {
           e.stopPropagation();
           onForget();
@@ -350,7 +349,7 @@ function WarriorCard({
         <div className="warrior-name">{stub.name}</div>
         <div className="warrior-rank">{rankName(rank)}</div>
         <div className="warrior-meta">
-          <span className="gold">Nivel {level}</span>
+          <span className="gold">Level {level}</span>
           <span className="dot" />
           <span>{pct}% wr</span>
         </div>
@@ -367,7 +366,7 @@ function WarriorCard({
         {weaponId && (
           <div className="weapon-line">
             <WeaponGlyph kind={mapWeaponKind(weaponId)} />
-            <span>Arma equipada</span>
+            <span>Weapon equipada</span>
           </div>
         )}
       </div>

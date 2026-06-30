@@ -1,4 +1,4 @@
-// Bitácora live del combate. Convierte FightStep[] en log rows con icono +
+// Battle Log live del combate. Convierte FightStep[] en log rows con icono +
 // actor coloreado + texto + dmg numérico.
 //
 // Se le pasa el log completo y el currentIdx (steps procesados hasta ahora).
@@ -56,7 +56,7 @@ export function CombatLog({ log, currentIdx, logLength }: CombatLogProps) {
   return (
     <aside className="log-panel">
       <div className="log-head">
-        <span className="title">Bitácora</span>
+        <span className="title">Battle Log</span>
         <span className="live">En vivo</span>
       </div>
       <div className="log-list">
@@ -111,7 +111,7 @@ function stepToRow(
         icon: TYPE_ICONS.info,
         actorName: nameOf(step.f),
         actorSide: sideOf(step.f),
-        text: 'entra a la fosa.',
+        text: 'enters the pit.',
       };
     case StepType.Hit: {
       const isCrit = step.c === 1;
@@ -123,10 +123,10 @@ function stepToRow(
         actorName: nameOf(step.f),
         actorSide: sideOf(step.f),
         text: isCrit
-          ? '¡golpe crítico devastador!'
+          ? 'devastating critical hit!'
           : wName
-            ? `golpea con ${wName}.`
-            : 'asesta un golpe.',
+            ? `strikes with ${wName}.`
+            : 'lands a hit.',
         dmg: step.d,
       };
     }
@@ -139,7 +139,7 @@ function stepToRow(
         icon: TYPE_ICONS.hit,
         actorName: nameOf(step.f),
         actorSide: sideOf(step.f),
-        text: 'descarga su técnica.',
+        text: 'unleashes a technique.',
         dmg: step.d,
       };
     case StepType.Evade:
@@ -149,7 +149,7 @@ function stepToRow(
         icon: TYPE_ICONS.dodge,
         actorName: nameOf(step.f),
         actorSide: sideOf(step.f),
-        text: 'rueda y esquiva.',
+        text: 'rolls and dodges.',
       };
     case StepType.Block:
       return {
@@ -158,7 +158,7 @@ function stepToRow(
         icon: TYPE_ICONS.block,
         actorName: nameOf(step.f),
         actorSide: sideOf(step.f),
-        text: 'bloquea el ataque.',
+        text: 'blocks the attack.',
       };
     case StepType.Counter:
       return {
@@ -167,7 +167,7 @@ function stepToRow(
         icon: TYPE_ICONS.hit,
         actorName: nameOf(step.f),
         actorSide: sideOf(step.f),
-        text: 'contraataca.',
+        text: 'counterattacks.',
       };
     case StepType.SkillActivate:
       return {
@@ -176,7 +176,7 @@ function stepToRow(
         icon: TYPE_ICONS.skill,
         actorName: nameOf(step.b),
         actorSide: sideOf(step.b),
-        text: `activa ${getSkill(step.s)?.name ?? step.s}.`,
+        text: `activates ${getSkill(step.s)?.name ?? step.s}.`,
       };
     case StepType.Heal:
       return {
@@ -185,7 +185,7 @@ function stepToRow(
         icon: TYPE_ICONS.skill,
         actorName: nameOf(step.b),
         actorSide: sideOf(step.b),
-        text: `recupera ${step.h} HP.`,
+        text: `recovers ${step.h} HP.`,
       };
     case StepType.Vampirism:
       return {

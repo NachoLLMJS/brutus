@@ -1,4 +1,4 @@
-// Profile v2 — Templo personal.
+// Profile v2 — Temple personal.
 // Visual treatment del bundle de Claude Design (BgPortrait full-bleed,
 // hero banner gigante, big-stats row, dual cols con glass panels).
 // Lógica preservada: useBrute, useGameStore (rememberBrute / forgetBrute /
@@ -99,7 +99,7 @@ export function Profile() {
     };
   }, [brute]);
 
-  // Bitácora + linaje deterministas.
+  // Battle Log + linaje deterministas.
   const history = useMemo(() => (brute ? battleHistoryFor(brute, 5) : []), [brute]);
   const lineage = useMemo(() => (brute ? lineageFor(brute) : ''), [brute]);
 
@@ -109,7 +109,7 @@ export function Profile() {
         <BgPortrait glowing={portraitGlow} />
         <main className="profile-v2">
           <div className="text-center font-display text-ink-strong py-12 uppercase tracking-widest">
-            Convocando…
+            Summoning…
           </div>
         </main>
       </div>
@@ -121,7 +121,7 @@ export function Profile() {
         <BgPortrait glowing={false} />
         <main className="profile-v2">
           <PaperPanel>
-            <p className="text-blood font-display">Error: {error ?? 'no se encontró el bruto.'}</p>
+            <p className="text-blood font-display">Error: {error ?? 'Brawler not found.'}</p>
             <button
               type="button"
               className="btn mt-4"
@@ -130,7 +130,7 @@ export function Profile() {
                 navigate('/', { replace: true });
               }}
             >
-              Volver
+              Back
             </button>
           </PaperPanel>
         </main>
@@ -154,7 +154,7 @@ export function Profile() {
     const effective = effectiveStats[key];
     if (effective !== base) {
       const delta = effective - base;
-      return `Base ${base} · habilidades ${delta > 0 ? '+' : ''}${delta}`;
+      return `Base ${base} · skills ${delta > 0 ? '+' : ''}${delta}`;
     }
     return fallback;
   };
@@ -193,13 +193,13 @@ export function Profile() {
             onClick={() => navigate(`/brute/${brute.id}/levelup`)}
             className="levelup-banner block w-full"
           >
-            ★ ¡Tenés un nivel pendiente! Elegí tu mejora ★
+            ★ You have a pending level! Choose your upgrade ★
           </button>
         )}
 
         <section className="temple-rpg-layout">
           <aside className="temple-warrior-card">
-            <div className="temple-card-kicker">◇ Perfil del Vault Brawler ◇</div>
+            <div className="temple-card-kicker">◇ Vault Brawler Profile ◇</div>
             <div className="temple-avatar-stage" aria-label={`Vault Brawler ${brute.name}`}>
               <BruteAvatar brute={brute} size="sm" />
             </div>
@@ -215,31 +215,31 @@ export function Profile() {
             </h1>
             <div className="temple-rank-row">
               <span>{rankName(brute.rank)}</span>
-              <b>Nivel {brute.level}</b>
+              <b>Level {brute.level}</b>
             </div>
-            <div className="temple-xp-label">{xpPct}% al nivel {brute.level + 1}</div>
+            <div className="temple-xp-label">{xpPct}% to nivel {brute.level + 1}</div>
             <div className="temple-xp-bar"><span style={{ width: `${xpPct}%` }} /></div>
 
             <div className="temple-card-stats">
-              <BigStat label="Vitalidad" value={effectiveStats.hp} max={Math.max(MAX_HP, effectiveStats.hp)} color="#5fb04a" sub={statSub('hp', `+${Math.max(1, Math.floor(effectiveStats.hp / 12))} al subir nivel`)} />
-              <BigStat label="Fuerza" value={effectiveStats.strength} max={Math.max(MAX_STAT, effectiveStats.strength)} color="#c41a1a" sub={statSub('strength', `Daño base ${Math.floor(effectiveStats.strength * 0.4) + 4}`)} />
-              <BigStat label="Agilidad" value={effectiveStats.agility} max={Math.max(MAX_STAT, effectiveStats.agility)} color="#e6b450" sub={statSub('agility', `Esquiva ${Math.min(50, Math.floor(effectiveStats.agility * 0.3))}%`)} />
-              <BigStat label="Velocidad" value={effectiveStats.speed} max={Math.max(MAX_STAT, effectiveStats.speed)} color="#9b5cc9" sub={statSub('speed', effectiveStats.speed > 50 ? 'Inicia primero' : 'Iniciativa media')} />
+              <BigStat label="Vitality" value={effectiveStats.hp} max={Math.max(MAX_HP, effectiveStats.hp)} color="#5fb04a" sub={statSub('hp', `+${Math.max(1, Math.floor(effectiveStats.hp / 12))} to subir nivel`)} />
+              <BigStat label="Strength" value={effectiveStats.strength} max={Math.max(MAX_STAT, effectiveStats.strength)} color="#c41a1a" sub={statSub('strength', `Base damage ${Math.floor(effectiveStats.strength * 0.4) + 4}`)} />
+              <BigStat label="Agility" value={effectiveStats.agility} max={Math.max(MAX_STAT, effectiveStats.agility)} color="#e6b450" sub={statSub('agility', `Dodge ${Math.min(50, Math.floor(effectiveStats.agility * 0.3))}%`)} />
+              <BigStat label="Speed" value={effectiveStats.speed} max={Math.max(MAX_STAT, effectiveStats.speed)} color="#9b5cc9" sub={statSub('speed', effectiveStats.speed > 50 ? 'Acts first' : 'Average initiative')} />
             </div>
 
             <div className="temple-action-row">
-              <button type="button" className="btn-hero gold" onClick={goTrain}>Entrenar</button>
-              <button type="button" className="btn-hero primary" onClick={goFight} disabled={noNormalFights}>Pelear</button>
+              <button type="button" className="btn-hero gold" onClick={goTrain}>Train</button>
+              <button type="button" className="btn-hero primary" onClick={goFight} disabled={noNormalFights}>Fight</button>
             </div>
             <div className="temple-card-footer">
-              <span>{fightsRemaining}/{fightsTotal} hoy</span>
-              <span>Derrotas {brute.defeatsToday}/3</span>
-              <Link to="/">Cambiar Brawler</Link>
+              <span>{fightsRemaining}/{fightsTotal} today</span>
+              <span>Defeats {brute.defeatsToday}/3</span>
+              <Link to="/">Change Brawler</Link>
             </div>
           </aside>
 
           <section className="temple-main-stack">
-            <Glass num="◇" title="Habilidades activas" meta={`${ownedSkills.size}/${allSkillIds.length} aprendidas`}>
+            <Glass num="◇" title="Active Skills" meta={`${ownedSkills.size}/${allSkillIds.length} learned`}>
               <div className="invv2 temple-skills-grid">
                 {allSkillIds.map((sid) => {
                   const owned = ownedSkills.has(sid);
@@ -261,7 +261,7 @@ export function Profile() {
               </div>
             </Glass>
 
-            <Glass num="◇" title="Armas" meta={`${ownedWeapons.size}/${allWeaponIds.length} forjadas`}>
+            <Glass num="◇" title="Weapons" meta={`${ownedWeapons.size}/${allWeaponIds.length} forged`}>
               <div className="invv2 temple-weapons-grid">
                 {allWeaponIds.map((wid) => {
                   const owned = ownedWeapons.has(wid);
@@ -284,11 +284,11 @@ export function Profile() {
             </Glass>
 
             {skill && (
-              <Glass num="◇" title="Mejora activa">
+              <Glass num="◇" title="Active Upgrade">
                 <div className="detail-strip temple-active-detail">
                   <div className="icon"><img src={skillAsset(skill.id)} alt={skill.name} /></div>
                   <div>
-                    <div className="name">{skill.name} · activa</div>
+                    <div className="name">{skill.name} · active</div>
                     <div className="desc">{skill.description}</div>
                   </div>
                 </div>
@@ -297,18 +297,18 @@ export function Profile() {
           </section>
 
           <aside className="temple-side-stack">
-            <Glass num="◇" title="Bestias" meta={`${beasts.length}/3`}>
+            <Glass num="◇" title="Beasts" meta={`${beasts.length}/3`}>
               <div className="beastsv2 temple-beasts-compact">
                 {beasts.map((b) => (
                   <BeastV2 key={b.id} kind={b.meta.kind} name={capitalize(b.id)} hp={b.meta.hp} dmg={b.meta.dmg} />
                 ))}
                 {Array.from({ length: beastsEmptyCount }).map((_, i) => (
-                  <div key={i} className="beast-empty">Establo vacío</div>
+                  <div key={i} className="beast-empty">Empty stable</div>
                 ))}
               </div>
             </Glass>
 
-            <Glass num="◇" title="Bitácora" meta="5 últimas">
+            <Glass num="◇" title="Battle Log" meta="5 latest">
               <div className="battlesv2 temple-battle-log">
                 {history.map((b, i) => (
                   <div key={i} className={clsx('battlev2', b.result)}>
@@ -331,7 +331,7 @@ export function Profile() {
 
         {pupils.length > 0 && (
           <section className="mt-8">
-            <Glass num="— VII" title="Vault Brawlers vinculados" meta={`${pupils.length} creados`}>
+            <Glass num="— VII" title="Linked Vault Brawlers" meta={`${pupils.length} created`}>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {pupils.map((p) => (
                   <BruteCard key={p.id} brute={p} onClick={() => navigate(`/brute/${p.id}`)} />

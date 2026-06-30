@@ -51,7 +51,7 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
   connect: async () => {
     const provider = getEthereumProvider();
     if (!provider) {
-      set({ error: 'MetaMask no está instalado.' });
+      set({ error: 'MetaMask is not installed.' });
       return;
     }
     if (!isMetaMaskProvider(provider)) {
@@ -69,10 +69,10 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
         address,
         chainId,
         connected: Boolean(address),
-        error: address ? null : 'No se recibió ninguna cuenta.',
+        error: address ? null : 'No account was received.',
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo conectar MetaMask.';
+      const message = error instanceof Error ? error.message : 'Could not connect MetaMask.';
       set({ error: message });
     } finally {
       set({ connecting: false });
@@ -111,7 +111,7 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
   switchToBnb: async () => {
     const provider = getEthereumProvider();
     if (!provider) {
-      set({ error: 'MetaMask no está instalado.' });
+      set({ error: 'MetaMask is not installed.' });
       return;
     }
     set({ connecting: true, error: null });
@@ -119,7 +119,7 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
       await switchToBnbTestnet(provider);
       await get().refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo cambiar a BNB.';
+      const message = error instanceof Error ? error.message : 'Could not switch to BNB.';
       set({ error: message });
     } finally {
       set({ connecting: false });
@@ -128,7 +128,7 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
 }));
 
 export function walletStatusLabel(address: string | null, chainId: string | null): string {
-  if (!address) return 'Conectar MetaMask';
+  if (!address) return 'Connect MetaMask';
   if (!isSupportedBnbChain(chainId)) return `${formatWallet(address)} · wrong chain`;
   return `${formatWallet(address)} · BNB`;
 }

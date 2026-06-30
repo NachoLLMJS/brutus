@@ -1,11 +1,11 @@
 // SymbolDebugger — herramienta dev para identificar Symbols del fork
 // `brutus-fla-parser` y mapearlos a partes anatómicas en `partRegistry.ts`.
 //
-// Renderiza cada Symbol con SVG inline directo (las partes "hoja" del árbol).
+// Renderiza cada Symbol with SVG inline directo (las partes "hoja" del árbol).
 // Symbols puramente compuestos (parts: solo sub-symbols) no se renderizan
 // pero se listan con su composición.
 //
-// Ruta: /debug/symbols (solo accesible en dev — el route está siempre montado
+// Ruta: /debug/symbols (solo accesible en dev — el route is siempre montado
 // pero no hay link visible en la nav).
 
 import { useMemo, useState } from 'react';
@@ -111,9 +111,9 @@ export function SymbolDebugger() {
           Symbol Debugger
         </h1>
         <div style={{ color: 'var(--text-secondary)', marginTop: 4, fontSize: 11 }}>
-          Total <b style={{ color: 'var(--text-strong)' }}>{stats.total}</b> · con SVG inline{' '}
-          <b style={{ color: 'var(--accent-gold)' }}>{stats.withSvg}</b> · solo composición{' '}
-          <b style={{ color: 'var(--hp-full)' }}>{stats.composed}</b> · animados{' '}
+          Total <b style={{ color: 'var(--text-strong)' }}>{stats.total}</b> · with SVG inline{' '}
+          <b style={{ color: 'var(--accent-gold)' }}>{stats.withSvg}</b> · composition only{' '}
+          <b style={{ color: 'var(--hp-full)' }}>{stats.composed}</b> · animated{' '}
           <b style={{ color: 'var(--primary)' }}>{stats.animated}</b>
         </div>
       </header>
@@ -155,7 +155,7 @@ export function SymbolDebugger() {
                 letterSpacing: '0.06em',
               }}
             >
-              {m === 'has-svg' ? 'con SVG' : m === 'composed' ? 'composición' : m === 'animated' ? 'animados' : 'todos'}
+              {m === 'has-svg' ? 'with SVG' : m === 'composed' ? 'composition' : m === 'animated' ? 'animated' : 'all'}
             </button>
           ))}
         </div>
@@ -185,7 +185,7 @@ export function SymbolDebugger() {
           ))}
           {filtered.length === 0 && (
             <div style={{ gridColumn: '1 / -1', padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
-              Sin resultados
+              No resultados
             </div>
           )}
         </div>
@@ -295,7 +295,7 @@ function SymbolThumb({
   );
 }
 
-/** Renderiza un SVG string escalado al container. */
+/** Renderiza un SVG string escalado to container. */
 function ScaledSvg({ svg }: { svg: string }) {
   return (
     <div
@@ -443,13 +443,13 @@ function SymbolDetail({
             marginBottom: 6,
           }}
         >
-          Cómo editarlo
+          How to edit it
         </h3>
         <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-          1. Abrí <code>packages/brutus-fla-parser/Symbols.js</code><br />
-          2. Buscá <code style={{ color: 'var(--accent-gold)' }}>{`var ${entry.name} = `}</code><br />
-          3. Modificá los <code>svg</code> strings dentro de <code>parts</code><br />
-          4. Anotá el Symbol en <code>client/src/lib/partRegistry.ts</code>
+          1. Open <code>packages/brutus-fla-parser/Symbols.js</code><br />
+          2. Search for <code style={{ color: 'var(--accent-gold)' }}>{`var ${entry.name} = `}</code><br />
+          3. Modify los <code>svg</code> strings dentro de <code>parts</code><br />
+          4. Note el Symbol en <code>client/src/lib/partRegistry.ts</code>
         </div>
       </section>
 

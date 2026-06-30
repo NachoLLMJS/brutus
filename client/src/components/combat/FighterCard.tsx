@@ -4,7 +4,7 @@
 // FightFighter (del log) solo trae name/hp/avatar. Las metadata extra
 // (level, rank, weaponId, skills) se pasan como props opcionales — el parent
 // las extrae de `lastFight.brute` (player) o de `useBrute(opponentBruteId)`
-// (oponente). Si están ausentes, se ocultan los elementos.
+// (oponente). Si isn ausentes, se ocultan los elementos.
 
 import { BruteAvatar } from '@/components/BruteAvatar';
 import { HPBarV2 } from './HPBarV2';

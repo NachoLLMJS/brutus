@@ -4,7 +4,7 @@
 import { create } from 'zustand';
 
 interface CombatSettingsState {
-  /** Si está activo, banners DOM "¡CRÍTICO!"/"¡BLOQUEO!"/"¡ESQUIVA!" sobre el canvas. */
+  /** Si is activo, banners DOM "CRITICAL!"/"BLOCK!"/"DODGE!" sobre el canvas. */
   showActionBanner: boolean;
   /** Cuántos eventos del log mostrar (5..30). */
   logLength: number;

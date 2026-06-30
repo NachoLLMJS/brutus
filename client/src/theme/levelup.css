@@ -149,7 +149,7 @@
 .levelup-card[data-kind="weapon"] { border-top: 4px solid var(--border-main); }
 .levelup-card[data-kind="pet"] { border-top: 4px solid var(--hp-full); }
 
-/* Glow específico al hover por tipo */
+/* Glow específico to hover por tipo */
 .levelup-card[data-kind="stat"]:hover:not(:disabled) {
   border-color: var(--primary);
   box-shadow:

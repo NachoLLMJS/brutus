@@ -1,7 +1,7 @@
 // Drop de arma con física: gravedad, rebotes en el suelo, rotación, sombra
 // dinámica y fade-out tras N rebotes. Inspirado en `itemDrop.ts` de LaBrute.
 //
-// Usado por `animDisarm` (defensor le quita el arma al atacante: vuela y
+// Usado por `animDisarm` (defensor le quita el arma to atacante: vuela y
 // cae) y `animTrash` (bruto descarta el arma para hacer swap).
 
 import * as PIXI from 'pixi.js';
@@ -17,13 +17,13 @@ export interface DropOptions {
   direction: 1 | -1;
   /** Multiplicador global de velocidad de animación. */
   speed?: number;
-  /** Velocidad horizontal inicial (px/seg). Default 280. */
+  /** Speed horizontal inicial (px/seg). Default 280. */
   initialVx?: number;
-  /** Velocidad vertical inicial (px/seg, negativo = hacia arriba). Default -340. */
+  /** Speed vertical inicial (px/seg, negativo = hacia arriba). Default -340. */
   initialVy?: number;
   /** Coeficiente de rebote vertical (0..1). Default 0.55. */
   bounciness?: number;
-  /** Velocidad angular inicial (rad/seg). Default Math.PI*4. */
+  /** Speed angular inicial (rad/seg). Default Math.PI*4. */
   angularVelocity?: number;
   /** Cantidad de rebotes antes de empezar el fade-out. Default 3. */
   bouncesBeforeFade?: number;
@@ -84,7 +84,7 @@ export async function dropWeaponWithPhysics(opts: DropOptions): Promise<void> {
       sprite.y += vy * dt;
       sprite.rotation += angularVel * dt;
 
-      // Sombra sigue al sprite en X y escala con la altura.
+      // Sombra sigue to sprite en X y escala con la altura.
       shadow.x = sprite.x;
       const heightAboveGround = Math.max(0, opts.groundY - sprite.y);
       const shadowScale = Math.max(0.3, 1 - heightAboveGround / 200);

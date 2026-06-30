@@ -207,7 +207,7 @@ export default class BruteDisplay {
             throw new Error(`Part ${symbol.partIdx} not found in fighter config`);
           }
           // Clamp defensivo: si el body string trae un índice fuera del rango
-          // de frames del symbol, caer al frame 0 en lugar de no renderizar
+          // de frames del symbol, caer to frame 0 en lugar de no renderizar
           // (lo que dejaría huecos visibles en el bruto).
           const numFrames = symbol.frames?.length ?? 0;
           framesToLoad = [partValue < numFrames ? partValue : 0];

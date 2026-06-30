@@ -115,7 +115,7 @@ const ANIMATIONS: Record<ModelKey, Partial<Record<AnimationName, LaBruteSymbol>>
     eat: Symbol880,
   },
   // Pets (porteado de `labrute/.../FighterHolder.ts:82-183`).
-  // Solo tienen un subset de animaciones; el resto cae al fallback de
+  // Solo tienen un subset de animaciones; el resto cae to fallback de
   // `setAnimation` que llama 'idle' cuando la pedida no existe.
   dog: {
     idle: Symbol894,
@@ -295,7 +295,7 @@ const WEAPON_FRAMES: (string | null)[] = [
 
 /**
  * Mapeo de los ids snake_case de Brutus (catálogo en `core/src/data/weapons.ts`)
- * al índice de frame del Symbol68 de LaBrute. Ids sin match exacto caen a un
+ * to índice de frame del Symbol68 de LaBrute. Ids sin match exacto caen a un
  * frame fallback razonable. Mantener sincronizado con `client/src/lib/assets.ts`.
  */
 const BRUTUS_TO_FRAME: Record<string, number> = {
@@ -605,7 +605,7 @@ export default class FighterHolder {
 
       const loopStart = LOOP_START[this.#model][name] ?? null;
       if (loopStart === null) {
-        // One-shot: esperar al :end.
+        // One-shot: esperar to :end.
         this.#queuePending(`${name}:end`, resolve);
       } else {
         // Looping: esperar una vuelta completa.
@@ -699,7 +699,7 @@ export default class FighterHolder {
   /** Devuelve el id (en snake_case Brutus) del arma actualmente equipada o null. */
   getWeapon(): string | null {
     if (this.#weaponFrame === 0) return null;
-    // Inversa rápida: busca la clave de BRUTUS_TO_FRAME que apunte al frame.
+    // Inversa rápida: busca la clave de BRUTUS_TO_FRAME que apunte to frame.
     for (const [k, v] of Object.entries(BRUTUS_TO_FRAME)) {
       if (v === this.#weaponFrame) return k;
     }

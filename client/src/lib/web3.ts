@@ -57,7 +57,7 @@ async function assertBnbTestnet(provider: EthereumProvider): Promise<void> {
 }
 
 export function formatWallet(address: string | null): string {
-  if (!address) return 'Sin wallet';
+  if (!address) return 'No wallet';
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 

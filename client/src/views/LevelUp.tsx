@@ -1,4 +1,4 @@
-// LevelUp — Bendición tras subir de nivel.
+// LevelUp — Blessing after leveling up.
 // Visual treatment dark fantasy estilo Slay-the-Spire/Hades 2: 2 cards de
 // elección con border-top color por tipo (stat=sangre, skill=oro,
 // weapon=bronce, pet=verde). Lógica preservada: pendingLevelUp del store +
@@ -29,11 +29,11 @@ export function LevelUp() {
     try {
       await api.brutes.levelup(id, { choice });
       setPendingLevelUp(null);
-      pushToast('success', '¡Bendición forjada!');
+      pushToast('success', 'Blessing forged!');
       navigate(`/brute/${id}`);
     } catch (e) {
       const code = e instanceof ApiError ? e.code : 'NETWORK_ERROR';
-      pushToast('error', `No se pudo aplicar: ${code}`);
+      pushToast('error', `Could not apply: ${code}`);
       setSubmitting(false);
     }
   };
@@ -43,17 +43,17 @@ export function LevelUp() {
       <div className="levelup-shell">
         <header className="levelup-hero">
           <div className="eyebrow">
-            <span>Forja interrumpida</span>
+            <span>Forge interrupted</span>
           </div>
           <h1>
-            Sin <em>bendición</em>
+            No <em>blessing</em>
           </h1>
         </header>
         <div className="levelup-empty">
-          <div className="empty-mark">No hay subida de nivel pendiente</div>
-          <div className="empty-sub">Volvé a la fosa y forjate la próxima victoria.</div>
+          <div className="empty-mark">No pending level-up</div>
+          <div className="empty-sub">Return to the pit and forge your next victory.</div>
           <button className="btn" onClick={() => navigate(`/brute/${id}`)}>
-            Volver al templo
+            Back to temple
           </button>
         </div>
       </div>
@@ -64,14 +64,14 @@ export function LevelUp() {
     <div className="levelup-shell anim-fade-up">
       <header className="levelup-hero">
         <div className="eyebrow">
-          <span>Has subido de nivel</span>
+          <span>You leveled up</span>
         </div>
         <h1>
-          Forja tu <em>bendición</em>
+          Forge your <em>blessing</em>
         </h1>
-        <div className="sub">Una sola elección. Para siempre.</div>
+        <div className="sub">One choice. Forever.</div>
         <div className="instruction">
-          Las dos sendas se abren ante vos. Elegí la que dará forma a tu próximo combate.
+          Two paths open before you. Choose the one that will shape your next fight.
         </div>
       </header>
 
@@ -111,7 +111,7 @@ function ChoiceCard({ choice, onSelect, disabled }: ChoiceCardProps) {
       <h3 className="levelup-title">{title}</h3>
       <p className="levelup-desc">{description}</p>
       <div className="levelup-pick">
-        <span>Forjar esta senda</span>
+        <span>Forge this path</span>
         <span className="arrow" aria-hidden>
           ›
         </span>
@@ -146,8 +146,8 @@ function describeChoice(c: LevelUpChoice): ChoiceDescription {
           : '';
       return {
         title: `${main}${second}`,
-        description: 'Tus atributos se templan. Mejora permanente al nacer del fuego.',
-        kindLabel: 'Atributo',
+        description: 'Your attributes are tempered. A permanent upgrade born from fire.',
+        kindLabel: 'Attribute',
         glyph: 'rage',
       };
     }
@@ -155,8 +155,8 @@ function describeChoice(c: LevelUpChoice): ChoiceDescription {
       const e = getSkill(c.skillId);
       return {
         title: e?.name ?? c.skillId,
-        description: e?.description ?? 'Habilidad desconocida.',
-        kindLabel: 'Habilidad',
+        description: e?.description ?? 'Unknown skill.',
+        kindLabel: 'Skill',
         glyph: mapSkillGlyph(c.skillId),
       };
     }
@@ -164,8 +164,8 @@ function describeChoice(c: LevelUpChoice): ChoiceDescription {
       const e = getWeapon(c.weaponId);
       return {
         title: e?.name ?? c.weaponId,
-        description: e?.description ?? 'Arma desconocida.',
-        kindLabel: 'Arma',
+        description: e?.description ?? 'Unknown weapon.',
+        kindLabel: 'Weapon',
         glyph: mapWeaponGlyph(c.weaponId),
       };
     }
@@ -173,8 +173,8 @@ function describeChoice(c: LevelUpChoice): ChoiceDescription {
       const e = getPet(c.petId);
       return {
         title: e?.name ?? c.petId,
-        description: e?.description ?? 'Bestia desconocida.',
-        kindLabel: 'Bestia',
+        description: e?.description ?? 'Unknown beast.',
+        kindLabel: 'Beast',
         glyph: 'fury',
       };
     }
@@ -183,10 +183,10 @@ function describeChoice(c: LevelUpChoice): ChoiceDescription {
 
 function labelStat(stat: string): string {
   switch (stat) {
-    case 'hp': return 'Vitalidad';
-    case 'strength': return 'Fuerza';
-    case 'agility': return 'Agilidad';
-    case 'speed': return 'Velocidad';
+    case 'hp': return 'Vitality';
+    case 'strength': return 'Strength';
+    case 'agility': return 'Agility';
+    case 'speed': return 'Speed';
     default: return stat;
   }
 }

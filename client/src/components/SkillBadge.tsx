@@ -8,12 +8,12 @@ interface SkillBadgeProps {
 export function SkillBadge({ skillId }: SkillBadgeProps) {
   const s = getSkill(skillId);
   const name = s?.name ?? skillId;
-  const description = s?.description ?? 'Habilidad desconocida.';
+  const description = s?.description ?? 'Unknown skill.';
   return (
     <span
       className="badge group relative cursor-help inline-flex items-center gap-1.5"
       tabIndex={0}
-      aria-label={`Habilidad: ${name}`}
+      aria-label={`Skill: ${name}`}
     >
       <img
         src={skillAsset(skillId)}

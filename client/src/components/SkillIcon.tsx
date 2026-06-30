@@ -20,7 +20,7 @@ interface PetIconProps extends IconProps {
 
 /**
  * Iconos cuadrados estilo MyBrute (sticker): 32x32, fondo crema, borde marrón.
- * Tooltip con nombre + descripción al hover.
+ * Tooltip con nombre + descripción to hover.
  */
 export function SkillIcon({ skillId, muted, className }: SkillIconProps) {
   const s = getSkill(skillId);

@@ -7,8 +7,8 @@ import type { Pet } from '../types.js';
 export const PETS: readonly Pet[] = [
   {
     id: 'wolf',
-    name: 'Lobo',
-    description: 'Bestia feroz, ágil y mortal. Acompaña al bruto al combate.',
+    name: 'Wolf',
+    description: 'Fierce, agile, deadly beast. Accompanies the brawler into combat.',
     hp: 16,
     strength: 8,
     agility: 7,
@@ -20,8 +20,8 @@ export const PETS: readonly Pet[] = [
   },
   {
     id: 'bear',
-    name: 'Oso',
-    description: 'Coloso lento pero brutal. Cada zarpazo es devastador.',
+    name: 'Bear',
+    description: 'Slow but brutal colossus. Every swipe is devastating.',
     hp: 120,
     strength: 45,
     agility: 4,
@@ -33,8 +33,8 @@ export const PETS: readonly Pet[] = [
   },
   {
     id: 'panthers',
-    name: 'Panteras',
-    description: 'Trío de felinos veloces que atacan en jauría.',
+    name: 'Panthers',
+    description: 'Trio of swift cats that attack as a pack.',
     hp: 30,
     strength: 28,
     agility: 20,
@@ -46,8 +46,8 @@ export const PETS: readonly Pet[] = [
   },
   {
     id: 'mastiff',
-    name: 'Mastín',
-    description: 'Perro de presa, leal y robusto.',
+    name: 'Mastiff',
+    description: 'Loyal, sturdy attack dog.',
     hp: 22,
     strength: 10,
     agility: 6,

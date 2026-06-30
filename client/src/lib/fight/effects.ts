@@ -19,7 +19,7 @@ import { MotionBlurFilter } from '@pixi/filter-motion-blur';
 // extienden `Filter` desde su propia versión de @pixi/core (a veces una v7
 // instalada en el root del workspace), mientras que pixi.js usa @pixi/core v6.
 // Las clases son estructuralmente iguales, pero TS detecta `_resolution` como
-// `protected` y rechaza la asignación. Casteamos a `PIXI.Filter` al asignar
+// `protected` y rechaza la asignación. Casteamos a `PIXI.Filter` to asignar
 // para puentear el mismatch — funciona en runtime porque la instancia es la
 // misma.
 function appendFilter(target: PIXI.Container, f: unknown): void {
@@ -66,7 +66,7 @@ export function flashColor(
 // ───────────────────────── glow ─────────────────────────
 
 /**
- * Aplica un GlowFilter al target con fade-in y fade-out simétrico.
+ * Aplica un GlowFilter to target con fade-in y fade-out simétrico.
  * Resuelve cuando el efecto terminó.
  */
 export function glow(
@@ -104,7 +104,7 @@ export function glow(
 
 /**
  * Sacude el stage con `intensity` px durante `durationMs`. Restaura la
- * posición original al terminar. Resuelve cuando el shake terminó.
+ * posición original to terminar. Resuelve cuando el shake terminó.
  */
 export function screenShake(
   stage: PIXI.Container,
@@ -192,7 +192,7 @@ export interface ParticleOptions {
 
 /**
  * Emite partículas simples (círculos) desde (x,y). Cada una se anima con
- * tweener (alpha + posición) y se destruye al terminar. No bloqueante.
+ * tweener (alpha + posición) y se destruye to terminar. No bloqueante.
  */
 export function particles(
   stage: PIXI.Container,
@@ -319,7 +319,7 @@ export function bloodSplatter(
 
 /**
  * 4-6 partículas color crema/marrón saliendo bajas y dispersándose
- * horizontalmente. Para usar al correr o caer.
+ * horizontalmente. Para usar to correr o caer.
  */
 export function dustCloud(
   stage: PIXI.Container,

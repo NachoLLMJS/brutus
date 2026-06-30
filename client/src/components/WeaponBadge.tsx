@@ -9,12 +9,12 @@ interface WeaponBadgeProps {
 export function WeaponBadge({ weaponId }: WeaponBadgeProps) {
   const w = getWeapon(weaponId);
   const name = w?.name ?? weaponId;
-  const description = w?.description ?? 'Arma desconocida.';
+  const description = w?.description ?? 'Unknown weapon.';
   return (
     <span
       className="badge group relative cursor-help inline-flex items-center gap-1.5"
       tabIndex={0}
-      aria-label={`Arma: ${name}`}
+      aria-label={`Weapon: ${name}`}
     >
       <img
         src={weaponAsset(weaponId)}

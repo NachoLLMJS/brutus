@@ -29,7 +29,7 @@ export function BruteCard({ brute, onClick, selected, className }: BruteCardProp
       <div className="flex flex-col gap-0.5">
         <div className="font-serif text-lg text-ink leading-tight">{brute.name}</div>
         <div className="text-xs text-muted">
-          Nivel {brute.level}
+          Level {brute.level}
           {rankLabel && (
             <>
               <span aria-hidden> · </span>

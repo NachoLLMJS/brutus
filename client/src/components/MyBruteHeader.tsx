@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
  * dos personajes laterales y un reloj abajo. 957px max-width centrado.
  *
  * Los assets vienen de LaBrute (header/background.png, header/left.png,
- * header/right.png) y están copiados a /images/ui/header/.
+ * header/right.png) y isn copiados a /images/ui/header/.
  */
 export function MyBruteHeader() {
   const [time, setTime] = useState<string>(() => formatTime(new Date()));

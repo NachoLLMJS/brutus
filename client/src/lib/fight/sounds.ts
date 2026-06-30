@@ -4,7 +4,7 @@
 //
 // Los assets vienen de LaBrute (`public/sfx/`). El uso es siempre por
 // "key" semántico: `playSfx('hit')`, `playSfx('evade')`, etc. — el mapeo
-// real al archivo está aquí, así si después reskinneamos los SFX a fantasía
+// real to archivo is aquí, así si después reskinneamos los SFX a fantasía
 // oscura cambiamos solo este archivo.
 
 import { sound } from '@pixi/sound';
@@ -164,7 +164,7 @@ export function playSfx(key: SfxKey): void {
 }
 
 /**
- * Mapea el id de un skill (snake_case del catálogo core) al SFX más cercano
+ * Mapea el id de un skill (snake_case del catálogo core) to SFX más cercano
  * de LaBrute. Si no hay match exacto, fallback genérico.
  */
 const SKILL_SFX_MAP: Record<string, SfxKey> = {
@@ -230,7 +230,7 @@ const WEAPON_SPECIFIC_SFX: Record<string, SfxKey[]> = {
   sai:          ['hit_knife_1', 'hit_knife_2'],
 };
 
-/** Armas tipo filo → se complementan con sharp1..8. */
+/** Weapons tipo filo → se complementan con sharp1..8. */
 const SHARP_WEAPONS = new Set<string>([
   'knife', 'dagger', 'axe', 'hatchet', 'scimitar', 'broadsword',
   'katana', 'claymore', 'rapier', 'sai', 'shuriken', 'fan',
@@ -296,7 +296,7 @@ export function setVolume(v: number): void {
 }
 
 /**
- * Música de fondo en loop. Se llama al iniciar el combate y `stopBgm` al
+ * Música de fondo en loop. Se llama to iniciar el combate y `stopBgm` al
  * destruir el stage. Si ya hay otro BGM sonando, lo detiene primero.
  */
 let bgmInstance: { stop?: () => void } | null = null;

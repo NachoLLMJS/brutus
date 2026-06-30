@@ -83,71 +83,71 @@ const KIND_COLORS: Record<FlavorKind, string> = {
 };
 
 const RANK_NAMES: readonly string[] = [
-  'Iniciado', 'Mercenario', 'Soldado', 'Cazador',
-  'Hechicero', 'Gladiador', 'Verdugo', 'Carnicero',
-  'Caballero Negro', 'Señor de la Sangre',
+  'Initiate', 'Mercenary', 'Soldier', 'Hunter',
+  'Sorcerer', 'Gladiator', 'Executioner', 'Butcher',
+  'Black Knight', 'Blood Lord',
 ];
 
 const RUMORS: readonly string[] = [
-  'Dicen que cuelga los cráneos de sus víctimas en el cinturón. Lleva siete.',
-  'Pelea descalzo. Las losas de la fosa lo recuerdan.',
-  'Doce Vault Brawlers han entrado a la fosa contra él. Doce no salieron caminando.',
-  'Su armadura nunca se quita. Algunos dicen que ya no puede.',
-  'Le hablan los muertos. A veces les hace caso.',
-  'Vino del desierto a buscar oro. Encontró sangre. Se quedó.',
-  'Sus flechas están marcadas con runas. Las recoge después de cada pelea.',
-  'Despoja a los caídos. Su carro huele a ruina.',
-  'Reza antes de cada combate. No se sabe a quién.',
-  'No habla. Nadie lo ha oído jamás. Solo el filo del acero.',
-  'Le pagaron en oro para que no peleara. Vino igual.',
-  'Su sombra llega antes que él. La fosa la conoce.',
-  'Una vez perdió un ojo. Dicen que aún lo busca.',
-  'Bebe de los caídos. Solo agua, dice. Pero está rojiza.',
-  'Su nombre aparece tres veces en el libro de los condenados.',
-  'No tiene maestro. Aprendió a matar de la propia fosa.',
+  "They say he hangs his victims' skulls from his belt. He carries seven.",
+  'Fights barefoot. The pit stones remember him.',
+  'Twelve Vault Brawlers entered the pit against him. Twelve did not walk out.',
+  'His armor never comes off. Some say it no longer can.',
+  'The dead speak to him. Sometimes he listens.',
+  'He came from the desert seeking gold. He found blood. He stayed.',
+  'His arrows are marked with runes. He collects them after every fight.',
+  'He strips the fallen. His cart smells of ruin.',
+  'He prays before every fight. No one knows to whom.',
+  'He does not speak. No one has ever heard him. Only the edge of steel.',
+  'They paid him in gold not to fight. He came anyway.',
+  'His shadow arrives before he does. The pit knows it.',
+  'He once lost an eye. They say he still looks for it.',
+  'He drinks from the fallen. Just water, he says. But it is reddish.',
+  'His name appears three times in the book of the damned.',
+  'He has no master. He learned to kill from the pit itself.',
 ];
 
 const LAST_FIGHT_LABELS: readonly string[] = [
-  'Hace 2m', 'Hace 14m', 'Hace 22m', 'Hace 41m',
-  'Hace 1h', 'Hace 3h', 'Hace 5h', 'Hace 8h',
-  'Ayer', 'Hace 2 días',
+  '2m ago', '14m ago', '22m ago', '41m ago',
+  '1h ago', '3h ago', '5h ago', '8h ago',
+  'Yesterday', '2 days ago',
 ];
 
 const WEAPON_GLYPH_MAP: Record<string, { name: string; icon: WeaponIcon }> = {
-  knife:        { name: 'Cuchillo de Hueso', icon: 'dagger' },
-  dagger:       { name: 'Daga Maldita', icon: 'dagger' },
+  knife:        { name: 'Bone Knife', icon: 'dagger' },
+  dagger:       { name: 'Cursed Dagger', icon: 'dagger' },
   sai:          { name: 'Sai', icon: 'dagger' },
-  axe:          { name: 'Hacha del Verdugo', icon: 'axe' },
-  hatchet:      { name: 'Hachuela', icon: 'axe' },
-  scimitar:     { name: 'Cimitarra Curva', icon: 'sword' },
-  broadsword:   { name: 'Espada Ancha', icon: 'sword' },
-  katana:       { name: 'Katana Negra', icon: 'sword' },
-  claymore:     { name: 'Mandoble', icon: 'sword' },
-  rapier:       { name: 'Estoque', icon: 'sword' },
-  lance:        { name: 'Lanza', icon: 'spear' },
-  halberd:      { name: 'Alabarda', icon: 'spear' },
-  trident:      { name: 'Tridente', icon: 'spear' },
-  bo_staff:     { name: 'Bastón Bo', icon: 'mace' },
-  morning_star: { name: 'Lucero del Alba', icon: 'flail' },
-  flail:        { name: 'Mangual', icon: 'flail' },
+  axe:          { name: 'Executioner Axe', icon: 'axe' },
+  hatchet:      { name: 'Hatchet', icon: 'axe' },
+  scimitar:     { name: 'Curved Scimitar', icon: 'sword' },
+  broadsword:   { name: 'Broadsword', icon: 'sword' },
+  katana:       { name: 'Black Katana', icon: 'sword' },
+  claymore:     { name: 'Claymore', icon: 'sword' },
+  rapier:       { name: 'Rapier', icon: 'sword' },
+  lance:        { name: 'Spear', icon: 'spear' },
+  halberd:      { name: 'Halberd', icon: 'spear' },
+  trident:      { name: 'Trident', icon: 'spear' },
+  bo_staff:     { name: 'Bo Staff', icon: 'mace' },
+  morning_star: { name: 'Morning Star', icon: 'flail' },
+  flail:        { name: 'Flail', icon: 'flail' },
   nunchaku:     { name: 'Nunchaku', icon: 'flail' },
-  chain_whip:   { name: 'Látigo de Cadena', icon: 'flail' },
-  whip:         { name: 'Látigo', icon: 'flail' },
-  mighty_hammer:{ name: 'Martillo Poderoso', icon: 'hammer' },
-  mug:          { name: 'Jarra Roñosa', icon: 'mace' },
-  frying_pan:   { name: 'Sartén', icon: 'mace' },
-  noodle_bowl:  { name: 'Cuenco de Fideos', icon: 'mace' },
-  wrench:       { name: 'Llave Inglesa', icon: 'mace' },
-  fan:          { name: 'Abanico', icon: 'dagger' },
+  chain_whip:   { name: 'Chain Whip', icon: 'flail' },
+  whip:         { name: 'Whip', icon: 'flail' },
+  mighty_hammer:{ name: 'Mighty Hammer', icon: 'hammer' },
+  mug:          { name: 'Rusty Mug', icon: 'mace' },
+  frying_pan:   { name: 'Frying Pan', icon: 'mace' },
+  noodle_bowl:  { name: 'Noodle Bowl', icon: 'mace' },
+  wrench:       { name: 'Wrench', icon: 'mace' },
+  fan:          { name: 'Fan', icon: 'dagger' },
   shuriken:     { name: 'Shuriken', icon: 'dagger' },
-  crossbow:     { name: 'Ballesta', icon: 'bow' },
+  crossbow:     { name: 'Crossbow', icon: 'bow' },
 };
 
 const BEAST_GLYPH_MAP: Record<string, { name: string; icon: BeastIcon }> = {
-  dog:     { name: 'Lobo Garmr', icon: 'wolf' },
-  wolf:    { name: 'Lobo', icon: 'wolf' },
-  bear:    { name: 'Oso Krogh', icon: 'bear' },
-  panther: { name: 'Pantera Sombra', icon: 'panther' },
+  dog:     { name: 'Garmr Wolf', icon: 'wolf' },
+  wolf:    { name: 'Wolf', icon: 'wolf' },
+  bear:    { name: 'Krogh Bear', icon: 'bear' },
+  panther: { name: 'Shadow Panther', icon: 'panther' },
 };
 
 /* ------------------------ Mappings ------------------------ */
@@ -175,9 +175,9 @@ function deriveStreak(rng: () => number, victories: number, defeats: number): nu
 
 function deriveStatus(rng: () => number): { status: FlavorStatus; label: string } {
   const r = rng();
-  if (r < 0.55) return { status: 'online', label: 'En la fosa' };
-  if (r < 0.85) return { status: 'recent', label: 'Hace poco' };
-  return { status: 'cold', label: 'Inactivo' };
+  if (r < 0.55) return { status: 'online', label: 'In the pit' };
+  if (r < 0.85) return { status: 'recent', label: 'Recently' };
+  return { status: 'cold', label: 'Inactive' };
 }
 
 /* ------------------------ Public API ------------------------ */
@@ -190,7 +190,7 @@ export function flavorFor(brute: Brute): OpponentFlavor {
   const weaponId = brute.weapons[0];
   const weapon = weaponId && WEAPON_GLYPH_MAP[weaponId]
     ? WEAPON_GLYPH_MAP[weaponId]!
-    : { name: 'Puños', icon: 'none' as WeaponIcon };
+    : { name: 'Fists', icon: 'none' as WeaponIcon };
 
   const petId = brute.pets[0];
   const beast = petId && BEAST_GLYPH_MAP[petId] ? BEAST_GLYPH_MAP[petId]! : null;

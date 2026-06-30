@@ -10,7 +10,7 @@ export interface RecentBrute {
 
 /**
  * Offer pendiente atado a un bruto específico.
- * No se persiste: la sesión activa pertenece solo a la wallet conectada.
+ * No se persiste: la sesión active pertenece solo a la wallet conectada.
  */
 export interface PendingLevelUp {
   bruteId: string;

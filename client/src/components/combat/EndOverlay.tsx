@@ -1,4 +1,4 @@
-// End overlay post-combate: card con verdict (Victoria/Derrota) + nombre del
+// End overlay post-combate: card con verdict (Victory/Defeat) + nombre del
 // ganador + summary + rewards (XP real, Streak determinístico) + acciones.
 
 import type { ReactNode } from 'react';
@@ -13,10 +13,10 @@ interface EndOverlayProps {
   totalSteps: number;
   /** XP ganado en el combate (real, viene del backend). */
   xpAwarded?: number;
-  /** Racha de victorias (determinístico). */
+  /** Streak de victorias (determinístico). */
   streak: number;
   onProfile: () => void;
-  /** Si hay levelup pendiente, redirige al level-up en lugar de profile. */
+  /** Si hay levelup pendiente, redirige to level-up en lugar de profile. */
   hasLevelUp?: boolean;
   onLevelUp?: () => void;
   claimRewardButton?: ReactNode;
@@ -38,15 +38,15 @@ export function EndOverlay({
   claimRewardButton,
 }: EndOverlayProps) {
   if (!visible) return null;
-  const verdict = isPlayerWinner ? 'Victoria' : 'Derrota';
+  const verdict = isPlayerWinner ? 'Victory' : 'Defeat';
   return (
     <div className="end-overlay">
       <div className="end-card">
         <div className="verdict">{verdict}</div>
         <h1>{winnerName}</h1>
         <p className="summary">
-          <b>{playerName}</b> termina con <b>{Math.max(0, playerHp)}/{playerMaxHp}</b> HP.
-          Combate decidido en <b>{totalSteps}</b> turnos.
+          <b>{playerName}</b> ends with <b>{Math.max(0, playerHp)}/{playerMaxHp}</b> HP.
+          Fight decided in <b>{totalSteps}</b> turns.
         </p>
         <div className="end-rewards">
           {typeof xpAwarded === 'number' && (
@@ -56,7 +56,7 @@ export function EndOverlay({
             </div>
           )}
           <div className="end-reward">
-            <span className="lbl">Racha</span>
+            <span className="lbl">Streak</span>
             <span className="val">×{streak}</span>
           </div>
         </div>
@@ -64,11 +64,11 @@ export function EndOverlay({
         <div className="end-actions">
           {hasLevelUp && onLevelUp ? (
             <button type="button" className="cb-btn gold" onClick={onLevelUp}>
-              ★ Elegir mejora
+              ★ Choose upgrade
             </button>
           ) : (
             <button type="button" className="cb-btn gold" onClick={onProfile}>
-              Al templo →
+              To temple →
             </button>
           )}
         </div>

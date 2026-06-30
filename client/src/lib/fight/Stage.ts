@@ -108,7 +108,7 @@ const ATTACK_OFFSET = 130;
 const STEP_BASE_MS = 220;
 const FIGHTER_SCALE = 1.8;
 const PET_SCALE = 1.0;
-const PET_OFFSET_X = 75;          // separación lateral del pet respecto al dueño
+const PET_OFFSET_X = 75;          // separación lateral del pet respecto to dueño
 const PET_GAP = 38;               // separación entre pets del mismo dueño
 /** Backgrounds disponibles en /images/game/resources/misc/background/. */
 const BACKGROUND_COUNT = 13;
@@ -286,14 +286,14 @@ export class FightStage {
     });
     display.setFacing(facing);
 
-    // Arma inicial: el primer step Arrive del log también la setea, pero
+    // Weapon inicial: el primer step Arrive del log también la setea, pero
     // anticipamos para que el spawn ya tenga el sprite correcto.
     const initialWeapon = this.findInitialWeapon(f.id);
     if (initialWeapon) display.setWeapon(initialWeapon);
 
     const holder = new PIXI.Container();
     // Spawn offscreen para la animación de "arrive": los brutos entran
-    // corriendo desde fuera del canvas. La animación real al home se hace en
+    // corriendo desde fuera del canvas. La animación real to home se hace en
     // playArrives() antes del primer step del log.
     holder.x = facing === 'right' ? -150 : ARENA_W + 150;
     holder.y = GROUND_Y;
@@ -374,7 +374,7 @@ export class FightStage {
     };
     this.fighters.set(f.id as FighterId, runtime);
 
-    // Idle al spawnear (FighterHolder ya empieza en idle, pero por las dudas).
+    // Idle to spawnear (FighterHolder ya empieza en idle, pero por las dudas).
     display.setAnimation('idle');
 
     // Sincronizar HP bar con la posición del holder en cada tick.
@@ -470,16 +470,16 @@ export class FightStage {
 
   /**
    * Animación de entrada: todos los brutos y pets corren desde offscreen
-   * hacia su home position. Se ejecuta UNA VEZ al inicio del combate, antes
+   * hacia su home position. Se ejecuta UNA VEZ to inicio del combate, antes
    * de procesar steps. Los Arrive steps del log después se vuelven no-op
-   * (animArrive lo skippea si ya están en home).
+   * (animArrive lo skippea si ya isn en home).
    */
   private async playArrives(): Promise<void> {
     if (this.skipped || this.destroyed) return;
     playSfx('arrive');
     const arriving: Promise<void>[] = [];
     for (const r of this.fighters.values()) {
-      // Si ya está en home (skip / replay), no animar.
+      // Si ya is en home (skip / replay), no animar.
       if (r.holder.x === r.homeX) continue;
       r.display.setAnimation('run');
       const tween = Tweener.add(
@@ -549,7 +549,7 @@ export class FightStage {
     // Música de fondo en loop durante todo el combate.
     playBgm('bg');
     // Animación de entrada: los brutos corren desde offscreen hasta su home.
-    // Pets siguen al dueño con un offset.
+    // Pets siguen to dueño con un offset.
     await this.playArrives();
     const total = this.log.steps.length;
     for (let i = 0; i < total; i++) {
@@ -576,7 +576,7 @@ export class FightStage {
       return;
     }
 
-    // Failsafe: una pelea jamás debe quedarse sin final si el log llega sin End.
+    // Failsafe: una fight jamás debe quedarse sin final si el log llega sin End.
     const alive = [...this.fighters.values()].filter((f) => !f.isPet && f.hp > 0);
     const winner = alive.sort((a, b) => b.hp - a.hp)[0];
     if (winner) {
@@ -679,8 +679,8 @@ export class FightStage {
   /**
    * Espera a que el FighterHolder emita un frame event (ej `'throw:launch'`)
    * o, si no lo hace dentro de `fallbackMs`, resuelve igual. Usado para
-   * sincronizar SFX al frame visual exacto sin colgar si la animación
-   * cambia o no llega al frame.
+   * sincronizar SFX to frame visual exacto sin colgar si la animación
+   * cambia o no llega to frame.
    */
   private awaitFrameEvent(
     display: FighterHolder,
@@ -719,7 +719,7 @@ export class FightStage {
   private async animArrive(step: ArriveStep) {
     const f = this.get(step.f);
     if (!f) return this.wait(0);
-    // playArrives() ya hizo entrar al bruto desde offscreen al inicio del
+    // playArrives() ya hizo entrar to bruto desde offscreen to inicio del
     // combate. El step Arrive del log es solo para mantener el weapon inicial
     // sincronizado y no genera animación adicional.
     if (step.w !== undefined) {
@@ -784,7 +784,7 @@ export class FightStage {
     // estoc=lance/thrown, whip=látigo. Los pets usan 'attack'.
     const attackAnim = this.pickAttackAnim(attacker, step.w);
 
-    // Lanzar la animación del attacker (sin esperar).
+    // Spearr la animación del attacker (sin esperar).
     void attacker.display.playAnimation(attackAnim).then(() => {
       if (!this.destroyed && attacker.alive) attacker.display.setAnimation('idle');
     });
@@ -872,7 +872,7 @@ export class FightStage {
     void f.display.playAnimation('evade').then(() => {
       if (!this.destroyed && f.alive) f.display.setAnimation('idle');
     });
-    // SFX sincronizado al frame de la esquiva.
+    // SFX sincronizado to frame de la esquiva.
     await this.awaitFrameEvent(f.display, 'evade:dodge', 100);
     playSfx('evade');
     const origY = f.holder.y;
@@ -896,7 +896,7 @@ export class FightStage {
     void f.display.playAnimation('block').then(() => {
       if (!this.destroyed && f.alive) f.display.setAnimation('idle');
     });
-    // SFX sincronizado al frame de la pose de bloqueo. Random entre 4 variantes.
+    // SFX sincronizado to frame de la pose de bloqueo. Random entre 4 variantes.
     await this.awaitFrameEvent(f.display, 'block:pose', 150);
     playBlockSfx();
     await this.wait(180);
@@ -982,7 +982,7 @@ export class FightStage {
     const fromX = attacker?.holder.x ?? ARENA_W / 2;
     const fromY = (attacker?.holder.y ?? GROUND_Y) - (attacker?.display.baseHeight ?? 200) * 0.4;
 
-    // Lanzar una bomba a cada target en arco; cuando llega, explota.
+    // Spearr una bomba a cada target en arco; cuando llega, explota.
     const bombPromises: Promise<void>[] = [];
     for (const tid of step.t) {
       const tgt = this.get(tid);
@@ -1150,34 +1150,34 @@ export class FightStage {
     // de "throw mid-fight no muestra proyectil" reaparece, queda log claro.
     if (!step.w) {
       // eslint-disable-next-line no-console
-      console.warn('[animThrow] step.w vacío — no se animará proyectil', step);
+      console.warn('[animThrow] empty step.w — projectile will not animate', step);
     }
     if (!t) {
       // eslint-disable-next-line no-console
       console.warn('[animThrow] target no encontrado', step);
     }
 
-    // Lanzar la animación del bruto (windup + lanzamiento).
+    // Spearr la animación del bruto (windup + lanzamiento).
     void f.display.playAnimation('throw').catch(() => {
       void f.display.playAnimation('fist');
     });
 
-    // Esperar al frame de lanzamiento (frame 6) — ahí suena el SFX y el
-    // proyectil sale de la mano. Si la animación no llega al frame, el
+    // Esperar to frame de lanzamiento (frame 6) — ahí suena el SFX y el
+    // proyectil sale de la mano. Si la animación no llega to frame, el
     // fallback resuelve a tiempo igual.
     await this.awaitFrameEvent(f.display, 'throw:launch', 250);
     playSfx('equip');
 
-    // Quitar el arma de la mano del bruto: a partir de acá pelea con puños.
+    // Quitar el arma de la mano del bruto: a partir de acá fight con puños.
     if (step.k !== 1) {
       f.display.setWeapon(null);
     }
 
     // Trayectoria del arma volando hacia el oponente.
     if (t && step.w) {
-      // Offset vertical fijo: apunta al pecho del bruto (visualmente ~110px
+      // Offset vertical fijo: apunta to pecho del bruto (visualmente ~110px
       // sobre el suelo para FIGHTER_SCALE=1.8). El `baseHeight` que reporta
-      // el FighterHolder está sobre-dimensionado vs el sprite real, así que
+      // el FighterHolder is sobre-dimensionado vs el sprite real, así que
       // usamos un valor calibrado.
       const CHEST_Y = -110;
       const startX = f.holder.x + (f.facing === 'left' ? -20 : 20);
@@ -1227,7 +1227,7 @@ export class FightStage {
       // Si el modelo no soporta 'trash', caemos silenciosamente.
     });
     // Sincronizar el setWeapon(null) con el frame :trashed (frame 3) y, al
-    // mismo tiempo, lanzar el arma al suelo con física.
+    // mismo tiempo, lanzar el arma to suelo con física.
     await this.awaitFrameEvent(f.display, 'trash:trashed', 250);
     const direction: 1 | -1 = f.facing === 'right' ? 1 : -1;
     void dropWeaponWithPhysics({

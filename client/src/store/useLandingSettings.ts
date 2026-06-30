@@ -1,4 +1,4 @@
-// Settings del Landing (Forja la Leyenda).
+// Settings del Landing (Forge la Leyenda).
 // No se persisten: nada del juego queda guardado en localStorage.
 
 import { create } from 'zustand';

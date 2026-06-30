@@ -1,4 +1,4 @@
-/* Brutus — Lobby (Tablón de la fosa) styles.
+/* Brutus — Lobby (Board de la fosa) styles.
  * Adaptado del bundle de Claude Design. Solo contiene estilos específicos
  * del lobby; tokens y reset viven en tokens.css/global.css.
  */
@@ -235,7 +235,7 @@
   flex: 1;
 }
 
-.your-bruto {
+.your-brawler {
   text-align: center;
 }
 .your-bust {
