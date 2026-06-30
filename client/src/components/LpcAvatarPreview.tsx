@@ -39,8 +39,9 @@ const DIRECTIONS = [
 ] as const;
 
 type DirectionKey = (typeof DIRECTIONS)[number]['key'];
-type LpcOption<K extends string> = { key: K; label: string; src?: string; bgSrc?: string; fgSrc?: string; tint?: string };
-type Layer = { src: string; tint?: string };
+type LpcOption<K extends string> = { key: K; label: string; src?: string; bgSrc?: string; fgSrc?: string; tint?: string; palette?: PaletteMaterial };
+type PaletteMaterial = 'metal' | 'cloth';
+type Layer = { src: string; tint?: string; palette?: PaletteMaterial; color?: LpcArmorColorKey };
 
 export type LpcHeadKey = 'humanMale' | 'humanGaunt' | 'humanPlump' | 'humanElder';
 export type LpcHairKey = 'bedhead' | 'bob' | 'afro' | 'buzzcut' | 'long' | 'curlyShort' | 'bangs' | 'none';
@@ -53,16 +54,38 @@ export type LpcLegsArmorKey = 'none' | 'plate';
 export type LpcFeetArmorKey = 'none' | 'plate';
 export type LpcWeaponKey = 'none';
 
-const ARMOR_TINTS: Record<LpcArmorColorKey, string> = {
-  steel: 'rgba(185, 196, 202, 0.28)',
-  yellow: 'rgba(255, 221, 54, 0.36)',
-  iron: 'rgba(106, 117, 128, 0.3)',
-  bronze: 'rgba(176, 105, 43, 0.3)',
-  copper: 'rgba(210, 104, 58, 0.28)',
-  pink: 'rgba(255, 83, 184, 0.34)',
-  purple: 'rgba(153, 91, 255, 0.36)',
-  silver: 'rgba(225, 230, 235, 0.34)',
-  black: 'rgba(20, 24, 31, 0.44)',
+const OFFICIAL_PALETTES = {
+  metal: {
+    source: ['#1D131E', '#2E2533', '#4D4A5D', '#726B7E', '#867E7F', '#C4B59F', '#FFFFFF'],
+    ceramic: ['#181009', '#2B1C1D', '#32251A', '#594435', '#7D604D', '#BA9069', '#FBE3B0'],
+    brass: ['#1A1213', '#2E2533', '#61482C', '#836332', '#AF8A35', '#FDD082', '#FDF5CC'],
+    copper: ['#691503', '#4F2313', '#7B2008', '#973C23', '#9D5427', '#EC855C', '#FFC95A'],
+    bronze: ['#4F2313', '#573726', '#6D4A00', '#966600', '#BF8200', '#E7A820', '#FBE3B0'],
+    iron: ['#000000', '#1D131E', '#1B192B', '#29253A', '#343043', '#484152', '#726B7E'],
+    steel: ['#1D131E', '#2E2533', '#4D4A5D', '#726B7E', '#867E7F', '#C4B59F', '#FFFFFF'],
+    silver: ['#1D131E', '#2E2533', '#31313E', '#4A5057', '#818B8B', '#D6E1D3', '#FFFFFF'],
+    gold: ['#2E2533', '#4F2313', '#6D4A00', '#966600', '#DC6F35', '#FFC95A', '#FFFF61'],
+  },
+  cloth: {
+    source: ['#1d131e9C', '#1d131e', '#4D4A5D', '#958080', '#C4B59F', '#E5E6C7', '#FFFFFF'],
+    black: ['#0000009C', '#000000', '#161616', '#2E2533', '#4D4A5D', '#726B7E', '#867E7F'],
+    yellow: ['#3017239C', '#301723', '#5F2F25', '#BA5B23', '#D99431', '#F3C03F', '#FFE360'],
+    pink: ['#1d131e9C', '#1d131e', '#54242E', '#6C3536', '#AE424A', '#C36072', '#E08080'],
+    purple: ['#1807169C', '#180716', '#13112D', '#261044', '#411357', '#621E78', '#813089'],
+    silver: ['#2818209C', '#281820', '#4D4A5D', '#958080', '#C4B59F', '#E5E6C7', '#FFFFFF'],
+  },
+} as const;
+
+const ARMOR_COLOR_TO_OFFICIAL: Record<LpcArmorColorKey, keyof typeof OFFICIAL_PALETTES.metal | keyof typeof OFFICIAL_PALETTES.cloth> = {
+  steel: 'steel',
+  yellow: 'yellow',
+  iron: 'iron',
+  bronze: 'bronze',
+  copper: 'copper',
+  pink: 'pink',
+  purple: 'purple',
+  silver: 'silver',
+  black: 'black',
 };
 
 export const LPC_ARMOR_COLOR_OPTIONS = [
@@ -158,12 +181,12 @@ function pick<K extends string>(options: ReadonlyArray<LpcOption<K>>, key: K): L
   return options.find((o) => o.key === key);
 }
 
-function toLayer(option?: { src?: string; tint?: string }): Layer | undefined {
-  return option?.src ? { src: option.src, tint: option.tint } : undefined;
+function toLayer(option?: { src?: string; tint?: string; palette?: PaletteMaterial }, color?: LpcArmorColorKey): Layer | undefined {
+  return option?.src ? { src: option.src, tint: option.tint, palette: option.palette, color } : undefined;
 }
 
-function tintLayer(option: LpcOption<string> | undefined, tint: string): Layer | undefined {
-  return option?.src ? { src: option.src, tint } : undefined;
+function paletteLayer(option: LpcOption<string> | undefined, color: LpcArmorColorKey, palette: PaletteMaterial): Layer | undefined {
+  return option?.src ? { src: option.src, palette, color } : undefined;
 }
 
 function isFixedColorHeadwear(headwear: LpcHeadwearKey): boolean {
@@ -172,18 +195,17 @@ function isFixedColorHeadwear(headwear: LpcHeadwearKey): boolean {
 
 function layerPaths(props: Required<Omit<LpcAvatarPreviewProps, 'scale' | 'compact'>>) {
   const wings = pick(LPC_WINGS_OPTIONS, props.wings);
-  const armorTint = ARMOR_TINTS[props.armorColor];
   const headwear = pick(LPC_HEADWEAR_OPTIONS, props.headwear);
   const customHeadSkin = props.headwear === 'cedricHelmet' || props.headwear === 'jasonHelmet';
-  const headwearLayer = isFixedColorHeadwear(props.headwear) ? toLayer(headwear) : tintLayer(headwear, armorTint);
+  const headwearLayer = isFixedColorHeadwear(props.headwear) ? toLayer(headwear) : paletteLayer(headwear, props.armorColor, 'metal');
   return [
     wings?.bgSrc ? { src: wings.bgSrc } : undefined,
     { src: bodyMaleIdle },
     customHeadSkin ? undefined : toLayer(pick(LPC_HEAD_OPTIONS, props.head)),
-    tintLayer(pick(LPC_LEGS_ARMOR_OPTIONS, props.legsArmor), armorTint),
-    tintLayer(pick(LPC_FEET_ARMOR_OPTIONS, props.feetArmor), armorTint),
-    tintLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor), armorTint),
-    tintLayer(pick(LPC_ARMS_ARMOR_OPTIONS, props.armsArmor), armorTint),
+    paletteLayer(pick(LPC_LEGS_ARMOR_OPTIONS, props.legsArmor), props.armorColor, 'metal'),
+    paletteLayer(pick(LPC_FEET_ARMOR_OPTIONS, props.feetArmor), props.armorColor, 'metal'),
+    paletteLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor), props.armorColor, props.torsoArmor === 'trenchCoat' ? 'cloth' : 'metal'),
+    paletteLayer(pick(LPC_ARMS_ARMOR_OPTIONS, props.armsArmor), props.armorColor, 'metal'),
     customHeadSkin ? undefined : toLayer(pick(LPC_HAIR_OPTIONS, props.hair)),
     headwearLayer,
     toLayer(pick(LPC_WEAPON_OPTIONS, props.weapon)),
@@ -200,6 +222,48 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+
+function hexToRgb(hex: string): [number, number, number] {
+  const raw = hex.replace('#', '').slice(0, 6);
+  return [parseInt(raw.slice(0, 2), 16), parseInt(raw.slice(2, 4), 16), parseInt(raw.slice(4, 6), 16)];
+}
+
+function paletteFor(material: PaletteMaterial, color: LpcArmorColorKey) {
+  const key = ARMOR_COLOR_TO_OFFICIAL[color];
+  if (material === 'metal') {
+    const metalTarget = OFFICIAL_PALETTES.metal[key as keyof typeof OFFICIAL_PALETTES.metal];
+    if (key === 'black' || key === 'pink' || key === 'purple' || key === 'yellow') {
+      const clothTarget = OFFICIAL_PALETTES.cloth[key as keyof typeof OFFICIAL_PALETTES.cloth];
+      if (clothTarget) return { source: OFFICIAL_PALETTES.metal.source, target: clothTarget };
+    }
+    return { source: OFFICIAL_PALETTES.metal.source, target: metalTarget ?? OFFICIAL_PALETTES.metal.steel };
+  }
+  const target = OFFICIAL_PALETTES.cloth[key as keyof typeof OFFICIAL_PALETTES.cloth] ?? OFFICIAL_PALETTES.cloth.black;
+  return { source: OFFICIAL_PALETTES.cloth.source, target };
+}
+
+function recolorWithOfficialPalette(ctx: CanvasRenderingContext2D, material: PaletteMaterial, color: LpcArmorColorKey) {
+  const { source, target } = paletteFor(material, color);
+  const sourceRgb = source.map(hexToRgb);
+  const targetRgb = target.map(hexToRgb);
+  const image = ctx.getImageData(0, 0, FRAME, FRAME);
+  const data = image.data;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] === 0) continue;
+    for (let j = 0; j < sourceRgb.length; j += 1) {
+      const src = sourceRgb[j]!;
+      if (Math.abs(data[i]! - src[0]) <= 1 && Math.abs(data[i + 1]! - src[1]) <= 1 && Math.abs(data[i + 2]! - src[2]) <= 1) {
+        const dst = targetRgb[j]!;
+        data[i] = dst[0];
+        data[i + 1] = dst[1];
+        data[i + 2] = dst[2];
+        break;
+      }
+    }
+  }
+  ctx.putImageData(image, 0, 0);
+}
+
 function drawLayer(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
@@ -208,7 +272,7 @@ function drawLayer(
   row: number,
   scale: number,
 ) {
-  if (!layer.tint) {
+  if (!layer.tint && !layer.palette) {
     ctx.drawImage(img, frame * FRAME, row * FRAME, FRAME, FRAME, 0, 0, FRAME * scale, FRAME * scale);
     return;
   }
@@ -219,10 +283,14 @@ function drawLayer(
   if (!offCtx) return;
   offCtx.imageSmoothingEnabled = false;
   offCtx.drawImage(img, frame * FRAME, row * FRAME, FRAME, FRAME, 0, 0, FRAME, FRAME);
-  offCtx.globalCompositeOperation = 'source-atop';
-  offCtx.fillStyle = layer.tint;
-  offCtx.fillRect(0, 0, FRAME, FRAME);
-  offCtx.globalCompositeOperation = 'source-over';
+  if (layer.palette && layer.color) {
+    recolorWithOfficialPalette(offCtx, layer.palette, layer.color);
+  } else if (layer.tint) {
+    offCtx.globalCompositeOperation = 'source-atop';
+    offCtx.fillStyle = layer.tint;
+    offCtx.fillRect(0, 0, FRAME, FRAME);
+    offCtx.globalCompositeOperation = 'source-over';
+  }
   ctx.drawImage(off, 0, 0, FRAME * scale, FRAME * scale);
 }
 
