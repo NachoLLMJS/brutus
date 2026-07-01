@@ -147,7 +147,7 @@ export function Docs() {
             <p className="docs-kicker">Project docs</p>
             <h1>Vault Brawl explained</h1>
             <p className="docs-lead">
-              A dark-fantasy auto-battler where players create Vault Brawlers, fight rivals, grow their stable,
+              A dark fantasy auto battler where players create Vault Brawlers, fight rivals, grow their stable,
               and use BNB Mainnet for extra brawlers and transparent reward claims.
             </p>
             <div className="docs-hero-actions">

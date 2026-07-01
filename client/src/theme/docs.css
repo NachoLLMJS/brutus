@@ -173,7 +173,7 @@
 
 .docs-attack-stage {
   position: absolute;
-  inset: 84px 0 88px;
+  inset: 26px 0 88px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -597,5 +597,5 @@
   .docs-flow b { display: none; }
   .docs-loop-cards { grid-template-columns: 1fr; }
   .docs-attack-card { min-height: 470px; }
-  .docs-attack-stage { inset: 112px 0 98px; padding: 0 10px; }
+  .docs-attack-stage { inset: 60px 0 98px; padding: 0 10px; }
 }
