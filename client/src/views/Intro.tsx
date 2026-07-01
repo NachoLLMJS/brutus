@@ -24,11 +24,11 @@ export function Intro() {
         src="/videos/vault-brawl-intro.mp4"
         autoPlay
         muted
-        loop
         playsInline
         preload="metadata"
         onLoadedMetadata={(event) => updateLogoCue(event.currentTarget)}
         onTimeUpdate={(event) => updateLogoCue(event.currentTarget)}
+        onEnded={() => setShowLogo(true)}
       />
       <div className="intro-page-vignette" aria-hidden />
       {showLogo && (
