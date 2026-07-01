@@ -188,34 +188,6 @@
     linear-gradient(180deg, rgba(5, 3, 8, 0.02), rgba(5, 3, 8, 0.36));
 }
 
-.intro-page .intro-page-logo {
-  position: absolute;
-  z-index: 3;
-  top: 42%;
-  left: 50%;
-  width: min(52vw, 460px);
-  transform: translate(-50%, -50%);
-  display: block;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  animation: heroFinalLogoReveal .72s cubic-bezier(.2,.9,.2,1) both;
-}
-
-.intro-page .intro-page-logo img {
-  width: 100%;
-  height: auto;
-  display: block;
-  filter:
-    drop-shadow(0 0 28px rgba(230, 180, 80, 0.62))
-    drop-shadow(0 18px 28px rgba(0, 0, 0, 0.88));
-}
-
-.intro-page .intro-page-logo:hover img {
-  transform: scale(1.035);
-}
-
 .intro-page .intro-page-skip {
   position: absolute;
   right: 28px;
@@ -242,12 +214,6 @@
 
 .intro-page ~ .twitter-floating-button {
   display: none;
-}
-
-@keyframes heroFinalLogoReveal {
-  0% { opacity: 0; transform: translate(-50%, -42%) scale(0.72); filter: blur(8px); }
-  68% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0); }
-  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
 }
 
 /* Hero asimétrico variant */
@@ -789,7 +755,6 @@
 @media (max-width: 900px) {
   .landing-shell .hero { height: 200px; }
   .intro-page { min-height: 100vh; }
-  .intro-page .intro-page-logo { width: min(60vw, 420px); }
   .landing-shell .hero-content { padding: 0 86px; }
   .landing-shell .sigil { width: 74px; height: 74px; }
 }
@@ -805,7 +770,6 @@
   .landing-shell .sigil { display: none; }
   .landing-shell .hero { height: 170px; }
   .intro-page { min-height: 100vh; }
-  .intro-page .intro-page-logo { width: min(64vw, 380px); top: 42%; }
   .intro-page .intro-page-skip { right: 16px; bottom: 16px; padding: 10px 14px; font-size: 11px; }
   .landing-shell .hero-content { padding: 0 12px; }
   .landing-shell .hero.asym .hero-content { padding: 0 12px; }
