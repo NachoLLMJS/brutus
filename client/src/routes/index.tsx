@@ -1,4 +1,5 @@
 import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { Intro } from '@/views/Intro';
 import { Landing } from '@/views/Landing';
 import { CharacterCreator } from '@/views/CharacterCreator';
 import { Profile } from '@/views/Profile';
@@ -23,10 +24,11 @@ function RootLayout() {
 }
 
 export const router = createBrowserRouter([
+  { path: '/', element: <Intro /> },
   {
     element: <RootLayout />,
     children: [
-      { path: '/', element: <Landing /> },
+      { path: '/home', element: <Landing /> },
       { path: '/create', element: <CharacterCreator /> },
       { path: '/brute/:id', element: <Profile /> },
       { path: '/brute/:id/arena', element: <Arena /> },

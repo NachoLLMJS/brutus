@@ -156,7 +156,7 @@
   text-transform: uppercase;
 }
 
-.landing-intro {
+.intro-page {
   position: relative;
   min-height: calc(100vh - 62px);
   width: 100%;
@@ -168,7 +168,7 @@
   border-bottom: 1px solid rgba(230, 180, 80, 0.22);
 }
 
-.landing-intro .hero-intro-video {
+.intro-page .intro-page-video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -177,7 +177,7 @@
   z-index: 0;
 }
 
-.landing-intro .hero-video-vignette {
+.intro-page .intro-page-vignette {
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -187,7 +187,7 @@
     linear-gradient(180deg, rgba(5, 3, 8, 0.02), rgba(5, 3, 8, 0.36));
 }
 
-.landing-intro .hero-final-logo {
+.intro-page .intro-page-logo {
   position: absolute;
   z-index: 3;
   top: 40%;
@@ -195,10 +195,14 @@
   width: min(76vw, 680px);
   transform: translate(-50%, -50%);
   display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
   animation: heroFinalLogoReveal .72s cubic-bezier(.2,.9,.2,1) both;
 }
 
-.landing-intro .hero-final-logo img {
+.intro-page .intro-page-logo img {
   width: 100%;
   height: auto;
   display: block;
@@ -207,11 +211,11 @@
     drop-shadow(0 18px 28px rgba(0, 0, 0, 0.88));
 }
 
-.landing-intro .hero-final-logo:hover img {
+.intro-page .intro-page-logo:hover img {
   transform: scale(1.035);
 }
 
-.landing-intro .intro-skip {
+.intro-page .intro-skip {
   position: absolute;
   right: 28px;
   bottom: 24px;
@@ -229,10 +233,14 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
 }
 
-.landing-intro .intro-skip:hover {
+.intro-page .intro-skip:hover {
   color: var(--text-strong);
   border-color: var(--accent-gold);
   background: rgba(196, 26, 26, 0.22);
+}
+
+.intro-page ~ .twitter-floating-button {
+  display: none;
 }
 
 @keyframes heroFinalLogoReveal {
@@ -779,8 +787,8 @@
 /* tablet */
 @media (max-width: 900px) {
   .landing-shell .hero { height: 200px; }
-  .landing-intro { min-height: calc(100vh - 58px); }
-  .landing-intro .hero-final-logo { width: min(82vw, 560px); }
+  .intro-page { min-height: calc(100vh - 58px); }
+  .intro-page .intro-page-logo { width: min(82vw, 560px); }
   .landing-shell .hero-content { padding: 0 86px; }
   .landing-shell .sigil { width: 74px; height: 74px; }
 }
@@ -795,9 +803,9 @@
   }
   .landing-shell .sigil { display: none; }
   .landing-shell .hero { height: 170px; }
-  .landing-intro { min-height: calc(100vh - 56px); }
-  .landing-intro .hero-final-logo { width: min(88vw, 420px); top: 40%; }
-  .landing-intro .intro-skip { right: 16px; bottom: 16px; padding: 10px 14px; font-size: 11px; }
+  .intro-page { min-height: calc(100vh - 56px); }
+  .intro-page .intro-page-logo { width: min(88vw, 420px); top: 40%; }
+  .intro-page .intro-skip { right: 16px; bottom: 16px; padding: 10px 14px; font-size: 11px; }
   .landing-shell .hero-content { padding: 0 12px; }
   .landing-shell .hero.asym .hero-content { padding: 0 12px; }
   .landing-shell .hero-eyebrow { font-size: 10px; letter-spacing: 0.24em; }

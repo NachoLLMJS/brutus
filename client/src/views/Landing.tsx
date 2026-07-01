@@ -68,87 +68,42 @@ export function Landing() {
   const visibleBrutes = useMemo(() => recent, [recent]);
 
   return (
-    <>
-      <IntroCinematic />
-
-      <div className="landing-shell" style={glowVars}>
-        <Forge
-          onForge={({ name, gender }) => {
-            setToast(`${name} enters the Vault…`);
-            window.setTimeout(() => setToast(null), 1800);
-            // Pre-populate name + gender in CharacterCreator via URL params.
-            navigate(`/create?name=${encodeURIComponent(name)}&gender=${gender === 'M' ? 'male' : 'female'}`);
-          }}
-        />
-
-        <RecentWarriorsSection
-          brutes={visibleBrutes}
-          bruteInfo={bruteInfo}
-          onSelect={(id) => {
-            setCurrent(id);
-            navigate(`/brute/${id}`);
-          }}
-          onForget={(id) => {
-            const stub = recent.find((b) => b.id === id);
-            const name = stub?.name ?? 'this Vault Brawler';
-            const ok = window.confirm(`Are you sure you want to remove ${name} from recent Vault Brawlers?`);
-            if (!ok) return;
-            forget(id);
-          }}
-        />
-
-        <footer className="landing-footer">
-          <div className="footer-mark">
-            <span className="pip" />
-            <span>Vault Brawl · MMXXVI · Forged in the Vault</span>
-          </div>
-          <a href="#how">How to play</a>
-        </footer>
-
-        {toast && <div className="landing-toast">{toast}</div>}
-      </div>
-    </>
-  );
-}
-
-/* ─────────────────────── INTRO CINEMATIC ─────────────────────── */
-
-function IntroCinematic() {
-  const [showLogo, setShowLogo] = useState(false);
-
-  const updateLogoCue = (video: HTMLVideoElement) => {
-    const duration = Number.isFinite(video.duration) ? video.duration : 10;
-    setShowLogo(video.currentTime >= Math.max(0, duration - 3));
-  };
-
-  const scrollToForge = (event: React.MouseEvent<HTMLElement>) => {
-    event.preventDefault();
-    document.getElementById('forge')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  return (
-    <section className="landing-intro" aria-label="Vault Brawl intro cinematic">
-      <video
-        className="hero-intro-video"
-        src="/videos/vault-brawl-intro.mp4"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        onLoadedMetadata={(event) => updateLogoCue(event.currentTarget)}
-        onTimeUpdate={(event) => updateLogoCue(event.currentTarget)}
+    <div className="landing-shell" style={glowVars}>
+      <Forge
+        onForge={({ name, gender }) => {
+          setToast(`${name} enters the Vault…`);
+          window.setTimeout(() => setToast(null), 1800);
+          // Pre-populate name + gender in CharacterCreator via URL params.
+          navigate(`/create?name=${encodeURIComponent(name)}&gender=${gender === 'M' ? 'male' : 'female'}`);
+        }}
       />
-      <div className="hero-video-vignette" aria-hidden />
-      {showLogo && (
-        <a className="hero-final-logo" href="#forge" onClick={scrollToForge} aria-label="Start forging a Vault Brawler">
-          <img src="/logos/vaultbrawl-retro-parchment-banner.png" alt="Vault Brawl" draggable={false} />
-        </a>
-      )}
-      <button className="intro-skip" type="button" onClick={scrollToForge}>
-        Skip cinematic
-      </button>
-    </section>
+
+      <RecentWarriorsSection
+        brutes={visibleBrutes}
+        bruteInfo={bruteInfo}
+        onSelect={(id) => {
+          setCurrent(id);
+          navigate(`/brute/${id}`);
+        }}
+        onForget={(id) => {
+          const stub = recent.find((b) => b.id === id);
+          const name = stub?.name ?? 'this Vault Brawler';
+          const ok = window.confirm(`Are you sure you want to remove ${name} from recent Vault Brawlers?`);
+          if (!ok) return;
+          forget(id);
+        }}
+      />
+
+      <footer className="landing-footer">
+        <div className="footer-mark">
+          <span className="pip" />
+          <span>Vault Brawl · MMXXVI · Forged in the Vault</span>
+        </div>
+        <a href="#how">How to play</a>
+      </footer>
+
+      {toast && <div className="landing-toast">{toast}</div>}
+    </div>
   );
 }
 
