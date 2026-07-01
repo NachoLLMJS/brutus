@@ -161,7 +161,7 @@
 
 .docs-attack-card {
   position: relative;
-  min-height: 330px;
+  min-height: 280px;
   border: 1px solid rgba(209, 154, 73, 0.36);
   border-radius: 16px;
   overflow: hidden;
@@ -173,7 +173,7 @@
 
 .docs-attack-stage {
   position: absolute;
-  inset: 0 0 76px;
+  inset: 0 0 12px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -265,21 +265,6 @@
   left: 59%;
   top: 30%;
   animation: docsDamage 1.8s linear infinite;
-}
-
-.docs-combat-caption {
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 16px;
-  padding: 12px 14px;
-  border: 1px solid rgba(209, 154, 73, 0.18);
-  border-radius: 10px;
-  background: rgba(5, 4, 8, 0.68);
-  color: rgba(244, 224, 183, 0.72);
-  font-size: 12px;
-  line-height: 1.45;
-  text-align: center;
 }
 
 .docs-section-intro {
@@ -596,6 +581,6 @@
   }
   .docs-flow b { display: none; }
   .docs-loop-cards { grid-template-columns: 1fr; }
-  .docs-attack-card { min-height: 360px; }
-  .docs-attack-stage { inset: 12px 0 92px; padding: 0 10px; }
+  .docs-attack-card { min-height: 300px; }
+  .docs-attack-stage { inset: 8px 0 18px; padding: 0 10px; }
 }

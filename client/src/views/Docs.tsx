@@ -65,9 +65,7 @@ function AttackPreview() {
           <strong>Nyra Vaultwing</strong>
         </div>
       </div>
-      <div className="docs-combat-caption">
-        Same rhythm as the fight viewer: run into range, play the attack frame, show impact damage, knock the target back, then return to stance.
-      </div>
+
     </div>
   );
 }
