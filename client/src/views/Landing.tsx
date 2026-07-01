@@ -113,36 +113,38 @@ export function Landing() {
 /* ─────────────────────── HERO ─────────────────────── */
 
 function Hero({ asym }: { asym: boolean }) {
+  const [showLogo, setShowLogo] = useState(false);
+
+  const updateLogoCue = (video: HTMLVideoElement) => {
+    const duration = Number.isFinite(video.duration) ? video.duration : 10;
+    setShowLogo(video.currentTime >= Math.max(0, duration - 3));
+  };
+
+  const scrollToForge = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    document.getElementById('forge')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <header className={`hero${asym ? ' asym' : ''}`}>
-      <div className="hero-frame" />
-      <div className="hero-corner tl" />
-      <div className="hero-corner tr" />
-      <div className="hero-corner bl" />
-      <div className="hero-corner br" />
-
-      <SkullSigil side="left" />
-      <SkullSigil side="right" />
-
-      <div className="hero-content">
-        <div className="hero-eyebrow">
-          <span>Where the Vault forges legends</span>
-        </div>
-        <h1 className="hero-title">
-          Vault<span className="v"> B</span>rawl
-        </h1>
-        <div className="hero-sub">Create your Vault Brawler and dominate the arena</div>
-      </div>
+    <header className={`hero hero-video${asym ? ' asym' : ''}`}>
+      <video
+        className="hero-intro-video"
+        src="/videos/vault-brawl-intro.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        onLoadedMetadata={(event) => updateLogoCue(event.currentTarget)}
+        onTimeUpdate={(event) => updateLogoCue(event.currentTarget)}
+      />
+      <div className="hero-video-vignette" aria-hidden />
+      {showLogo && (
+        <a className="hero-final-logo" href="#forge" onClick={scrollToForge} aria-label="Start forging a Vault Brawler">
+          <img src="/logos/vaultbrawl-retro-parchment-banner.png" alt="Vault Brawl" draggable={false} />
+        </a>
+      )}
     </header>
-  );
-}
-
-function SkullSigil({ side }: { side: 'left' | 'right' }) {
-  return (
-    <div className={`sigil ${side}`} aria-hidden>
-      <div className="sigil-glow" />
-      <img src="/logos/vaultbrawl-retro-parchment-banner.png" alt="" draggable={false} />
-    </div>
   );
 }
 
@@ -164,7 +166,7 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
   };
 
   return (
-    <section className="forge">
+    <section id="forge" className="forge">
       <aside className="forge-aside">
         <div>
           <h2>

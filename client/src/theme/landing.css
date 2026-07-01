@@ -156,6 +156,70 @@
   text-transform: uppercase;
 }
 
+.landing-shell .hero.hero-video {
+  height: auto;
+  min-height: 320px;
+  aspect-ratio: 16 / 9;
+  max-height: min(62vh, 540px);
+  border: 1px solid rgba(230, 180, 80, 0.28);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #050309;
+  box-shadow:
+    0 0 0 1px rgba(230, 180, 80, 0.08) inset,
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 42px rgba(103, 57, 143, 0.24);
+}
+
+.landing-shell .hero-intro-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.landing-shell .hero-video-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 44%, transparent 35%, rgba(0, 0, 0, 0.22) 68%, rgba(0, 0, 0, 0.58) 100%),
+    linear-gradient(180deg, rgba(5, 3, 8, 0.1), rgba(5, 3, 8, 0.28));
+}
+
+.landing-shell .hero-final-logo {
+  position: absolute;
+  z-index: 3;
+  top: 43%;
+  left: 50%;
+  width: min(72%, 560px);
+  transform: translate(-50%, -50%);
+  display: block;
+  animation: heroFinalLogoReveal .72s cubic-bezier(.2,.9,.2,1) both;
+}
+
+.landing-shell .hero-final-logo img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter:
+    drop-shadow(0 0 24px rgba(230, 180, 80, 0.58))
+    drop-shadow(0 16px 24px rgba(0, 0, 0, 0.86));
+}
+
+.landing-shell .hero-final-logo:hover img {
+  transform: scale(1.035);
+}
+
+@keyframes heroFinalLogoReveal {
+  0% { opacity: 0; transform: translate(-50%, -42%) scale(0.72); filter: blur(8px); }
+  68% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); filter: blur(0); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+}
+
 /* Hero asimétrico variant */
 .landing-shell .hero.asym .hero-content {
   text-align: left;
@@ -694,6 +758,7 @@
 /* tablet */
 @media (max-width: 900px) {
   .landing-shell .hero { height: 200px; }
+  .landing-shell .hero.hero-video { min-height: 280px; }
   .landing-shell .hero-content { padding: 0 86px; }
   .landing-shell .sigil { width: 74px; height: 74px; }
 }
@@ -708,6 +773,8 @@
   }
   .landing-shell .sigil { display: none; }
   .landing-shell .hero { height: 170px; }
+  .landing-shell .hero.hero-video { min-height: 220px; border-radius: 10px; }
+  .landing-shell .hero-final-logo { width: min(82%, 420px); top: 42%; }
   .landing-shell .hero-content { padding: 0 12px; }
   .landing-shell .hero.asym .hero-content { padding: 0 12px; }
   .landing-shell .hero-eyebrow { font-size: 10px; letter-spacing: 0.24em; }
