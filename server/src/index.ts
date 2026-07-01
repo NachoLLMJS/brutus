@@ -15,6 +15,7 @@ import { apiRouter } from './routes/index.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 const app = express();
+const bnbTestnetRpcOrigin = new URL(env.BNB_TESTNET_RPC_URL).origin;
 
 app.disable('x-powered-by');
 if (env.NODE_ENV === 'production') {
@@ -25,6 +26,10 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         "script-src": ["'self'", "'unsafe-eval'"],
+        "connect-src": [
+          "'self'",
+          bnbTestnetRpcOrigin,
+        ],
       },
     },
   }),
