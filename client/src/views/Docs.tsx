@@ -71,7 +71,7 @@ function AttackPreview() {
         </div>
       </div>
       <div className="docs-combat-caption">
-        Combat is automatic: brawlers move in, strike, trigger skills, lose HP, and the winner can become eligible for an on-chain reward.
+        Same rhythm as the fight viewer: run into range, play the attack frame, show impact damage, knock the target back, then return to stance.
       </div>
     </div>
   );
@@ -98,6 +98,29 @@ function InfoCard({ label, value, note }: { label: string; value: string; note: 
     <div className="docs-info-card">
       <span>{label}</span>
       <strong>{value}</strong>
+      <small>{note}</small>
+    </div>
+  );
+}
+
+function FlowStep({
+  title,
+  note,
+  brute,
+  chest,
+}: {
+  title: string;
+  note: string;
+  brute: BruteAvatarSubject;
+  chest?: boolean;
+}) {
+  return (
+    <div className="docs-flow-step">
+      <div className="docs-flow-art">
+        <BruteAvatar brute={brute} size="sm" anim={{ facing: 'right' }} />
+        {chest && <img src="/images/docs/vault-chest.png" alt="Vault chest" />}
+      </div>
+      <span>{title}</span>
       <small>{note}</small>
     </div>
   );
@@ -136,19 +159,27 @@ export function Docs() {
         </section>
 
         <DocSection id="game-loop" kicker="01 · Game" title="Core game loop">
-          <div className="docs-two-col">
-            <div>
-              <p>
-                Vault Brawl is played around your personal stable of brawlers. You create a brawler, train it,
-                enter the Board, and fight generated rivals. Battles resolve automatically with stats, weapons,
-                skills, beasts, HP, and damage rolls.
-              </p>
-              <ol className="docs-steps">
-                <li><strong>Create</strong> a Vault Brawler.</li>
-                <li><strong>Train or fight</strong> each day.</li>
-                <li><strong>Win XP</strong> and unlock level-up choices.</li>
-                <li><strong>Forge</strong> skills, weapons, and a deeper stable.</li>
-              </ol>
+          <p className="docs-section-intro">
+            The game is built around clear daily choices: grow your brawler, pick fights, and expand your stable when you want more chances to play.
+          </p>
+          <div className="docs-loop-layout">
+            <div className="docs-loop-cards">
+              <div className="docs-loop-card">
+                <strong>Create</strong>
+                <span>Start with a Vault Brawler tied to your wallet session.</span>
+              </div>
+              <div className="docs-loop-card">
+                <strong>Train</strong>
+                <span>Use daily training to push stats without risking a fight.</span>
+              </div>
+              <div className="docs-loop-card">
+                <strong>Fight</strong>
+                <span>Enter the Board, face rivals, and let the combat engine resolve the battle.</span>
+              </div>
+              <div className="docs-loop-card">
+                <strong>Upgrade</strong>
+                <span>Wins and progress unlock new stats, skills, weapons, and beasts.</span>
+              </div>
             </div>
             <div className="docs-idle-grid" aria-label="Vault Brawler examples">
               {fighters.slice(1).map((fighter, index) => (
@@ -193,11 +224,24 @@ export function Docs() {
 
         <DocSection id="vault-flow" kicker="04 · Vault" title="Where the BNB goes">
           <div className="docs-flow">
-            <div><span>Player buys extra brawler</span></div>
+            <FlowStep
+              title="Player buys extra brawler"
+              note="After 3 free brawlers, the wallet can pay for another Vault Brawler."
+              brute={fighters[2]!}
+            />
             <b>→</b>
-            <div><span>BNB payment is sent</span></div>
+            <FlowStep
+              title="BNB payment is sent"
+              note="MetaMask sends the exact extra-brawler price on BNB Testnet."
+              brute={fighters[3]!}
+            />
             <b>→</b>
-            <div><span>100% goes to the Vault</span></div>
+            <FlowStep
+              title="100% goes to the Vault"
+              note="The BNB lands in the Vault and becomes visible in Vault Info."
+              brute={fighters[1]!}
+              chest
+            />
           </div>
           <p>
             The in-game Vault Info panel reads the chain and shows the numbers players care about: vault balance,
@@ -208,13 +252,13 @@ export function Docs() {
 
         <DocSection id="rewards" kicker="05 · Rewards" title="Combat rewards and claims">
           <p>
-            When a player wins an eligible fight, the game operator records that win on-chain. If the wallet meets the hold
-            requirement and the reward pool has enough BNB, the winner can claim the combat reward.
+            When your wallet holds more than <strong>10,000 $VB</strong> and your own Vault Brawler wins an eligible recorded combat,
+            you can claim the combat reward from the reward pool.
           </p>
           <div className="docs-callout-grid">
             <InfoCard label="Claim per eligible win" value="0.001 BNB" note="Shown live in Vault Info." />
-            <InfoCard label="Required" value="Token hold" note="The wallet must hold the required game token amount." />
-            <InfoCard label="Limit" value="Once per fight" note="A recorded fight reward cannot be claimed twice." />
+            <InfoCard label="Required hold" value="10,000+ $VB" note="The winning wallet must hold more than 10,000 $VB." />
+            <InfoCard label="Required win" value="Your brawler" note="The combat must be won by your own Vault Brawler." />
           </div>
         </DocSection>
 
@@ -230,7 +274,7 @@ export function Docs() {
             </details>
             <details>
               <summary>Can every win claim BNB?</summary>
-              <p>Only eligible recorded wins can claim, and only if the reward pool has enough BNB and the wallet satisfies the token hold requirement.</p>
+              <p>No. The wallet must hold more than 10,000 $VB and the eligible recorded fight must be won by that wallet’s own Vault Brawler. The reward pool also needs enough BNB, and each fight can only be claimed once.</p>
             </details>
           </div>
         </DocSection>
