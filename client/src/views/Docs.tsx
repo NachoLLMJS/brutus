@@ -292,10 +292,6 @@ export function Docs() {
               <summary>Can I claim the same fight twice?</summary>
               <p>No. Once a recorded fight reward is claimed, that fight is marked as claimed and cannot pay again.</p>
             </details>
-            <details>
-              <summary>What happens if the reward pool is empty?</summary>
-              <p>The claim cannot be paid until the reward pool has enough BNB. The win can be valid, but the pool still needs available funds.</p>
-            </details>
           </div>
         </DocSection>
       </article>
