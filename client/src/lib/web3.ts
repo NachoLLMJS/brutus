@@ -90,6 +90,14 @@ const EXTRA_BRUTE_PRICE_SELECTOR = '0x2cab4165';
 const NEXT_BRUTE_ID_SELECTOR = '0x0b4dd2a0';
 const BRUTE_CREATED_TOPIC = '0xfbe356727e47cbbe402da96eaae9ef22f838ecffbd2203e8119a4c42cb408e7b';
 
+const BNB_TESTNET_RPC = BNB_TESTNET.rpcUrls[0];
+const VAULT_TOTAL_RECEIVED_SELECTOR = '0x33e4c946';
+const VAULT_BALANCE_SELECTOR = '0x0bf6cc08';
+
+const TOKEN_TOTAL_SUPPLY_SELECTOR = '0x18160ddd';
+const TOKEN_SYMBOL_SELECTOR = '0x95d89b41';
+const REWARDS_TOTAL_CLAIMED_SELECTOR = '0xd54ad2a1';
+
 interface TransactionReceiptLog {
   address: string;
   topics: string[];
@@ -116,6 +124,14 @@ function encodeAddress(address: string): string {
 
 function hexToBigInt(hex: string): bigint {
   return BigInt(hex && hex !== '0x' ? hex : '0x0');
+}
+
+function decodeAbiStringResult(hex: string): string {
+  const clean = strip0x(hex);
+  const offset = Number(hexToBigInt(`0x${clean.slice(0, 64)}`));
+  const lengthStart = offset * 2;
+  const length = Number(hexToBigInt(`0x${clean.slice(lengthStart, lengthStart + 64)}`));
+  return hexToUtf8(clean.slice(lengthStart + 64, lengthStart + 64 + length * 2));
 }
 
 function hexToUtf8(hex: string): string {
@@ -374,6 +390,117 @@ export async function claimCombatRewardOnChain(
   return { txHash };
 }
 
+
+async function publicEthCall(to: string, data: string): Promise<string> {
+  const response = await fetch(BNB_TESTNET_RPC, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'eth_call',
+      params: [{ to, data }, 'latest'],
+    }),
+  });
+  const payload = await response.json() as { result?: string; error?: { message?: string } };
+  if (!response.ok || payload.error || !payload.result) {
+    throw new Error(payload.error?.message ?? 'vault_rpc_call_failed');
+  }
+  return payload.result;
+}
+
+async function publicEthCallOptional(to: string, data: string): Promise<string | null> {
+  try {
+    return await publicEthCall(to, data);
+  } catch {
+    return null;
+  }
+}
+
+async function publicEthGetBalance(address: string): Promise<bigint> {
+  const response = await fetch(BNB_TESTNET_RPC, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'eth_getBalance',
+      params: [address, 'latest'],
+    }),
+  });
+  const payload = await response.json() as { result?: string; error?: { message?: string } };
+  if (!response.ok || payload.error || !payload.result) {
+    throw new Error(payload.error?.message ?? 'vault_rpc_balance_failed');
+  }
+  return hexToBigInt(payload.result);
+}
+
+export interface VaultInfo {
+  chainName: string;
+  chainId: string;
+  tokenSymbol: string;
+  vaultBalance: bigint;
+  totalTaxRewardsReceived: bigint;
+  totalOnChainBrawlers: number;
+  extraBrutePrice: bigint;
+  walletTokenBalance: bigint | null;
+  tokenTotalSupply: bigint;
+  combatRewardsBalance: bigint;
+  combatClaimAmount: bigint;
+  combatMinimumHold: bigint;
+  combatTotalClaimed: bigint;
+}
+
+export async function readVaultInfo(walletAddress?: string | null): Promise<VaultInfo> {
+  const vault = BRUTUS_BNB_TESTNET_CONTRACTS.vault;
+  const token = BRUTUS_BNB_TESTNET_CONTRACTS.token;
+  const registry = BRUTUS_BNB_TESTNET_CONTRACTS.registry;
+  const combatRewards = BRUTUS_BNB_TESTNET_CONTRACTS.combatRewards;
+  const priceUser = walletAddress ?? '0x0000000000000000000000000000000000000000';
+  const [
+    symbolResult,
+    balanceResult,
+    receivedResult,
+    nextBruteIdResult,
+    extraPriceResult,
+    walletTokenBalanceResult,
+    tokenSupplyResult,
+    combatRewardsBalance,
+    claimAmountResult,
+    minimumHoldResult,
+    totalClaimedResult,
+  ] = await Promise.all([
+    publicEthCall(token, TOKEN_SYMBOL_SELECTOR),
+    publicEthCall(vault, VAULT_BALANCE_SELECTOR),
+    publicEthCall(vault, VAULT_TOTAL_RECEIVED_SELECTOR),
+    publicEthCall(registry, NEXT_BRUTE_ID_SELECTOR),
+    publicEthCall(registry, `${EXTRA_BRUTE_PRICE_SELECTOR}${encodeAddress(priceUser)}`),
+    walletAddress ? publicEthCallOptional(token, `${ERC20_BALANCE_OF_SELECTOR}${encodeAddress(walletAddress)}`) : Promise.resolve(null),
+    publicEthCall(token, TOKEN_TOTAL_SUPPLY_SELECTOR),
+    publicEthGetBalance(combatRewards),
+    publicEthCall(combatRewards, CLAIM_AMOUNT_WEI_SELECTOR),
+    publicEthCall(combatRewards, MINIMUM_TOKEN_HOLD_SELECTOR),
+    publicEthCall(combatRewards, REWARDS_TOTAL_CLAIMED_SELECTOR),
+  ]);
+
+  const nextBruteId = Number(hexToBigInt(nextBruteIdResult));
+
+  return {
+    chainName: BNB_TESTNET.chainName,
+    chainId: BNB_TESTNET.chainId,
+    tokenSymbol: decodeAbiStringResult(symbolResult),
+    vaultBalance: hexToBigInt(balanceResult),
+    totalTaxRewardsReceived: hexToBigInt(receivedResult),
+    totalOnChainBrawlers: Math.max(0, nextBruteId - 1),
+    extraBrutePrice: hexToBigInt(extraPriceResult),
+    walletTokenBalance: walletTokenBalanceResult ? hexToBigInt(walletTokenBalanceResult) : null,
+    tokenTotalSupply: hexToBigInt(tokenSupplyResult),
+    combatRewardsBalance,
+    combatClaimAmount: hexToBigInt(claimAmountResult),
+    combatMinimumHold: hexToBigInt(minimumHoldResult),
+    combatTotalClaimed: hexToBigInt(totalClaimedResult),
+  };
+}
 export function formatBnbWei(wei: bigint): string {
   const whole = wei / 1_000_000_000_000_000_000n;
   const fraction = wei % 1_000_000_000_000_000_000n;

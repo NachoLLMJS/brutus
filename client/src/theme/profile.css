@@ -1049,6 +1049,77 @@
 }
 .temple-battle-log .battlev2-foe { font-size: 14px; }
 .temple-battle-log .battlev2-when { font-size: 10px; }
+.vaultinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.vaultinfo-hero {
+  padding: 12px;
+  border: 1px solid rgba(230, 180, 80, 0.28);
+  background: radial-gradient(circle at 50% 0%, rgba(196, 26, 26, 0.18), rgba(17, 10, 20, 0.72));
+  text-align: center;
+}
+.vaultinfo-hero span,
+.vaultinfo-hero small,
+.vaultinfo-row span,
+.vaultinfo-refresh,
+.vaultinfo-empty {
+  font-family: var(--font-sans);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.vaultinfo-hero span {
+  display: block;
+  font-size: 10px;
+}
+.vaultinfo-hero strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--accent-gold);
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.08em;
+}
+.vaultinfo-hero small {
+  display: block;
+  margin-top: 4px;
+  font-size: 9px;
+}
+.vaultinfo-grid,
+.vaultinfo-addresses {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border-shadow);
+}
+.vaultinfo-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 2px;
+  border-bottom: 1px solid var(--border-shadow);
+}
+.vaultinfo-row span {
+  font-size: 10px;
+}
+.vaultinfo-row b {
+  color: var(--ink-strong);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-align: right;
+}
+.vaultinfo-addresses .vaultinfo-row b {
+  color: var(--accent-gold);
+}
+.vaultinfo-refresh,
+.vaultinfo-empty {
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 10px;
+}
 .temple-bottom-lineage {
   max-width: 900px;
   margin: 10px auto 0;

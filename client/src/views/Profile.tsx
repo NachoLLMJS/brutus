@@ -20,7 +20,8 @@ import { useGameStore } from '@/store/useGameStore';
 import { useWalletStore } from '@/store/useWalletStore';
 import { useProfileSettings } from '@/store/useProfileSettings';
 import { useLobbySettings } from '@/store/useLobbySettings';
-import { battleHistoryFor, lineageFor, rankName } from '@/lib/profileFlavor';
+import { lineageFor, rankName } from '@/lib/profileFlavor';
+import { formatBnbWei, readVaultInfo, type VaultInfo } from '@/lib/web3';
 
 const MAX_HP = 200;
 const MAX_STAT = 100;
@@ -47,6 +48,9 @@ export function Profile() {
   const setTrainingMode = useLobbySettings((s) => s.setTrainingMode);
 
   const [pupils, setPupils] = useState<Brute[]>([]);
+  const [vaultInfo, setVaultInfo] = useState<VaultInfo | null>(null);
+  const [vaultInfoLoading, setVaultInfoLoading] = useState(false);
+  const [vaultInfoError, setVaultInfoError] = useState<string | null>(null);
   const pendingLevelUp = useGameStore((s) => s.pendingLevelUp);
   const hasPendingLevelUp = pendingLevelUp?.bruteId === id;
 
@@ -99,8 +103,30 @@ export function Profile() {
     };
   }, [brute]);
 
-  // Battle Log + linaje deterministas.
-  const history = useMemo(() => (brute ? battleHistoryFor(brute, 5) : []), [brute]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setVaultInfoLoading(true);
+    setVaultInfoError(null);
+    void readVaultInfo(walletAddress)
+      .then((info) => {
+        if (!cancelled) setVaultInfo(info);
+      })
+      .catch((e) => {
+        if (!cancelled) {
+          setVaultInfo(null);
+          setVaultInfoError(e instanceof Error ? e.message : 'vault_info_unavailable');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setVaultInfoLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [walletAddress]);
+
+  // Linaje determinista.
   const lineage = useMemo(() => (brute ? lineageFor(brute) : ''), [brute]);
 
   if (loading && !brute) {
@@ -308,19 +334,8 @@ export function Profile() {
               </div>
             </Glass>
 
-            <Glass num="◇" title="Battle Log" meta="5 latest">
-              <div className="battlesv2 temple-battle-log">
-                {history.map((b, i) => (
-                  <div key={i} className={clsx('battlev2', b.result)}>
-                    <div className="battlev2-r">{b.result === 'win' ? 'V' : 'D'}</div>
-                    <div>
-                      <div className="battlev2-foe">{b.foe} <span className="lvl">N{b.level}</span></div>
-                      <div className="battlev2-when">{b.when}</div>
-                    </div>
-                    <div className="battlev2-xp">{b.xp >= 0 ? '+' : ''}{b.xp}</div>
-                  </div>
-                ))}
-              </div>
+            <Glass num="◇" title="Vault Info" meta="on-chain">
+              <VaultInfoPanel info={vaultInfo} loading={vaultInfoLoading} error={vaultInfoError} />
             </Glass>
           </aside>
         </section>
@@ -399,6 +414,66 @@ function BigStat({
         />
       </div>
       {sub && <div className="bigstat-sub">{sub}</div>}
+    </div>
+  );
+}
+
+
+function vaultMetric(value: bigint, suffix = 'BNB'): string {
+  return `${formatBnbWei(value)} ${suffix}`;
+}
+
+function tokenMetric(value: bigint, symbol: string): string {
+  const formatted = formatBnbWei(value);
+  return `${formatted} ${symbol}`;
+}
+
+function VaultInfoPanel({
+  info,
+  loading,
+  error,
+}: {
+  info: VaultInfo | null;
+  loading: boolean;
+  error: string | null;
+}) {
+  if (loading && !info) {
+    return <div className="vaultinfo-empty">Reading vault on-chain…</div>;
+  }
+  if (error && !info) {
+    return <div className="vaultinfo-empty">Vault RPC unavailable</div>;
+  }
+  if (!info) {
+    return <div className="vaultinfo-empty">Vault info unavailable</div>;
+  }
+  return (
+    <div className="vaultinfo">
+      <div className="vaultinfo-hero">
+        <span>Vault balance</span>
+        <strong>{formatBnbWei(info.vaultBalance)} BNB</strong>
+        <small>{info.chainName}</small>
+      </div>
+      <div className="vaultinfo-grid">
+        <VaultInfoRow label="Extra brawlers on-chain" value={info.totalOnChainBrawlers.toString()} />
+        <VaultInfoRow label="Extra brawler price" value={vaultMetric(info.extraBrutePrice)} />
+        <VaultInfoRow label="Tax received" value={vaultMetric(info.totalTaxRewardsReceived)} />
+        <VaultInfoRow label="Reward pool" value={vaultMetric(info.combatRewardsBalance)} />
+        <VaultInfoRow label="Claim per win" value={vaultMetric(info.combatClaimAmount)} />
+        <VaultInfoRow label="Claimed so far" value={vaultMetric(info.combatTotalClaimed)} />
+        <VaultInfoRow label="Hold required" value={tokenMetric(info.combatMinimumHold, info.tokenSymbol)} />
+        <VaultInfoRow label="Token supply" value={tokenMetric(info.tokenTotalSupply, info.tokenSymbol)} />
+        <VaultInfoRow label="Your token hold" value={info.walletTokenBalance === null ? 'Connect wallet' : tokenMetric(info.walletTokenBalance, info.tokenSymbol)} />
+      </div>
+      {loading && <div className="vaultinfo-refresh">Refreshing…</div>}
+    </div>
+  );
+}
+
+function VaultInfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="vaultinfo-row">
+      <span>{label}</span>
+      <b>{value}</b>
     </div>
   );
 }

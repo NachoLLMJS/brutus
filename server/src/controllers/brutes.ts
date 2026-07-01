@@ -8,7 +8,7 @@ const ID_REGEX = /^[a-z0-9]{20,40}$/;
 const WALLET_REGEX = /^0x[0-9a-fA-F]{40}$/;
 const TX_HASH_REGEX = /^0x[0-9a-fA-F]{64}$/;
 
-// Keep this schema in the server watch path so client/UI/core/html/skill-asset deploys rebuild reliably.
+// Keep this schema in the server watch path so client/UI/core/html/skill/weapon/vault-info deploys rebuild reliably.
 const LpcAppearanceSchema = z.object({
   head: z.enum(['humanMale', 'humanGaunt', 'humanPlump', 'humanElder']),
   hair: z.enum(['none', 'bedhead', 'bob', 'afro', 'buzzcut', 'long', 'curlyShort', 'bangs']),
