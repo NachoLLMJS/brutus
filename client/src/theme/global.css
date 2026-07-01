@@ -4,6 +4,7 @@
 @import './combat.css';
 @import './landing.css';
 @import './creator.css';
+@import './docs.css';
 @import './levelup.css';
 
 @tailwind base;

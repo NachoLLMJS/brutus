@@ -37,6 +37,11 @@ const NAV: NavItem[] = [
     to: (id) => (id ? `/brute/${id}/levelup` : '/create'),
     matches: (p) => p === '/create' || p.endsWith('/levelup'),
   },
+  {
+    label: 'Docs',
+    to: () => '/docs',
+    matches: (p) => p === '/docs',
+  },
 ];
 
 export function Topbar() {

@@ -6,6 +6,7 @@ import { Arena } from '@/views/Arena';
 import { FightViewer } from '@/views/FightViewer';
 import { Tournament } from '@/views/Tournament';
 import { LevelUp } from '@/views/LevelUp';
+import { Docs } from '@/views/Docs';
 import { SymbolDebugger } from '@/views/SymbolDebugger';
 import { BrutePartsViewer } from '@/views/BrutePartsViewer';
 import { Topbar } from '@/components/Topbar';
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
       { path: '/brute/:id/fight/:fid', element: <FightViewer /> },
       { path: '/brute/:id/tournament', element: <Tournament /> },
       { path: '/brute/:id/levelup', element: <LevelUp /> },
+      { path: '/docs', element: <Docs /> },
       // Dev tool — sin link visible en la nav. Para identificar Symbols
       // del fork brutus-fla-parser cuando se reskinea sprites.
       { path: '/debug/symbols', element: <SymbolDebugger /> },
