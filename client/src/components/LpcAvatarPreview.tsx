@@ -27,6 +27,7 @@ import armsBracersIdle from '@/assets/lpc-test/arms-bracers-idle.png?url';
 import torsoArmorPlateIdle from '@/assets/lpc-test/torso-armor-plate-idle.png?url';
 import torsoArmorLegionIdle from '@/assets/lpc-test/torso-armor-legion-idle.png?url';
 import torsoChainmailIdle from '@/assets/lpc-test/torso-chainmail-idle.png?url';
+import torsoArmorLeatherIdle from '@/assets/lpc-test/torso-armor-leather-idle.png?url';
 import legsArmorPlateIdle from '@/assets/lpc-test/legs-armor-plate-idle.png?url';
 import feetArmorPlateSteelIdle from '@/assets/lpc-test/feet-armor-plate-steel-idle.png?url';
 
@@ -49,7 +50,7 @@ export type LpcWingsKey = 'none' | 'monarchPurple' | 'pixiePurple';
 export type LpcHeadwearKey = 'none' | 'armet' | 'barbuta' | 'greathelm' | 'maximus' | 'cedricHelmet' | 'jasonHelmet';
 export type LpcArmorColorKey = 'steel' | 'yellow' | 'iron' | 'bronze' | 'copper' | 'pink' | 'purple' | 'silver' | 'black';
 export type LpcArmsArmorKey = 'none' | 'plate' | 'bracers';
-export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail';
+export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail' | 'leather';
 export type LpcLegsArmorKey = 'none' | 'plate';
 export type LpcFeetArmorKey = 'none' | 'plate';
 export type LpcWeaponKey = 'none';
@@ -146,6 +147,7 @@ export const LPC_TORSO_ARMOR_OPTIONS = [
   { key: 'plate', label: 'Torso armour plate', src: torsoArmorPlateIdle },
   { key: 'legion', label: 'Torso legion', src: torsoArmorLegionIdle },
   { key: 'chainmail', label: 'Chainmail', src: torsoChainmailIdle },
+  { key: 'leather', label: 'Leather armour', src: torsoArmorLeatherIdle },
 ] as const satisfies ReadonlyArray<LpcOption<LpcTorsoArmorKey>>;
 
 export const LPC_LEGS_ARMOR_OPTIONS = [
@@ -204,7 +206,7 @@ function layerPaths(props: Required<Omit<LpcAvatarPreviewProps, 'scale' | 'compa
     customHeadSkin ? undefined : toLayer(pick(LPC_HEAD_OPTIONS, props.head)),
     paletteLayer(pick(LPC_LEGS_ARMOR_OPTIONS, props.legsArmor), props.armorColor, 'metal'),
     paletteLayer(pick(LPC_FEET_ARMOR_OPTIONS, props.feetArmor), props.armorColor, 'metal'),
-    paletteLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor), props.armorColor, props.torsoArmor === 'trenchCoat' ? 'cloth' : 'metal'),
+    paletteLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor), props.armorColor, props.torsoArmor === 'trenchCoat' || props.torsoArmor === 'leather' ? 'cloth' : 'metal'),
     paletteLayer(pick(LPC_ARMS_ARMOR_OPTIONS, props.armsArmor), props.armorColor, 'metal'),
     customHeadSkin ? undefined : toLayer(pick(LPC_HAIR_OPTIONS, props.hair)),
     headwearLayer,
