@@ -13,7 +13,7 @@ const fighters: BruteAvatarSubject[] = [
     gender: 'male',
     body: '1',
     bodyColors: '0',
-    appearance: { lpc: { head: 'humanMale', hair: 'bob', headwear: 'none', torsoArmor: 'leather', armsArmor: 'bracers', legsArmor: 'plate', feetArmor: 'plate', armorColor: 'purple', wings: 'monarchPurple' } },
+    appearance: { lpc: { head: 'humanMale', hair: 'none', headwear: 'jasonHelmet', torsoArmor: 'leather', armsArmor: 'bracers', legsArmor: 'plate', feetArmor: 'plate', armorColor: 'purple', wings: 'monarchPurple' } },
   },
   {
     id: 'docs-orrin',
@@ -31,46 +31,82 @@ const fighters: BruteAvatarSubject[] = [
   },
 ];
 
-const priceRows = [
-  ['1st extra', '0.01 BNB'],
-  ['2nd extra', '0.02 BNB'],
-  ['3rd extra', '0.04 BNB'],
-  ['4th extra', '0.08 BNB'],
-  ['Then', 'keeps doubling per wallet'],
+const toc = [
+  ['overview', 'Overview'],
+  ['game-loop', 'Game loop'],
+  ['blockchain', 'Blockchain layer'],
+  ['vault-brawlers', 'Extra brawlers'],
+  ['vault-flow', 'Where BNB goes'],
+  ['rewards', 'Combat rewards'],
+  ['quick-faq', 'Quick FAQ'],
 ];
 
-function MiniBrawl() {
-  return (
-    <div className="docs-brawl-scene" aria-label="Vault Brawlers battling">
-      <div className="docs-fighter docs-fighter-left">
-        <BruteAvatar brute={fighters[0]!} size="lg" anim={{ facing: 'right' }} />
-        <span>Vex Ashguard</span>
-      </div>
-      <div className="docs-vs">VS</div>
-      <div className="docs-fighter docs-fighter-right">
-        <BruteAvatar brute={fighters[1]!} size="lg" anim={{ facing: 'left' }} />
-        <span>Nyra Vaultwing</span>
-      </div>
-    </div>
-  );
-}
+const priceRows = [
+  ['1st paid extra', '0.01 BNB'],
+  ['2nd paid extra', '0.02 BNB'],
+  ['3rd paid extra', '0.04 BNB'],
+  ['4th paid extra', '0.08 BNB'],
+  ['After that', 'doubles per wallet'],
+];
 
-function IdleBrawlers() {
+function AttackPreview() {
   return (
-    <div className="docs-idle-row" aria-label="Idle Vault Brawlers">
-      {fighters.slice(1).map((fighter, index) => (
-        <div className="docs-idle-card" key={fighter.id}>
-          <BruteAvatar brute={fighter} size="md" anim={{ facing: index % 2 === 0 ? 'left' : 'right' }} />
+    <div className="docs-attack-card" aria-label="Vault Brawlers attacking in the arena">
+      <div className="docs-arena-label">Live combat style preview</div>
+      <div className="docs-hp-row">
+        <div><span>Vex Ashguard</span><i style={{ width: '74%' }} /></div>
+        <div><span>Nyra Vaultwing</span><i style={{ width: '58%' }} /></div>
+      </div>
+      <div className="docs-attack-stage">
+        <div className="docs-impact docs-impact-left">−18</div>
+        <div className="docs-slash docs-slash-a" />
+        <div className="docs-slash docs-slash-b" />
+        <div className="docs-attacker docs-attacker-left">
+          <BruteAvatar brute={fighters[0]!} size="lg" anim={{ facing: 'right' }} />
+          <strong>Vex Ashguard</strong>
         </div>
-      ))}
+        <div className="docs-attacker docs-attacker-right">
+          <BruteAvatar brute={fighters[1]!} size="lg" anim={{ facing: 'left' }} />
+          <strong>Nyra Vaultwing</strong>
+        </div>
+      </div>
+      <div className="docs-combat-caption">
+        Combat is automatic: brawlers move in, strike, trigger skills, lose HP, and the winner can become eligible for an on-chain reward.
+      </div>
     </div>
   );
 }
 
-function Section({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
+function Sidebar() {
   return (
-    <section className="docs-panel">
-      <p className="docs-eyebrow">{eyebrow}</p>
+    <aside className="docs-sidebar">
+      <div className="docs-sidebar-card">
+        <p>Vault Brawl</p>
+        <h3>Docs</h3>
+        <nav aria-label="Docs table of contents">
+          {toc.map(([id, label]) => (
+            <a href={`#${id}`} key={id}>{label}</a>
+          ))}
+        </nav>
+      </div>
+    </aside>
+  );
+}
+
+function InfoCard({ label, value, note }: { label: string; value: string; note: string }) {
+  return (
+    <div className="docs-info-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <small>{note}</small>
+    </div>
+  );
+}
+
+function DocSection({ id, kicker, title, children }: { id: string; kicker: string; title: string; children: React.ReactNode }) {
+  return (
+    <section id={id} className="docs-section">
+      <p className="docs-kicker">{kicker}</p>
       <h2>{title}</h2>
       {children}
     </section>
@@ -79,48 +115,68 @@ function Section({ eyebrow, title, children }: { eyebrow: string; title: string;
 
 export function Docs() {
   return (
-    <div className="docs-shell">
-      <section className="docs-hero">
-        <div className="docs-hero-copy">
-          <p className="docs-kicker">Vault Brawl Docs</p>
-          <h1>Fight, forge, own, and claim from the vault.</h1>
-          <p>
-            Vault Brawl is a dark-fantasy auto-battler where every player starts with free brawlers,
-            fights daily battles, and can use BNB Testnet blockchain actions for extra Vault Brawlers
-            and combat rewards.
-          </p>
-        </div>
-        <MiniBrawl />
-      </section>
+    <div className="docs-page">
+      <Sidebar />
 
-      <div className="docs-grid">
-        <Section eyebrow="01" title="The core game loop">
-          <p>
-            Create a Vault Brawler, train it, enter the Board, and fight rivals. Your brawler grows
-            through levels, stats, skills, weapons, and beasts. Battles are automatic: the fun is in
-            building a stronger brawler and choosing when to fight, train, or forge upgrades.
-          </p>
-          <IdleBrawlers />
-        </Section>
+      <article className="docs-main">
+        <section id="overview" className="docs-hero docs-section">
+          <div>
+            <p className="docs-kicker">Project docs</p>
+            <h1>Vault Brawl explained</h1>
+            <p className="docs-lead">
+              A dark-fantasy auto-battler where players create Vault Brawlers, fight rivals, grow their stable,
+              and use BNB Testnet for extra brawlers and transparent reward claims.
+            </p>
+            <div className="docs-hero-actions">
+              <a href="#vault-brawlers">Extra brawlers</a>
+              <a href="#rewards">Rewards</a>
+            </div>
+          </div>
+          <AttackPreview />
+        </section>
 
-        <Section eyebrow="02" title="What the blockchain does">
-          <p>
-            The chain is used only for the parts that should be public and verifiable: paid extra
-            Vault Brawlers, vault funding, and claimable BNB rewards after recorded wins. The normal
-            game stays fast; the blockchain layer adds ownership and transparent reward accounting.
-          </p>
-          <ul>
-            <li>BNB Testnet wallet connection through MetaMask.</li>
-            <li>Extra Vault Brawlers are minted/registered on-chain.</li>
-            <li>BNB paid for extras goes into the project vault.</li>
-            <li>Winning eligible combats can unlock a BNB reward claim.</li>
-          </ul>
-        </Section>
+        <DocSection id="game-loop" kicker="01 · Game" title="Core game loop">
+          <div className="docs-two-col">
+            <div>
+              <p>
+                Vault Brawl is played around your personal stable of brawlers. You create a brawler, train it,
+                enter the Board, and fight generated rivals. Battles resolve automatically with stats, weapons,
+                skills, beasts, HP, and damage rolls.
+              </p>
+              <ol className="docs-steps">
+                <li><strong>Create</strong> a Vault Brawler.</li>
+                <li><strong>Train or fight</strong> each day.</li>
+                <li><strong>Win XP</strong> and unlock level-up choices.</li>
+                <li><strong>Forge</strong> skills, weapons, and a deeper stable.</li>
+              </ol>
+            </div>
+            <div className="docs-idle-grid" aria-label="Vault Brawler examples">
+              {fighters.slice(1).map((fighter, index) => (
+                <div className="docs-mini-brawler" key={fighter.id}>
+                  <BruteAvatar brute={fighter} size="md" anim={{ facing: index % 2 === 0 ? 'right' : 'left' }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </DocSection>
 
-        <Section eyebrow="03" title="Free and extra Vault Brawlers">
+        <DocSection id="blockchain" kicker="02 · On-chain" title="What the blockchain does">
           <p>
-            Each wallet can create up to 3 base brawlers for free. After that, you can create extra
-            Vault Brawlers by paying BNB. The price is per wallet and increases with every extra brawler.
+            The blockchain is not used to slow down every click. The normal game remains fast, while BNB Testnet
+            handles the public economy pieces that benefit from being verifiable.
+          </p>
+          <div className="docs-info-grid">
+            <InfoCard label="Wallet" value="MetaMask" note="Connect on BNB Testnet." />
+            <InfoCard label="On-chain action" value="Extra brawlers" note="Paid extras are registered on-chain." />
+            <InfoCard label="Vault" value="BNB flow" note="Extra-brawler BNB goes to the Vault." />
+            <InfoCard label="Rewards" value="Claims" note="Eligible wins can claim BNB from the reward pool." />
+          </div>
+        </DocSection>
+
+        <DocSection id="vault-brawlers" kicker="03 · Stable" title="Free brawlers and extra Vault Brawlers">
+          <p>
+            Every wallet can start with up to <strong>3 base brawlers for free</strong>. After that, players who want a larger
+            stable can create paid extra Vault Brawlers. The extra price is calculated per wallet and doubles after each paid extra.
           </p>
           <div className="docs-price-table">
             {priceRows.map(([label, value]) => (
@@ -131,49 +187,54 @@ export function Docs() {
             ))}
           </div>
           <p className="docs-note">
-            Example: your first paid extra costs 0.01 BNB, then 0.02 BNB, then 0.04 BNB, etc.
+            The first paid extra costs 0.01 BNB. If the same wallet buys another, the next one costs 0.02 BNB, then 0.04 BNB, and so on.
           </p>
-        </Section>
+        </DocSection>
 
-        <Section eyebrow="04" title="Where the BNB goes">
-          <p>
-            When you buy an extra Vault Brawler, the BNB is sent to the Vault. The Vault Info panel
-            shows the important on-chain numbers: vault balance, extra brawlers on-chain, current
-            extra price, tax received, reward pool, claim amount, and token supply.
-          </p>
-          <div className="docs-vault-box">
-            <span>Extra brawler payment</span>
-            <strong>100% to Vault</strong>
-            <small>visible on-chain in Vault Info</small>
+        <DocSection id="vault-flow" kicker="04 · Vault" title="Where the BNB goes">
+          <div className="docs-flow">
+            <div><span>Player buys extra brawler</span></div>
+            <b>→</b>
+            <div><span>BNB payment is sent</span></div>
+            <b>→</b>
+            <div><span>100% goes to the Vault</span></div>
           </div>
-        </Section>
-
-        <Section eyebrow="05" title="Combat rewards and claims">
           <p>
-            When a fight is won and recorded by the game operator, the winner can claim the combat
-            reward if the reward pool has enough BNB and the wallet meets the hold requirement.
+            The in-game Vault Info panel reads the chain and shows the numbers players care about: vault balance,
+            extra brawlers on-chain, current extra price, tax received, reward pool, claim amount, hold requirement,
+            and token supply.
           </p>
-          <ul>
-            <li>Current claim per eligible win: 0.001 BNB.</li>
-            <li>You need to hold the required amount of the game token to claim.</li>
-            <li>Each recorded fight reward can only be claimed once.</li>
-            <li>If the pool is empty, the claim waits until rewards are funded again.</li>
-          </ul>
-        </Section>
+        </DocSection>
 
-        <Section eyebrow="06" title="What players should remember">
+        <DocSection id="rewards" kicker="05 · Rewards" title="Combat rewards and claims">
           <p>
-            You do not need to understand smart contracts to play. Connect a BNB Testnet wallet,
-            make brawlers, fight, and use the Vault Info panel to see the live on-chain economy.
-            Free brawlers are enough to start; paid extras are for players who want a larger stable
-            and to feed the vault economy.
+            When a player wins an eligible fight, the game operator records that win on-chain. If the wallet meets the hold
+            requirement and the reward pool has enough BNB, the winner can claim the combat reward.
           </p>
-          <div className="docs-footer-brawlers">
-            <BruteAvatar brute={fighters[2]!} size="md" anim={{ facing: 'right' }} />
-            <BruteAvatar brute={fighters[3]!} size="md" anim={{ facing: 'left' }} />
+          <div className="docs-callout-grid">
+            <InfoCard label="Claim per eligible win" value="0.001 BNB" note="Shown live in Vault Info." />
+            <InfoCard label="Required" value="Token hold" note="The wallet must hold the required game token amount." />
+            <InfoCard label="Limit" value="Once per fight" note="A recorded fight reward cannot be claimed twice." />
           </div>
-        </Section>
-      </div>
+        </DocSection>
+
+        <DocSection id="quick-faq" kicker="06 · FAQ" title="Quick FAQ">
+          <div className="docs-faq">
+            <details open>
+              <summary>Do I need to pay to play?</summary>
+              <p>No. You can start with base brawlers for free. Paying BNB is only for extra Vault Brawlers after the free stable limit.</p>
+            </details>
+            <details>
+              <summary>Does all BNB go to the Vault?</summary>
+              <p>Yes. The paid extra-brawler flow sends the BNB payment to the Vault, where it is visible through the on-chain Vault Info panel.</p>
+            </details>
+            <details>
+              <summary>Can every win claim BNB?</summary>
+              <p>Only eligible recorded wins can claim, and only if the reward pool has enough BNB and the wallet satisfies the token hold requirement.</p>
+            </details>
+          </div>
+        </DocSection>
+      </article>
     </div>
   );
 }
