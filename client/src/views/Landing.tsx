@@ -25,7 +25,6 @@ export function Landing() {
   const forget = useGameStore((s) => s.forgetBrute);
   const navigate = useNavigate();
 
-  const heroLayout = useLandingSettings((s) => s.heroLayout);
   const accentIntensity = useLandingSettings((s) => s.accentIntensity);
 
   const [bruteInfo, setBruteInfo] = useState<Record<string, Brute>>({});
@@ -69,50 +68,52 @@ export function Landing() {
   const visibleBrutes = useMemo(() => recent, [recent]);
 
   return (
-    <div className="landing-shell" style={glowVars}>
-      <Hero asym={heroLayout === 'asym'} />
+    <>
+      <IntroCinematic />
 
-      <Forge
-        onForge={({ name, gender }) => {
-          setToast(`${name} enters the Vault…`);
-          window.setTimeout(() => setToast(null), 1800);
-          // Pre-populate name + gender in CharacterCreator via URL params.
-          navigate(`/create?name=${encodeURIComponent(name)}&gender=${gender === 'M' ? 'male' : 'female'}`);
-        }}
-      />
+      <div className="landing-shell" style={glowVars}>
+        <Forge
+          onForge={({ name, gender }) => {
+            setToast(`${name} enters the Vault…`);
+            window.setTimeout(() => setToast(null), 1800);
+            // Pre-populate name + gender in CharacterCreator via URL params.
+            navigate(`/create?name=${encodeURIComponent(name)}&gender=${gender === 'M' ? 'male' : 'female'}`);
+          }}
+        />
 
-      <RecentWarriorsSection
-        brutes={visibleBrutes}
-        bruteInfo={bruteInfo}
-        onSelect={(id) => {
-          setCurrent(id);
-          navigate(`/brute/${id}`);
-        }}
-        onForget={(id) => {
-          const stub = recent.find((b) => b.id === id);
-          const name = stub?.name ?? 'this Vault Brawler';
-          const ok = window.confirm(`Are you sure you want to remove ${name} from recent Vault Brawlers?`);
-          if (!ok) return;
-          forget(id);
-        }}
-      />
+        <RecentWarriorsSection
+          brutes={visibleBrutes}
+          bruteInfo={bruteInfo}
+          onSelect={(id) => {
+            setCurrent(id);
+            navigate(`/brute/${id}`);
+          }}
+          onForget={(id) => {
+            const stub = recent.find((b) => b.id === id);
+            const name = stub?.name ?? 'this Vault Brawler';
+            const ok = window.confirm(`Are you sure you want to remove ${name} from recent Vault Brawlers?`);
+            if (!ok) return;
+            forget(id);
+          }}
+        />
 
-      <footer className="landing-footer">
-        <div className="footer-mark">
-          <span className="pip" />
-          <span>Vault Brawl · MMXXVI · Forged in the Vault</span>
-        </div>
-        <a href="#how">How to play</a>
-      </footer>
+        <footer className="landing-footer">
+          <div className="footer-mark">
+            <span className="pip" />
+            <span>Vault Brawl · MMXXVI · Forged in the Vault</span>
+          </div>
+          <a href="#how">How to play</a>
+        </footer>
 
-      {toast && <div className="landing-toast">{toast}</div>}
-    </div>
+        {toast && <div className="landing-toast">{toast}</div>}
+      </div>
+    </>
   );
 }
 
-/* ─────────────────────── HERO ─────────────────────── */
+/* ─────────────────────── INTRO CINEMATIC ─────────────────────── */
 
-function Hero({ asym }: { asym: boolean }) {
+function IntroCinematic() {
   const [showLogo, setShowLogo] = useState(false);
 
   const updateLogoCue = (video: HTMLVideoElement) => {
@@ -120,13 +121,13 @@ function Hero({ asym }: { asym: boolean }) {
     setShowLogo(video.currentTime >= Math.max(0, duration - 3));
   };
 
-  const scrollToForge = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  const scrollToForge = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     document.getElementById('forge')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <header className={`hero hero-video${asym ? ' asym' : ''}`}>
+    <section className="landing-intro" aria-label="Vault Brawl intro cinematic">
       <video
         className="hero-intro-video"
         src="/videos/vault-brawl-intro.mp4"
@@ -144,7 +145,10 @@ function Hero({ asym }: { asym: boolean }) {
           <img src="/logos/vaultbrawl-retro-parchment-banner.png" alt="Vault Brawl" draggable={false} />
         </a>
       )}
-    </header>
+      <button className="intro-skip" type="button" onClick={scrollToForge}>
+        Skip cinematic
+      </button>
+    </section>
   );
 }
 
