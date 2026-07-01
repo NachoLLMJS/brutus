@@ -489,11 +489,33 @@
 }
 
 .docs-flow-art img {
-  width: 86px;
-  height: 86px;
   object-fit: contain;
   image-rendering: auto;
   filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.5));
+}
+
+.docs-chest-sprite {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  display: inline-block;
+}
+
+.docs-chest-sprite img {
+  position: absolute;
+  inset: 0;
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+}
+
+.docs-chest-closed {
+  animation: docsChestClosed 2.4s steps(1, end) infinite;
+}
+
+.docs-chest-open {
+  opacity: 0;
+  animation: docsChestOpen 2.4s steps(1, end) infinite;
 }
 
 .docs-flow-step span {
@@ -583,6 +605,16 @@
   0%, 38%, 62%, 100% { opacity: 0; transform: translateY(12px) scale(.9); }
   43% { opacity: 1; transform: translateY(-8px) scale(1.05); }
   55% { opacity: 0; transform: translateY(-32px) scale(.9); }
+}
+
+@keyframes docsChestClosed {
+  0%, 42%, 100% { opacity: 1; }
+  43%, 78% { opacity: 0; }
+}
+
+@keyframes docsChestOpen {
+  0%, 42%, 100% { opacity: 0; }
+  43%, 78% { opacity: 1; }
 }
 
 @media (max-width: 1060px) {

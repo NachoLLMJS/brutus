@@ -118,7 +118,12 @@ function FlowStep({
     <div className="docs-flow-step">
       <div className="docs-flow-art">
         <BruteAvatar brute={brute} size="sm" anim={{ facing: 'right' }} />
-        {chest && <img src="/images/docs/vault-chest.png" alt="Vault chest" />}
+        {chest && (
+          <span className="docs-chest-sprite" aria-label="Vault chest opening">
+            <img className="docs-chest-closed" src="/images/docs/chest-closed.png" alt="" />
+            <img className="docs-chest-open" src="/images/docs/chest-open.png" alt="" />
+          </span>
+        )}
       </div>
       <span>{title}</span>
       <small>{note}</small>
@@ -148,7 +153,7 @@ export function Docs() {
             <h1>Vault Brawl explained</h1>
             <p className="docs-lead">
               A dark-fantasy auto-battler where players create Vault Brawlers, fight rivals, grow their stable,
-              and use BNB Testnet for extra brawlers and transparent reward claims.
+              and use BNB Mainnet for extra brawlers and transparent reward claims.
             </p>
             <div className="docs-hero-actions">
               <a href="#vault-brawlers">Extra brawlers</a>
@@ -193,11 +198,11 @@ export function Docs() {
 
         <DocSection id="blockchain" kicker="02 · On-chain" title="What the blockchain does">
           <p>
-            The blockchain is not used to slow down every click. The normal game remains fast, while BNB Testnet
+            The blockchain is not used to slow down every click. The normal game remains fast, while BNB Mainnet
             handles the public economy pieces that benefit from being verifiable.
           </p>
           <div className="docs-info-grid">
-            <InfoCard label="Wallet" value="MetaMask" note="Connect on BNB Testnet." />
+            <InfoCard label="Wallet" value="MetaMask" note="Connect on BNB Mainnet." />
             <InfoCard label="On-chain action" value="Extra brawlers" note="Paid extras are registered on-chain." />
             <InfoCard label="Vault" value="BNB flow" note="Extra-brawler BNB goes to the Vault." />
             <InfoCard label="Rewards" value="Claims" note="Eligible wins can claim BNB from the reward pool." />
@@ -232,7 +237,7 @@ export function Docs() {
             <b>→</b>
             <FlowStep
               title="BNB payment is sent"
-              note="MetaMask sends the exact extra-brawler price on BNB Testnet."
+              note="MetaMask sends the exact extra-brawler price on BNB Mainnet."
               brute={fighters[3]!}
             />
             <b>→</b>
