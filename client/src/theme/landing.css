@@ -188,6 +188,95 @@
     linear-gradient(180deg, rgba(5, 3, 8, 0.02), rgba(5, 3, 8, 0.36));
 }
 
+.intro-page .intro-page-play {
+  position: absolute;
+  z-index: 4;
+  top: 43%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 18px 46px;
+  border: 1px solid rgba(230, 180, 80, 0.64);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(230, 180, 80, 0.26), transparent 62%),
+    rgba(5, 3, 8, 0.80);
+  color: var(--accent-gold);
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.2vw, 40px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 0 34px rgba(230, 180, 80, 0.30),
+    0 16px 34px rgba(0, 0, 0, 0.66);
+  animation: introPlayFade .9s ease-out both;
+}
+
+.intro-page .intro-page-play:hover {
+  color: var(--text-strong);
+  border-color: var(--accent-gold);
+  background: rgba(196, 26, 26, 0.30);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+@keyframes introPlayFade {
+  from { opacity: 0; transform: translate(-50%, -44%) scale(0.92); filter: blur(7px); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+.intro-page .intro-page-play {
+  position: absolute;
+  z-index: 4;
+  top: 44%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 18px 44px;
+  border: 1px solid rgba(230, 180, 80, 0.66);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(230, 180, 80, 0.24), transparent 62%),
+    rgba(5, 3, 8, 0.78);
+  color: var(--accent-gold);
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 36px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 0 32px rgba(230, 180, 80, 0.30),
+    0 16px 32px rgba(0, 0, 0, 0.62);
+  animation: introPlayFadeIn .82s ease-out both;
+}
+
+.intro-page .intro-page-play:hover {
+  color: var(--text-strong);
+  border-color: var(--accent-gold);
+  background: rgba(196, 26, 26, 0.28);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.intro-page .intro-page-footer-logos {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 8px 14px;
+  border: 1px solid rgba(230, 180, 80, 0.18);
+  border-radius: 999px;
+  background: rgba(5, 3, 8, 0.42);
+  backdrop-filter: blur(6px);
+}
+
+.intro-page .intro-page-footer-logos img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.55));
+}
+
 .intro-page .intro-page-skip {
   position: absolute;
   right: 28px;
