@@ -52,11 +52,6 @@ const priceRows = [
 function AttackPreview() {
   return (
     <div className="docs-attack-card" aria-label="Vault Brawlers attacking in the arena">
-      <div className="docs-arena-label">Live combat style preview</div>
-      <div className="docs-hp-row">
-        <div><span>Vex Ashguard</span><i style={{ width: '74%' }} /></div>
-        <div><span>Nyra Vaultwing</span><i style={{ width: '58%' }} /></div>
-      </div>
       <div className="docs-attack-stage">
         <div className="docs-impact docs-impact-left">−18</div>
         <div className="docs-slash docs-slash-a" />
@@ -243,7 +238,7 @@ export function Docs() {
             <b>→</b>
             <FlowStep
               title="100% goes to the Vault"
-              note="The BNB lands in the Vault and becomes visible in Vault Info."
+              note="The BNB lands in the Vault."
               brute={fighters[1]!}
               chest
             />
@@ -275,11 +270,31 @@ export function Docs() {
             </details>
             <details>
               <summary>Does all BNB go to the Vault?</summary>
-              <p>Yes. The paid extra-brawler flow sends the BNB payment to the Vault, where it is visible through the on-chain Vault Info panel.</p>
+              <p>Yes. The paid extra-brawler flow sends the BNB payment to the Vault.</p>
             </details>
             <details>
               <summary>Can every win claim BNB?</summary>
               <p>No. The wallet must hold more than 10,000 $VB and the eligible recorded fight must be won by that wallet’s own Vault Brawler. The reward pool also needs enough BNB, and each fight can only be claimed once.</p>
+            </details>
+            <details>
+              <summary>How many free brawlers can I create?</summary>
+              <p>Each wallet can start with up to 3 base Vault Brawlers. Extra brawlers after that use the paid on-chain flow.</p>
+            </details>
+            <details>
+              <summary>How does extra brawler pricing work?</summary>
+              <p>The first paid extra costs 0.01 BNB. After each paid extra from the same wallet, the next price doubles: 0.02, 0.04, 0.08 BNB, and so on.</p>
+            </details>
+            <details>
+              <summary>What is $VB used for?</summary>
+              <p>$VB is the game token used for the reward eligibility gate. To claim a BNB combat reward, the winning wallet must hold more than 10,000 $VB.</p>
+            </details>
+            <details>
+              <summary>Can I claim the same fight twice?</summary>
+              <p>No. Once a recorded fight reward is claimed, that fight is marked as claimed and cannot pay again.</p>
+            </details>
+            <details>
+              <summary>What happens if the reward pool is empty?</summary>
+              <p>The claim cannot be paid until the reward pool has enough BNB. The win can be valid, but the pool still needs available funds.</p>
             </details>
           </div>
         </DocSection>

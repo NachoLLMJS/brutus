@@ -171,49 +171,6 @@
     linear-gradient(180deg, rgba(14, 9, 18, 0.94), rgba(6, 5, 10, 0.96));
 }
 
-.docs-arena-label {
-  position: absolute;
-  z-index: 5;
-  left: 16px;
-  top: 14px;
-  color: var(--accent-gold);
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.docs-hp-row {
-  position: absolute;
-  z-index: 5;
-  top: 42px;
-  left: 16px;
-  right: 16px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.docs-hp-row div {
-  display: grid;
-  gap: 5px;
-}
-
-.docs-hp-row span {
-  color: rgba(244, 224, 183, 0.7);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.docs-hp-row i {
-  display: block;
-  height: 8px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #5fcf65, #d7b449);
-  box-shadow: 0 0 14px rgba(95, 207, 101, 0.25);
-}
-
 .docs-attack-stage {
   position: absolute;
   inset: 84px 0 88px;
@@ -640,6 +597,5 @@
   .docs-flow b { display: none; }
   .docs-loop-cards { grid-template-columns: 1fr; }
   .docs-attack-card { min-height: 470px; }
-  .docs-hp-row { grid-template-columns: 1fr; }
   .docs-attack-stage { inset: 112px 0 98px; padding: 0 10px; }
 }
