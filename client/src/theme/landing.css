@@ -191,32 +191,30 @@
 .intro-page .intro-page-play {
   position: absolute;
   z-index: 4;
-  top: 43%;
+  top: 36%;
   left: 50%;
   transform: translate(-50%, -50%);
-  padding: 18px 46px;
-  border: 1px solid rgba(230, 180, 80, 0.64);
+  padding: 11px 28px;
+  border: 1px solid rgba(230, 180, 80, 0.52);
   border-radius: 999px;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(230, 180, 80, 0.26), transparent 62%),
-    rgba(5, 3, 8, 0.80);
+  background: rgba(5, 3, 8, 0.56);
   color: var(--accent-gold);
   font-family: var(--font-display);
-  font-size: clamp(24px, 3.2vw, 40px);
+  font-size: clamp(16px, 2vw, 24px);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   cursor: pointer;
   box-shadow:
-    0 0 34px rgba(230, 180, 80, 0.30),
-    0 16px 34px rgba(0, 0, 0, 0.66);
+    0 0 20px rgba(230, 180, 80, 0.20),
+    0 10px 22px rgba(0, 0, 0, 0.52);
   animation: introPlayFade .9s ease-out both;
 }
 
 .intro-page .intro-page-play:hover {
   color: var(--text-strong);
   border-color: var(--accent-gold);
-  background: rgba(196, 26, 26, 0.30);
-  transform: translate(-50%, -50%) scale(1.04);
+  background: rgba(196, 26, 26, 0.18);
+  transform: translate(-50%, -50%) scale(1.025);
 }
 
 @keyframes introPlayFade {
@@ -228,17 +226,17 @@
   position: absolute;
   z-index: 3;
   left: 50%;
-  bottom: 24px;
+  bottom: 10px;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 18px;
-  padding: 8px 14px;
-  border: 1px solid rgba(230, 180, 80, 0.18);
-  border-radius: 999px;
-  background: rgba(5, 3, 8, 0.42);
-  backdrop-filter: blur(6px);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .intro-page .intro-page-footer-logos img {

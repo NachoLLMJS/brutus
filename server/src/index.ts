@@ -2,7 +2,7 @@
 // 127.0.0.1 in development and 0.0.0.0 in production/Railway unless HOST
 // is explicitly configured. In production it can also serve the built React app.
 // Touch this entrypoint when Railway's watched paths need to rebuild bundled client assets.
-// Docs/landing refresh: 2026-07-01 intro-play-footer-logos.
+// Docs/landing refresh: 2026-07-01 intro-play-logos-position.
 
 import fs from 'node:fs';
 import path from 'node:path';
