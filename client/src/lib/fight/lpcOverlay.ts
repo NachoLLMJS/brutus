@@ -132,9 +132,9 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
   const customHeadSkin = headwear === 'cedricHelmet' || headwear === 'jasonHelmet';
   const wings = value(lpc.wings, ['none', 'monarchPurple', 'pixiePurple'] as const, 'none');
   const armsArmor = value(lpc.armsArmor, ['none', 'plate', 'bracers'] as const, 'none');
-  const torsoArmor = value(lpc.torsoArmor, ['none', 'trenchCoat', 'plate', 'legion', 'chainmail', 'leather', 'binanceJacket'] as const, 'trenchCoat');
+  const torsoArmor = value(lpc.torsoArmor, ['none', 'trenchCoat', 'plate', 'legion', 'chainmail', 'leather', 'binanceJacket', 'collaredCoat'] as const, 'trenchCoat');
   const legsArmor = value(lpc.legsArmor, ['none', 'plate'] as const, 'plate');
-  const feetArmor = value(lpc.feetArmor, ['none', 'plate'] as const, 'plate');
+  const feetArmor = value(lpc.feetArmor, ['none', 'plate', 'slippers', 'sandals', 'rimmedBoots'] as const, 'plate');
   const armorColor = value(lpc.armorColor, ['steel', 'yellow', 'iron', 'bronze', 'copper', 'pink', 'purple', 'silver', 'black'] as const, 'black');
 
   const layers: Array<Layer | undefined> = [
@@ -142,12 +142,16 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
     { src: p(`body/male/${a}.png`) },
     legsArmor === 'plate' ? { src: p(`armor/legsPlate/${a}.png`), palette: 'metal', color: armorColor } : undefined,
     feetArmor === 'plate' ? { src: p(`armor/feetPlate/${officialFeetColor(armorColor)}/${a}.png`) } : undefined,
+    feetArmor === 'slippers' ? { src: p(`feet/slippers/${officialFeetColor(armorColor, 'cloth')}/${a}.png`) } : undefined,
+    feetArmor === 'sandals' ? { src: p(`feet/sandals/${officialFeetColor(armorColor)}/${a}.png`) } : undefined,
+    feetArmor === 'rimmedBoots' ? { src: p(`feet/rimmedBoots/${officialFeetColor(armorColor)}/${a}.png`) } : undefined,
     torsoArmor === 'trenchCoat' ? { src: p(`armor/trenchCoat/${a}.png`), palette: 'cloth', color: armorColor } : undefined,
     torsoArmor === 'plate' ? { src: p(`armor/torsoPlate/${a}.png`), palette: 'metal', color: armorColor } : undefined,
     torsoArmor === 'legion' ? { src: p(`armor/torsoLegion/${a}.png`), palette: 'metal', color: armorColor } : undefined,
     torsoArmor === 'chainmail' ? { src: p(`armor/torsoChainmail/${a}.png`), palette: 'metal', color: armorColor } : undefined,
     torsoArmor === 'leather' ? { src: p(`armor/torsoLeather/${a}.png`), palette: 'cloth', color: armorColor } : undefined,
     torsoArmor === 'binanceJacket' ? { src: p(`armor/binanceJacket/${a}.png`) } : undefined,
+    torsoArmor === 'collaredCoat' ? { src: p(`torso/collaredCoat/${officialFeetColor(armorColor, 'cloth')}/${a}.png`) } : undefined,
     armsArmor === 'plate' ? { src: p(`armor/armsPlate/${a}.png`), palette: 'metal', color: armorColor } : undefined,
     armsArmor === 'bracers' ? { src: p(`armor/armsBracers/${a}.png`), palette: 'metal', color: armorColor } : undefined,
     customHeadSkin ? undefined : { src: p(`head/${head}/${a}.png`) },
@@ -210,7 +214,15 @@ function recolorWithOfficialPalette(ctx: CanvasRenderingContext2D, material: Pal
 }
 
 
-function officialFeetColor(color: string): string {
+function officialFeetColor(color: string, material: 'metal' | 'cloth' = 'metal'): string {
+  if (material === 'cloth') {
+    if (color === 'yellow') return 'gold';
+    if (color === 'pink' || color === 'purple' || color === 'black') return color;
+    if (color === 'iron') return 'iron';
+    if (color === 'bronze') return 'bronze';
+    if (color === 'copper') return 'copper';
+    return 'steel';
+  }
   if (color === 'yellow') return 'gold';
   if (color === 'pink') return 'brass';
   if (color === 'purple') return 'silver';

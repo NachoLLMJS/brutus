@@ -51,9 +51,9 @@ export type LpcWingsKey = 'none' | 'monarchPurple' | 'pixiePurple';
 export type LpcHeadwearKey = 'none' | 'armet' | 'barbuta' | 'greathelm' | 'maximus' | 'cedricHelmet' | 'jasonHelmet';
 export type LpcArmorColorKey = 'steel' | 'yellow' | 'iron' | 'bronze' | 'copper' | 'pink' | 'purple' | 'silver' | 'black';
 export type LpcArmsArmorKey = 'none' | 'plate' | 'bracers';
-export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail' | 'leather' | 'binanceJacket';
+export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail' | 'leather' | 'binanceJacket' | 'collaredCoat';
 export type LpcLegsArmorKey = 'none' | 'plate';
-export type LpcFeetArmorKey = 'none' | 'plate';
+export type LpcFeetArmorKey = 'none' | 'plate' | 'slippers' | 'sandals' | 'rimmedBoots';
 export type LpcWeaponKey = 'none';
 
 const OFFICIAL_PALETTES = {
@@ -150,6 +150,7 @@ export const LPC_TORSO_ARMOR_OPTIONS = [
   { key: 'chainmail', label: 'Chainmail', src: torsoChainmailIdle },
   { key: 'leather', label: 'Leather armour', src: torsoArmorLeatherIdle },
   { key: 'binanceJacket', label: 'Binance jacket', src: torsoBinanceJacketIdle },
+  { key: 'collaredCoat', label: 'Collared coat', src: '/lpc-combat/torso/collaredCoat/black/idle.png' },
 ] as const satisfies ReadonlyArray<LpcOption<LpcTorsoArmorKey>>;
 
 export const LPC_LEGS_ARMOR_OPTIONS = [
@@ -160,6 +161,9 @@ export const LPC_LEGS_ARMOR_OPTIONS = [
 export const LPC_FEET_ARMOR_OPTIONS = [
   { key: 'none', label: 'No feet armour' },
   { key: 'plate', label: 'Feet armour plate', src: feetArmorPlateSteelIdle },
+  { key: 'slippers', label: 'Slippers', src: '/lpc-combat/feet/slippers/black/idle.png' },
+  { key: 'sandals', label: 'Sandals', src: '/lpc-combat/feet/sandals/black/idle.png' },
+  { key: 'rimmedBoots', label: 'Folded rim boots', src: '/lpc-combat/feet/rimmedBoots/black/idle.png' },
 ] as const satisfies ReadonlyArray<LpcOption<LpcFeetArmorKey>>;
 
 export const LPC_WEAPON_OPTIONS = [
@@ -197,6 +201,30 @@ function isFixedColorHeadwear(headwear: LpcHeadwearKey): boolean {
   return headwear === 'cedricHelmet' || headwear === 'jasonHelmet';
 }
 
+function feetLayer(feetArmor: LpcFeetArmorKey, armorColor: LpcArmorColorKey): Layer | undefined {
+  if (feetArmor === 'none') return undefined;
+  if (feetArmor === 'plate') return paletteLayer(pick(LPC_FEET_ARMOR_OPTIONS, feetArmor), armorColor, 'metal');
+  const material = feetArmor === 'slippers' ? 'cloth' : 'metal';
+  return { src: `/lpc-combat/feet/${feetArmor}/${officialAssetColor(armorColor, material)}/idle.png` };
+}
+
+function torsoLayer(torsoArmor: LpcTorsoArmorKey, armorColor: LpcArmorColorKey): Layer | undefined {
+  if (torsoArmor === 'none') return undefined;
+  if (torsoArmor === 'binanceJacket') return toLayer(pick(LPC_TORSO_ARMOR_OPTIONS, torsoArmor));
+  if (torsoArmor === 'collaredCoat') return { src: `/lpc-combat/torso/collaredCoat/${officialAssetColor(armorColor, 'cloth')}/idle.png` };
+  return paletteLayer(pick(LPC_TORSO_ARMOR_OPTIONS, torsoArmor), armorColor, torsoArmor === 'trenchCoat' || torsoArmor === 'leather' ? 'cloth' : 'metal');
+}
+
+function officialAssetColor(color: LpcArmorColorKey, material: PaletteMaterial): string {
+  if (color === 'yellow') return 'gold';
+  if (color === 'pink' || color === 'purple' || color === 'black') return color;
+  if (color === 'iron') return 'iron';
+  if (color === 'bronze') return 'bronze';
+  if (color === 'copper') return 'copper';
+  if (material === 'metal' && color === 'silver') return 'silver';
+  return 'steel';
+}
+
 function layerPaths(props: Required<Omit<LpcAvatarPreviewProps, 'scale' | 'compact'>>) {
   const wings = pick(LPC_WINGS_OPTIONS, props.wings);
   const headwear = pick(LPC_HEADWEAR_OPTIONS, props.headwear);
@@ -209,10 +237,8 @@ function layerPaths(props: Required<Omit<LpcAvatarPreviewProps, 'scale' | 'compa
     { src: bodyMaleIdle },
     props.headwear === 'none' ? undefined : headLayer,
     paletteLayer(pick(LPC_LEGS_ARMOR_OPTIONS, props.legsArmor), props.armorColor, 'metal'),
-    paletteLayer(pick(LPC_FEET_ARMOR_OPTIONS, props.feetArmor), props.armorColor, 'metal'),
-    props.torsoArmor === 'binanceJacket'
-      ? toLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor))
-      : paletteLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor), props.armorColor, props.torsoArmor === 'trenchCoat' || props.torsoArmor === 'leather' ? 'cloth' : 'metal'),
+    feetLayer(props.feetArmor, props.armorColor),
+    torsoLayer(props.torsoArmor, props.armorColor),
     paletteLayer(pick(LPC_ARMS_ARMOR_OPTIONS, props.armsArmor), props.armorColor, 'metal'),
     props.headwear === 'none' ? headLayer : undefined,
     props.headwear === 'none' ? hairLayer : undefined,
