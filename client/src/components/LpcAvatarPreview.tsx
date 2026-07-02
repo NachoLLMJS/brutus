@@ -28,6 +28,7 @@ import torsoArmorPlateIdle from '@/assets/lpc-test/torso-armor-plate-idle.png?ur
 import torsoArmorLegionIdle from '@/assets/lpc-test/torso-armor-legion-idle.png?url';
 import torsoChainmailIdle from '@/assets/lpc-test/torso-chainmail-idle.png?url';
 import torsoArmorLeatherIdle from '@/assets/lpc-test/torso-armor-leather-idle.png?url';
+import torsoBinanceJacketIdle from '@/assets/lpc-test/torso-binance-jacket-idle.png?url';
 import legsArmorPlateIdle from '@/assets/lpc-test/legs-armor-plate-idle.png?url';
 import feetArmorPlateSteelIdle from '@/assets/lpc-test/feet-armor-plate-steel-idle.png?url';
 
@@ -50,7 +51,7 @@ export type LpcWingsKey = 'none' | 'monarchPurple' | 'pixiePurple';
 export type LpcHeadwearKey = 'none' | 'armet' | 'barbuta' | 'greathelm' | 'maximus' | 'cedricHelmet' | 'jasonHelmet';
 export type LpcArmorColorKey = 'steel' | 'yellow' | 'iron' | 'bronze' | 'copper' | 'pink' | 'purple' | 'silver' | 'black';
 export type LpcArmsArmorKey = 'none' | 'plate' | 'bracers';
-export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail' | 'leather';
+export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail' | 'leather' | 'binanceJacket';
 export type LpcLegsArmorKey = 'none' | 'plate';
 export type LpcFeetArmorKey = 'none' | 'plate';
 export type LpcWeaponKey = 'none';
@@ -109,7 +110,7 @@ export const LPC_HEAD_OPTIONS = [
 ] as const satisfies ReadonlyArray<LpcOption<LpcHeadKey>>;
 
 export const LPC_HAIR_OPTIONS = [
-  { key: 'none', label: 'No pelo' },
+  { key: 'none', label: 'No hair' },
   { key: 'bedhead', label: 'Bedhead', src: hairBedheadIdle },
   { key: 'bob', label: 'Bob', src: hairBobIdle },
   { key: 'afro', label: 'Afro', src: hairAfroIdle },
@@ -148,6 +149,7 @@ export const LPC_TORSO_ARMOR_OPTIONS = [
   { key: 'legion', label: 'Torso legion', src: torsoArmorLegionIdle },
   { key: 'chainmail', label: 'Chainmail', src: torsoChainmailIdle },
   { key: 'leather', label: 'Leather armour', src: torsoArmorLeatherIdle },
+  { key: 'binanceJacket', label: 'Binance jacket', src: torsoBinanceJacketIdle },
 ] as const satisfies ReadonlyArray<LpcOption<LpcTorsoArmorKey>>;
 
 export const LPC_LEGS_ARMOR_OPTIONS = [
@@ -199,16 +201,22 @@ function layerPaths(props: Required<Omit<LpcAvatarPreviewProps, 'scale' | 'compa
   const wings = pick(LPC_WINGS_OPTIONS, props.wings);
   const headwear = pick(LPC_HEADWEAR_OPTIONS, props.headwear);
   const customHeadSkin = props.headwear === 'cedricHelmet' || props.headwear === 'jasonHelmet';
+  const headLayer = customHeadSkin ? undefined : toLayer(pick(LPC_HEAD_OPTIONS, props.head));
+  const hairLayer = customHeadSkin ? undefined : toLayer(pick(LPC_HAIR_OPTIONS, props.hair));
   const headwearLayer = isFixedColorHeadwear(props.headwear) ? toLayer(headwear) : paletteLayer(headwear, props.armorColor, 'metal');
   return [
     wings?.bgSrc ? { src: wings.bgSrc } : undefined,
     { src: bodyMaleIdle },
-    customHeadSkin ? undefined : toLayer(pick(LPC_HEAD_OPTIONS, props.head)),
+    props.headwear === 'none' ? undefined : headLayer,
     paletteLayer(pick(LPC_LEGS_ARMOR_OPTIONS, props.legsArmor), props.armorColor, 'metal'),
     paletteLayer(pick(LPC_FEET_ARMOR_OPTIONS, props.feetArmor), props.armorColor, 'metal'),
-    paletteLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor), props.armorColor, props.torsoArmor === 'trenchCoat' || props.torsoArmor === 'leather' ? 'cloth' : 'metal'),
+    props.torsoArmor === 'binanceJacket'
+      ? toLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor))
+      : paletteLayer(pick(LPC_TORSO_ARMOR_OPTIONS, props.torsoArmor), props.armorColor, props.torsoArmor === 'trenchCoat' || props.torsoArmor === 'leather' ? 'cloth' : 'metal'),
     paletteLayer(pick(LPC_ARMS_ARMOR_OPTIONS, props.armsArmor), props.armorColor, 'metal'),
-    customHeadSkin ? undefined : toLayer(pick(LPC_HAIR_OPTIONS, props.hair)),
+    props.headwear === 'none' ? headLayer : undefined,
+    props.headwear === 'none' ? hairLayer : undefined,
+    props.headwear === 'none' ? undefined : hairLayer,
     headwearLayer,
     toLayer(pick(LPC_WEAPON_OPTIONS, props.weapon)),
     wings?.fgSrc ? { src: wings.fgSrc } : undefined,
