@@ -270,7 +270,8 @@
   background: rgba(196, 26, 26, 0.22);
 }
 
-.intro-page ~ .twitter-floating-button {
+.intro-page ~ .twitter-floating-button,
+.intro-page ~ .music-floating-button {
   display: none;
 }
 

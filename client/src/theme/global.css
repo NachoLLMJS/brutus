@@ -443,7 +443,8 @@
   overflow: hidden !important;
 }
 
-.twitter-floating-button {
+.twitter-floating-button,
+.music-floating-button {
   position: fixed;
   right: 22px;
   bottom: 22px;
@@ -469,7 +470,12 @@
   backdrop-filter: blur(6px);
   transition: transform 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
 }
-.twitter-floating-button:hover {
+.music-floating-button {
+  right: 158px;
+  cursor: pointer;
+}
+.twitter-floating-button:hover,
+.music-floating-button:hover {
   transform: translateY(-2px);
   color: var(--accent-gold);
   border-color: var(--accent-gold);
@@ -496,10 +502,14 @@
   line-height: 1;
 }
 @media (max-width: 640px) {
-  .twitter-floating-button {
+  .twitter-floating-button,
+  .music-floating-button {
     right: 14px;
     bottom: 14px;
     padding: 10px;
+  }
+  .music-floating-button {
+    right: 64px;
   }
   .twitter-floating-button__text {
     display: none;

@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { api } from '@/api/apiClient';
 import { router } from '@/routes';
 import { ToastContainer } from '@/components/Toast';
 import { RendererProvider } from '@/hooks/useRenderer';
+import { getMusicStatus, playBgm, setMuted, subscribeMusicStatus } from '@/lib/fight/sounds';
 import { getEthereumProvider } from '@/lib/web3';
 import { useGameStore } from '@/store/useGameStore';
 import { useWalletStore } from '@/store/useWalletStore';
@@ -65,6 +66,28 @@ function WalletBootstrap() {
   return null;
 }
 
+function SoundtrackBootstrap() {
+  useEffect(() => {
+    playBgm('bg');
+
+    const start = () => playBgm('bg');
+    const options: AddEventListenerOptions = { passive: true };
+    window.addEventListener('pointerdown', start, options);
+    window.addEventListener('keydown', start);
+    window.addEventListener('touchstart', start, options);
+    window.addEventListener('click', start, options);
+
+    return () => {
+      window.removeEventListener('pointerdown', start);
+      window.removeEventListener('keydown', start);
+      window.removeEventListener('touchstart', start);
+      window.removeEventListener('click', start);
+    };
+  }, []);
+
+  return null;
+}
+
 function TwitterFloatingButton() {
   return (
     <a
@@ -72,8 +95,8 @@ function TwitterFloatingButton() {
       href="https://x.com/VaultBrawl"
       target="_blank"
       rel="noreferrer noopener"
-      aria-label="Abrir Vault Brawl en X/Twitter"
-      title="Vault Brawl en X"
+      aria-label="Open Vault Brawl on X/Twitter"
+      title="Vault Brawl on X"
     >
       <span className="twitter-floating-button__icon" aria-hidden>X</span>
       <span className="twitter-floating-button__text">Twitter</span>
@@ -81,11 +104,47 @@ function TwitterFloatingButton() {
   );
 }
 
+function MusicMuteButton() {
+  const [musicStatus, setMusicStatus] = useState(() => getMusicStatus());
+
+  useEffect(() => subscribeMusicStatus(setMusicStatus), []);
+
+  const musicIsPlaying = musicStatus === 'playing';
+  const buttonText = musicIsPlaying ? 'Music Playing' : musicStatus === 'muted' ? 'Music Off' : 'Start Music';
+  const buttonTitle = musicIsPlaying ? 'Mute music' : 'Start music';
+  const buttonIcon = musicIsPlaying ? '♫' : '♪';
+
+  const handleClick = () => {
+    if (musicIsPlaying) {
+      setMuted(true);
+      return;
+    }
+    setMuted(false);
+    playBgm('bg');
+  };
+
+  return (
+    <button
+      type="button"
+      className="music-floating-button"
+      aria-label={buttonTitle}
+      aria-pressed={musicIsPlaying}
+      title={buttonTitle}
+      onClick={handleClick}
+    >
+      <span className="twitter-floating-button__icon" aria-hidden>{buttonIcon}</span>
+      <span className="twitter-floating-button__text">{buttonText}</span>
+    </button>
+  );
+}
+
 export function App() {
   return (
     <RendererProvider>
       <WalletBootstrap />
+      <SoundtrackBootstrap />
       <RouterProvider router={router} />
+      <MusicMuteButton />
       <TwitterFloatingButton />
       <ToastContainer />
     </RendererProvider>
