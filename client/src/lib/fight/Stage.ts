@@ -931,7 +931,7 @@ export class FightStage {
       this.stage,
       f.holder.x,
       f.holder.y - f.display.baseHeight + 10,
-      '¡Sobrevive!',
+      'Survives!',
       0xffe066,
     );
     return this.wait(260);
@@ -1056,7 +1056,7 @@ export class FightStage {
         void shockwave(this.stage, actor.holder.x, actor.holder.y - 20, 0x9333ea, 140);
         void glow(target, 0x9333ea, 460);
         void screenShake(this.stage, 8, 320);
-        void floatingText(this.stage, actor.holder.x, head, '¡MARTILLAZO!', 0xff5060);
+        void floatingText(this.stage, actor.holder.x, head, 'HAMMER!', 0xff5060);
         return this.wait(320);
       }
       case 'bomb': {
@@ -1081,7 +1081,7 @@ export class FightStage {
         void shockwave(this.stage, actor.holder.x, actor.holder.y - 20, 0xdc2626, 110);
         void glow(target, 0xdc2626, 540);
         void flashColor(target, 0xff2a2a, 320);
-        void floatingText(this.stage, actor.holder.x, head, '¡Furia!', 0xff5060);
+        void floatingText(this.stage, actor.holder.x, head, 'Fury!', 0xff5060);
         return this.wait(320);
       }
       case 'swift_wind':
@@ -1265,7 +1265,7 @@ export class FightStage {
       this.stage,
       victim.holder.x,
       victim.holder.y - victim.display.baseHeight + 10,
-      '¡Robo!',
+      'Stolen!',
       0xff5060,
     );
     return this.wait(220);

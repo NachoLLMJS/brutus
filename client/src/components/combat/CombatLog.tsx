@@ -194,7 +194,7 @@ function stepToRow(
         icon: TYPE_ICONS.skill,
         actorName: nameOf(step.b),
         actorSide: sideOf(step.b),
-        text: `drena ${step.h} HP.`,
+        text: `drains ${step.h} HP.`,
       };
     case StepType.Survive:
       return {
@@ -203,7 +203,7 @@ function stepToRow(
         icon: TYPE_ICONS.skill,
         actorName: nameOf(step.b),
         actorSide: sideOf(step.b),
-        text: 'sobrevive milagrosamente.',
+        text: 'survives miraculously.',
       };
     case StepType.Death:
       return {
@@ -212,7 +212,7 @@ function stepToRow(
         icon: TYPE_ICONS.end,
         actorName: nameOf(step.f),
         actorSide: sideOf(step.f),
-        text: 'cae en el polvo.',
+        text: 'falls into the dust.',
       };
     case StepType.End:
       return {
@@ -221,7 +221,7 @@ function stepToRow(
         icon: TYPE_ICONS.end,
         actorName: nameOf(step.w),
         actorSide: sideOf(step.w),
-        text: 'es coronado.',
+        text: 'is crowned.',
       };
     default:
       return null;

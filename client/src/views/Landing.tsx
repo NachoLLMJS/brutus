@@ -315,19 +315,19 @@ function WarriorCard({
           <span>{pct}% wr</span>
         </div>
         <div className="wl">
-          <span className="w">{wins}V</span>
+          <span className="w">{wins}W</span>
           <div className="wl-bar">
             <div
               className="wl-bar-fill"
               style={{ ['--wl' as string]: `${pct}%` } as React.CSSProperties}
             />
           </div>
-          <span className="l">{losses}D</span>
+          <span className="l">{losses}L</span>
         </div>
         {weaponId && (
           <div className="weapon-line">
             <WeaponGlyph kind={mapWeaponKind(weaponId)} />
-            <span>Weapon equipada</span>
+            <span>Weapon equipped</span>
           </div>
         )}
       </div>

@@ -168,10 +168,10 @@ export function Tournament() {
               fontWeight: 900,
             }}
           >
-            ¡ASCENSO!
+            ASCENSION!
           </div>
           <div className="font-display text-2xl text-ink-strong">
-            {bruteName} se eleva en gloria.
+            {bruteName} rises in glory.
           </div>
         </PaperPanel>
       </div>
@@ -488,7 +488,7 @@ function ChampionCard({
       </div>
       {revealed && highlight && (
         <div className="text-xs text-blood font-display mt-1 uppercase tracking-wider">
-          ¡Your Brawler!
+          Your Brawler!
         </div>
       )}
     </div>
