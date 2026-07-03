@@ -110,8 +110,21 @@ const FIGHTER_SCALE = 1.8;
 const PET_SCALE = 1.38;
 const PET_OFFSET_X = 88;          // separación lateral del pet respecto to dueño
 const PET_GAP = 52;               // separación entre pets del mismo dueño
-/** Backgrounds disponibles en /images/game/resources/misc/background/. */
+/** Backgrounds disponibles en /images/game/resources/misc/background/ (1.jpg..13.jpg). */
 const BACKGROUND_COUNT = 13;
+
+function hashFightBackgroundSeed(log: FightLog): number {
+  // FNV-1a 32-bit. Queremos variedad por combate, pero estabilidad al refrescar
+  // la misma pelea. Incluimos fighters, pets y steps porque fights consecutivos
+  // entre los mismos brutos pueden tener resultados/turnos distintos.
+  const seed = JSON.stringify({ fighters: log.fighters, pets: log.pets ?? [], steps: log.steps });
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash || 1;
+}
 
 /** Cualquier id numérico (1, 2 = brutos; 11..23 = pets). */
 type FighterId = number;
@@ -208,9 +221,7 @@ export class FightStage {
   }
 
   private drawBackground() {
-    // Elegimos un background pseudo-aleatorio determinístico desde el log
-    // (mismo combate → mismo fondo). Usamos fighters[0].id como semilla.
-    const seed = (this.log.fighters[0]?.bruteId ?? 'x').charCodeAt(0) || 1;
+    const seed = hashFightBackgroundSeed(this.log);
     const idx = (seed % BACKGROUND_COUNT) + 1;
     const url = `/images/game/resources/misc/background/${idx}.jpg`;
 
