@@ -50,7 +50,7 @@ export type AnimationName =
   | 'win' | 'train' | 'train2';
 
 type LegacyModelKey = 'male' | 'female' | 'dog' | 'bear' | 'panther';
-type CustomPetModelKey = 'douxDino' | 'mortDino' | 'tardDino' | 'vitaDino';
+type CustomPetModelKey = 'douxDino' | 'mortDino' | 'tardDino' | 'vitaDino' | 'bnbDino';
 type ModelKey = LegacyModelKey | CustomPetModelKey;
 
 const ANIMATIONS: Record<LegacyModelKey, Partial<Record<AnimationName, LaBruteSymbol>>> = {
@@ -268,6 +268,7 @@ const CUSTOM_PET_MODELS: Record<CustomPetModelKey, CustomPetDef> = {
   mortDino: { base: '/assets/pets/dinos/mort_dino', visualScale: 2.08, pixelPerfect: true, animations: DINO_ANIMS },
   tardDino: { base: '/assets/pets/dinos/tard_dino', visualScale: 2.22, pixelPerfect: true, animations: DINO_ANIMS },
   vitaDino: { base: '/assets/pets/dinos/vita_dino', visualScale: 2.36, pixelPerfect: true, animations: DINO_ANIMS },
+  bnbDino: { base: '/assets/pets/dinos/bnb_dino', visualScale: 2.5, pixelPerfect: true, animations: DINO_ANIMS },
 };
 
 function isCustomPetModel(model: ModelKey): model is CustomPetModelKey {

@@ -81,6 +81,7 @@ const PET_FILE: Record<string, string> = {
   mort_dino: 'dinos/mort_dino_preview.png',
   tard_dino: 'dinos/tard_dino_preview.png',
   vita_dino: 'dinos/vita_dino_preview.png',
+  bnb_dino: 'dinos/bnb_dino_preview.png',
   // Legacy fallbacks for old local DB rows.
   wolf: 'dog.svg',
   bear: 'bear.svg',

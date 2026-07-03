@@ -28,6 +28,7 @@ const PET_PRICES_BNB: Record<string, string> = {
   mort_dino: '0.0018',
   tard_dino: '0.0036',
   vita_dino: '0.0069',
+  bnb_dino: '0.0138',
 };
 
 const PET_PRICES_TOKEN: Record<string, string> = {
@@ -35,6 +36,7 @@ const PET_PRICES_TOKEN: Record<string, string> = {
   mort_dino: '1800',
   tard_dino: '3600',
   vita_dino: '6900',
+  bnb_dino: '13800',
 };
 
 function parseUnits18(amount: string): bigint {

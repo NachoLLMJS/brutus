@@ -68,6 +68,7 @@ function petModelFor(petId: string): PetModel {
     mort_dino: 'mortDino',
     tard_dino: 'tardDino',
     vita_dino: 'vitaDino',
+    bnb_dino: 'bnbDino',
   };
   const custom = modelByPetId[petId];
   if (custom) return custom;

@@ -58,6 +58,19 @@ export const PETS: readonly Pet[] = [
     damage: 16,
     initiative: 1.35,
   },
+  {
+    id: 'bnb_dino',
+    name: 'BNB Dino',
+    description: 'Mythic golden dino. The strongest current pet: elite damage, speed, and survivability.',
+    hp: 156,
+    strength: 72,
+    agility: 36,
+    speed: 34,
+    count: 1,
+    weight: 1,
+    damage: 22,
+    initiative: 1.9,
+  },
 ] as const;
 
 export const PETS_BY_ID: ReadonlyMap<string, Pet> = new Map(
