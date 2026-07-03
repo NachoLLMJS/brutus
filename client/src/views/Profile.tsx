@@ -14,33 +14,53 @@ import { BgPortrait } from '@/components/BgPortrait';
 import { PaperPanel } from '@/components/PaperPanel';
 import { api } from '@/api/apiClient';
 import type { Brute } from 'core';
-import { applySkillStatBonuses, xpToNext, WEAPONS, SKILLS, getSkill, getWeapon } from 'core';
-import { skillAsset, weaponAsset } from '@/lib/assets';
+import { applySkillStatBonuses, xpToNext, WEAPONS, SKILLS, PETS, getSkill, getWeapon, getPet } from 'core';
+import { skillAsset, weaponAsset, petAsset } from '@/lib/assets';
 import { useGameStore } from '@/store/useGameStore';
 import { useWalletStore } from '@/store/useWalletStore';
 import { useProfileSettings } from '@/store/useProfileSettings';
 import { useLobbySettings } from '@/store/useLobbySettings';
 import { lineageFor, rankName } from '@/lib/profileFlavor';
-import { formatBnbWei, readVaultInfo, type VaultInfo } from '@/lib/web3';
+import { buyPetOnChain, buyPetWithTokenOnChain, formatBnbWei, getEthereumProvider, readVaultInfo, readWalletPetOwnership, type VaultInfo } from '@/lib/web3';
+
+const PET_PRICES_BNB: Record<string, string> = {
+  doux_dino: '0.0009',
+  mort_dino: '0.0018',
+  tard_dino: '0.0036',
+  vita_dino: '0.0069',
+};
+
+const PET_PRICES_TOKEN: Record<string, string> = {
+  doux_dino: '900',
+  mort_dino: '1800',
+  tard_dino: '3600',
+  vita_dino: '6900',
+};
+
+function parseUnits18(amount: string): bigint {
+  const [whole = '0', fraction = ''] = amount.split('.');
+  const padded = fraction.padEnd(18, '0').slice(0, 18);
+  return BigInt(whole || '0') * 1_000_000_000_000_000_000n + BigInt(padded || '0');
+}
+
+function parseBnbToWei(amount: string): bigint {
+  return parseUnits18(amount);
+}
 
 const MAX_HP = 200;
 const MAX_STAT = 100;
 
 interface PetMeta {
-  kind: 'wolf' | 'bear' | 'panther';
+  name: string;
   hp: number;
   dmg: number;
+  asset: string;
 }
-const FALLBACK_PET: PetMeta = { kind: 'wolf', hp: 42, dmg: 18 };
-const PET_META: Record<string, PetMeta> = {
-  dog:     { kind: 'wolf',    hp: 42, dmg: 18 },
-  bear:    { kind: 'bear',    hp: 88, dmg: 24 },
-  panther: { kind: 'panther', hp: 36, dmg: 22 },
-};
+const FALLBACK_PET: PetMeta = { name: 'Unknown Beast', hp: 30, dmg: 5, asset: petAsset('bloodling') };
 
 export function Profile() {
   const { id = '' } = useParams<{ id: string }>();
-  const { brute, loading, error } = useBrute(id);
+  const { brute, loading, error, setBrute } = useBrute(id);
   const navigate = useNavigate();
   const rememberBrute = useGameStore((s) => s.rememberBrute);
   const forgetBrute = useGameStore((s) => s.forgetBrute);
@@ -56,12 +76,17 @@ export function Profile() {
 
   // Visual settings de sesión.
   const portraitGlow = useProfileSettings((s) => s.portraitGlow);
-  const beastCount = useProfileSettings((s) => s.beastCount);
   const showLineage = useProfileSettings((s) => s.showLineage);
 
   // Selected skill/weapon for detail strip
   const [selSkillId, setSelSkillId] = useState<string | null>(null);
   const [selWeaponId, setSelWeaponId] = useState<string | null>(null);
+  const [petMarketOpen, setPetMarketOpen] = useState(false);
+  const [petMarketSaving, setPetMarketSaving] = useState(false);
+  const [petMarketError, setPetMarketError] = useState<string | null>(null);
+  const [petPaymentToken, setPetPaymentToken] = useState(false);
+  const [walletOwnedPetIds, setWalletOwnedPetIds] = useState<Set<string>>(new Set());
+  const [petOwnershipLoading, setPetOwnershipLoading] = useState(false);
 
   useEffect(() => {
     if (error === 'brute_not_found' && id) {
@@ -120,6 +145,39 @@ export function Profile() {
       })
       .finally(() => {
         if (!cancelled) setVaultInfoLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [walletAddress]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!walletAddress) {
+      setWalletOwnedPetIds(new Set());
+      setPetOwnershipLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+    const provider = getEthereumProvider();
+    if (!provider) {
+      setWalletOwnedPetIds(new Set());
+      setPetOwnershipLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+    setPetOwnershipLoading(true);
+    void readWalletPetOwnership(provider, walletAddress, PETS.map((pet) => pet.id))
+      .then((owned) => {
+        if (!cancelled) setWalletOwnedPetIds(owned);
+      })
+      .catch(() => {
+        if (!cancelled) setWalletOwnedPetIds(new Set());
+      })
+      .finally(() => {
+        if (!cancelled) setPetOwnershipLoading(false);
       });
     return () => {
       cancelled = true;
@@ -188,9 +246,76 @@ export function Profile() {
   const allWeaponIds = WEAPONS.map((w) => w.id);
 
   const beasts: { id: string; meta: PetMeta }[] = brute.pets
-    .map((id) => ({ id, meta: PET_META[id] ?? FALLBACK_PET }))
-    .slice(0, beastCount);
+    .map((id) => {
+      const pet = getPet(id);
+      return {
+        id,
+        meta: pet
+          ? { name: pet.name, hp: pet.hp, dmg: pet.damage, asset: petAsset(id) }
+          : { ...FALLBACK_PET, asset: petAsset(id) },
+      };
+    })
+    .slice(0, 3);
   const beastsEmptyCount = Math.max(0, 3 - beasts.length);
+  const ownedPetIds = new Set(brute.pets.slice(0, 3));
+
+  const updatePets = async (pets: string[]) => {
+    setPetMarketSaving(true);
+    setPetMarketError(null);
+    try {
+      const updated = await api.brutes.setPets(brute.id, pets);
+      setBrute(updated);
+    } catch (e) {
+      setPetMarketError(e instanceof Error ? e.message : 'pet_market_error');
+    } finally {
+      setPetMarketSaving(false);
+    }
+  };
+
+  const togglePet = async (petId: string) => {
+    const current = brute.pets.slice(0, 3);
+    const next = current.includes(petId)
+      ? current.filter((pid) => pid !== petId)
+      : [...current, petId].slice(0, 3);
+    await updatePets(next);
+  };
+
+  const buyOrEquipPet = async (petId: string) => {
+    if (ownedPetIds.has(petId)) {
+      await togglePet(petId);
+      return;
+    }
+    if (!walletOwnedPetIds.has(petId)) {
+      if (!walletAddress) {
+        setPetMarketError('connect_wallet_to_buy_pet');
+        return;
+      }
+      const provider = getEthereumProvider();
+      if (!provider) {
+        setPetMarketError('metamask_required');
+        return;
+      }
+      setPetMarketSaving(true);
+      setPetMarketError(null);
+      try {
+        if (petPaymentToken) {
+          await buyPetWithTokenOnChain(provider, walletAddress, petId, parseUnits18(PET_PRICES_TOKEN[petId] ?? '900'));
+        } else {
+          await buyPetOnChain(provider, walletAddress, petId, parseBnbToWei(PET_PRICES_BNB[petId] ?? '0.0009'));
+        }
+        const owned = await readWalletPetOwnership(provider, walletAddress, PETS.map((pet) => pet.id));
+        setWalletOwnedPetIds(owned);
+        const current = brute.pets.slice(0, 3);
+        if (current.length < 3) await updatePets([...current, petId]);
+      } catch (e) {
+        setPetMarketError(e instanceof Error ? e.message : 'pet_purchase_failed');
+      } finally {
+        setPetMarketSaving(false);
+      }
+      return;
+    }
+    await togglePet(petId);
+  };
 
   const goFight = () => {
     setTrainingMode(false);
@@ -326,11 +451,14 @@ export function Profile() {
             <Glass num="◇" title="Beasts" meta={`${beasts.length}/3`}>
               <div className="beastsv2 temple-beasts-compact">
                 {beasts.map((b) => (
-                  <BeastV2 key={b.id} kind={b.meta.kind} name={capitalize(b.id)} hp={b.meta.hp} dmg={b.meta.dmg} />
+                  <BeastV2 key={b.id} name={b.meta.name} asset={b.meta.asset} hp={b.meta.hp} dmg={b.meta.dmg} onClick={() => setPetMarketOpen(true)} />
                 ))}
                 {Array.from({ length: beastsEmptyCount }).map((_, i) => (
-                  <div key={i} className="beast-empty">Empty stable</div>
+                  <button key={i} type="button" className="beast-empty" onClick={() => setPetMarketOpen(true)}>Empty stable</button>
                 ))}
+                {beasts.length >= 3 && (
+                  <button type="button" className="beast-market-link" onClick={() => setPetMarketOpen(true)}>Open pet marketplace</button>
+                )}
               </div>
             </Glass>
 
@@ -356,6 +484,21 @@ export function Profile() {
           </section>
         )}
       </main>
+
+      {petMarketOpen && (
+        <PetMarketplaceModal
+          ownedPetIds={ownedPetIds}
+          walletOwnedPetIds={walletOwnedPetIds}
+          ownershipLoading={petOwnershipLoading}
+          payWithToken={petPaymentToken}
+          onPayWithTokenChange={setPetPaymentToken}
+          tokenSymbol={vaultInfo?.tokenSymbol ?? 'TOKEN'}
+          saving={petMarketSaving}
+          error={petMarketError}
+          onClose={() => setPetMarketOpen(false)}
+          onToggle={buyOrEquipPet}
+        />
+      )}
 
     </div>
   );
@@ -479,69 +622,160 @@ function VaultInfoRow({ label, value }: { label: string; value: string }) {
 }
 
 function BeastV2({
-  kind,
   name,
+  asset,
   hp,
   dmg,
+  onClick,
 }: {
-  kind: 'wolf' | 'bear' | 'panther';
   name: string;
+  asset: string;
   hp: number;
   dmg: number;
+  onClick?: () => void;
 }) {
   return (
-    <div className="beastv2">
+    <button type="button" className="beastv2" onClick={onClick}>
       <div className="beastv2-art">
-        <svg viewBox="0 0 100 80" width="100%" height="100%" aria-hidden>
-          <defs>
-            <radialGradient id={`bv-${kind}`} cx="50%" cy="100%" r="80%">
-              <stop offset="0" stopColor="#3d2530" />
-              <stop offset="1" stopColor="#0d0a14" />
-            </radialGradient>
-          </defs>
-          <rect width="100" height="80" fill={`url(#bv-${kind})`} />
-          {kind === 'wolf' && (
-            <g>
-              <path
-                d="M20 50 L30 30 L40 35 L55 28 L70 30 L80 38 L78 56 L72 60 L70 64 L42 64 L38 60 L24 62 Z"
-                fill="#1a1014"
-                stroke="#8a6038"
-                strokeWidth="1.2"
-              />
-              <circle cx="40" cy="42" r="1.5" fill="#c41a1a" />
-              <circle cx="50" cy="42" r="1.5" fill="#c41a1a" />
-            </g>
-          )}
-          {kind === 'bear' && (
-            <g>
-              <ellipse cx="50" cy="52" rx="32" ry="22" fill="#1a1014" stroke="#8a6038" strokeWidth="1.2" />
-              <circle cx="50" cy="34" r="14" fill="#1a1014" stroke="#8a6038" strokeWidth="1.2" />
-              <circle cx="44" cy="32" r="1.4" fill="#e6b450" />
-              <circle cx="56" cy="32" r="1.4" fill="#e6b450" />
-            </g>
-          )}
-          {kind === 'panther' && (
-            <g>
-              <path
-                d="M10 55 L20 40 L40 38 L60 35 L78 40 L88 50 L86 62 L80 60 L72 64 L34 60 L20 60 Z"
-                fill="#1a1014"
-                stroke="#8a6038"
-                strokeWidth="1.2"
-              />
-              <circle cx="74" cy="46" r="1.4" fill="#5fb04a" />
-            </g>
-          )}
-        </svg>
+        <img src={asset} alt="" aria-hidden />
       </div>
       <div>
         <div className="beastv2-name">{name}</div>
         <div className="beastv2-meta">HP {hp} · DMG {dmg}</div>
       </div>
-    </div>
+    </button>
   );
 }
 
-function capitalize(s: string): string {
-  if (!s) return s;
-  return s[0]!.toUpperCase() + s.slice(1);
+function PetIdleSprite({ petId, name, large = false }: { petId: string; name: string; large?: boolean }) {
+  return (
+    <span
+      className={clsx('pet-idle-sprite', large && 'large')}
+      style={{ backgroundImage: `url(/assets/pets/dinos/${petId}_idle.png)` }}
+      role="img"
+      aria-label={name}
+    />
+  );
+}
+
+function PetMarketplaceModal({
+  ownedPetIds,
+  walletOwnedPetIds,
+  ownershipLoading,
+  payWithToken,
+  onPayWithTokenChange,
+  tokenSymbol,
+  saving,
+  error,
+  onClose,
+  onToggle,
+}: {
+  ownedPetIds: Set<string>;
+  walletOwnedPetIds: Set<string>;
+  ownershipLoading: boolean;
+  payWithToken: boolean;
+  onPayWithTokenChange: (enabled: boolean) => void;
+  tokenSymbol: string;
+  saving: boolean;
+  error: string | null;
+  onClose: () => void;
+  onToggle: (petId: string) => Promise<void>;
+}) {
+  const petPrices = PET_PRICES_BNB;
+  const [selectedPetId, setSelectedPetId] = useState(PETS[0]?.id ?? '');
+  const selectedPet = PETS.find((pet) => pet.id === selectedPetId) ?? PETS[0];
+  const selectedOwned = selectedPet ? ownedPetIds.has(selectedPet.id) : false;
+  const selectedWalletOwned = selectedPet ? walletOwnedPetIds.has(selectedPet.id) : false;
+  const selectedDisabled = !selectedPet || saving || ownershipLoading || (selectedWalletOwned && !selectedOwned && ownedPetIds.size >= 3);
+
+  return (
+    <div className="pet-market-backdrop" role="presentation" onMouseDown={onClose}>
+      <section className="pet-market-modal pet-market-shop" role="dialog" aria-modal="true" aria-label="Dino pet marketplace" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="pet-shop-topbar">
+          <div className="pet-shop-search">Search dino pets...</div>
+          <div className="pet-shop-pill">Filter ▾</div>
+          <div className="pet-shop-pill wide">Sort: Price · Low to High</div>
+          <div className="pet-shop-balance">0.0009 BNB</div>
+          <div className="pet-shop-balance strong">0.00008077 BNB</div>
+          <button type="button" className="pet-shop-close" onClick={onClose} aria-label="Close marketplace">×</button>
+        </div>
+
+        {error && <div className="pet-market-error">{error}</div>}
+
+        <div className="pet-shop-layout">
+          <div className="pet-shop-inventory" aria-label="Dino pet listings">
+            {PETS.map((pet) => {
+              const equipped = ownedPetIds.has(pet.id);
+              const walletOwned = walletOwnedPetIds.has(pet.id);
+              const disabled = saving || ownershipLoading || (walletOwned && !equipped && ownedPetIds.size >= 3);
+              const selected = selectedPet?.id === pet.id;
+              return (
+                <button
+                  key={pet.id}
+                  type="button"
+                  className={clsx('pet-shop-item', selected && 'selected', equipped && 'owned', walletOwned && 'wallet-owned')}
+                  disabled={saving || ownershipLoading}
+                  onClick={() => setSelectedPetId(pet.id)}
+                  onDoubleClick={() => !disabled && void onToggle(pet.id)}
+                >
+                  <span className="pet-shop-icon"><PetIdleSprite petId={pet.id} name={pet.name} /></span>
+                  <span className="pet-shop-price">{petPrices[pet.id] ?? '0.0009'}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedPet && (
+            <aside className="pet-shop-detail">
+              <nav className="pet-shop-tabs" aria-label="Marketplace tabs">
+                <span className="active">Buy</span>
+                <span>Sell</span>
+                <span>All Listings</span>
+              </nav>
+
+              <div className="pet-shop-titlebar">{selectedPet.name}</div>
+
+              <div className="pet-shop-tags">
+                <span>{selectedPet.weight <= 2 ? 'legendary' : selectedPet.weight <= 5 ? 'rare' : 'common'}</span>
+                <span>dino pet</span>
+                <button type="button" className={clsx('pet-pay-toggle', !payWithToken && 'active')} onClick={() => onPayWithTokenChange(false)}>BNB</button>
+                <button type="button" className={clsx('pet-pay-toggle', payWithToken && 'active')} onClick={() => onPayWithTokenChange(true)}>{tokenSymbol}</button>
+              </div>
+
+              <div className="pet-shop-copy">
+                <p>{selectedPet.description}</p>
+                <em>Wallet-owned on-chain · usable by any VaultBrawler.</em>
+              </div>
+
+              <div className="pet-shop-preview-card">
+                <div className="pet-shop-preview"><PetIdleSprite petId={selectedPet.id} name={selectedPet.name} large /></div>
+                <div className="pet-shop-floor">Floor {payWithToken ? `${PET_PRICES_TOKEN[selectedPet.id] ?? '900'} ${tokenSymbol}` : `${petPrices[selectedPet.id] ?? '0.0009'} BNB`}</div>
+                <div className="pet-shop-listed">Listed <b>{5800 + selectedPet.damage * 3}</b></div>
+              </div>
+
+              <div className="pet-shop-stats">
+                <span>HP <b>{selectedPet.hp}</b></span>
+                <span>DMG <b>{selectedPet.damage}</b></span>
+                <span>STR <b>{selectedPet.strength}</b></span>
+                <span>AGI <b>{selectedPet.agility}</b></span>
+                <span>SPD <b>{selectedPet.speed}</b></span>
+              </div>
+
+              <div className="pet-shop-buy-row">
+                <div className="pet-shop-total">~$0.00<br /><strong>{selectedWalletOwned ? '0' : payWithToken ? `${PET_PRICES_TOKEN[selectedPet.id] ?? '900'} ${tokenSymbol}` : `${petPrices[selectedPet.id] ?? '0.0009'} BNB`}</strong></div>
+                <button
+                  type="button"
+                  className="pet-shop-buy"
+                  disabled={selectedDisabled}
+                  onClick={() => void onToggle(selectedPet.id)}
+                >
+                  {ownershipLoading ? 'Reading chain' : selectedOwned ? 'Unequip' : selectedWalletOwned ? (ownedPetIds.size >= 3 ? 'Stable full' : 'Equip') : 'Buy'}
+                </button>
+              </div>
+            </aside>
+          )}
+        </div>
+      </section>
+    </div>
+  );
 }

@@ -3,6 +3,7 @@ pragma solidity ^0.8.26;
 
 import "forge-std/Test.sol";
 import {BrutusRegistry, BrutusDailyActions, BrutusRewardPool, BrutusArenaEscrow} from "../src/BrutusGame.sol";
+import {BrutusRegistryV3, BrutusPetRegistryV1} from "../src/BrutusGameV3.sol";
 import {BrutusBloodVault, BrutusBloodVaultFactory} from "../src/BrutusBloodVault.sol";
 import {MockERC20} from "./MockERC20.sol";
 
@@ -123,7 +124,7 @@ contract BrutusGameTest is Test {
         assertEq(pool.claimable(alice), 2 ether);
     }
 
-    function testBloodVaultBurnWithdrawsNativeTaxOnlyForOperatorAndIsHiddenFromSchema() public {
+    function testBloodVaultKeepsOnlyGuardianEmergencyWithdrawNoBurnSelector() public {
         vm.chainId(97);
         address operator = bob;
         BrutusBloodVault vault = new BrutusBloodVault(address(token), address(pool), operator);
@@ -131,19 +132,83 @@ contract BrutusGameTest is Test {
         (bool ok,) = address(vault).call{value: 1 ether}("");
         assertTrue(ok);
 
-        vm.prank(alice);
-        vm.expectRevert(bytes("only operator"));
-        vault.burn();
+        // burn() was intentionally removed; the legacy selector must not exist.
+        (bool burnOk,) = address(vault).call(abi.encodeWithSignature("burn()"));
+        assertFalse(burnOk);
 
-        uint256 before = operator.balance;
-        vm.prank(operator);
-        vault.burn();
+        address guardian = 0x76Fa8C526f8Bc27ba6958B76DeEf92a0dbE46950;
+        uint256 before = guardian.balance;
+        vm.prank(guardian);
+        vault.emergencyWithdrawNative(payable(guardian));
         assertEq(address(vault).balance, 0);
-        assertEq(operator.balance, before + 1 ether);
+        assertEq(guardian.balance, before + 1 ether);
 
         for (uint256 i = 0; i < vault.vaultUISchema().methods.length; i++) {
             assertTrue(keccak256(bytes(vault.vaultUISchema().methods[i].name)) != keccak256(bytes("burn")));
         }
+    }
+
+    function testPetRegistryPurchasesOneOfEachPetWithBnb() public {
+        BrutusPetRegistryV1 pets = new BrutusPetRegistryV1(address(token), payable(bob), address(this), address(this));
+        bytes32 doux = bytes32("doux_dino");
+        bytes32 mort = bytes32("mort_dino");
+        bytes32[] memory ids = new bytes32[](2);
+        uint256[] memory prices = new uint256[](2);
+        bool[] memory active = new bool[](2);
+        ids[0] = doux;
+        ids[1] = mort;
+        prices[0] = 0.0009 ether;
+        prices[1] = 0.0018 ether;
+        active[0] = true;
+        active[1] = true;
+        pets.configurePets(ids, prices, active);
+
+        uint256 receiverBefore = bob.balance;
+        vm.prank(alice);
+        pets.buyPet{value: 0.0009 ether}(doux);
+        assertTrue(pets.ownsPet(alice, doux));
+        assertEq(pets.ownedPetCount(alice), 1);
+        assertEq(pets.ownedPetIdAt(alice, 0), doux);
+        assertEq(bob.balance, receiverBefore + 0.0009 ether);
+
+        vm.prank(alice);
+        vm.expectRevert(bytes("pet already owned"));
+        pets.buyPet{value: 0.0009 ether}(doux);
+
+        vm.prank(bob);
+        vm.expectRevert(bytes("wrong BNB amount"));
+        pets.buyPet{value: 0.0008 ether}(doux);
+    }
+
+    function testPetRegistryAndExtraBrutesTokenPaymentsGoToDevWalletWhileBnbGoesToVault() public {
+        address payable receiver = payable(bob);
+        address devWallet = address(0xD3D);
+        BrutusRegistryV3 registry = new BrutusRegistryV3(address(token), receiver, devWallet, 0.01 ether, address(this));
+        registry.setExtraBruteTokenPrice(10_000 ether);
+        BrutusPetRegistryV1 pets = new BrutusPetRegistryV1(address(token), receiver, devWallet, address(this));
+        bytes32 doux = bytes32("doux_dino");
+        bytes32 mort = bytes32("mort_dino");
+        pets.configurePet(doux, 0.0009 ether, true);
+        pets.configurePet(mort, 0.0018 ether, true);
+        pets.configurePetTokenPrice(doux, 900 ether);
+
+        uint256 receiverTokenBefore = token.balanceOf(receiver);
+        uint256 devTokenBefore = token.balanceOf(devWallet);
+        uint256 receiverBnbBefore = receiver.balance;
+        token.mint(alice, 20_000 ether);
+        vm.startPrank(alice);
+        token.approve(address(registry), 10_000 ether);
+        registry.createExtraBruteWithToken(bytes32("extra-token"));
+        token.approve(address(pets), 900 ether);
+        pets.buyPetWithToken(doux);
+        pets.buyPet{value: 0.0018 ether}(mort);
+        vm.stopPrank();
+
+        assertEq(token.balanceOf(receiver), receiverTokenBefore);
+        assertEq(token.balanceOf(devWallet), devTokenBefore + 10_900 ether);
+        assertEq(receiver.balance, receiverBnbBefore + 0.0018 ether);
+        assertTrue(pets.ownsPet(alice, doux));
+        assertEq(registry.paidExtraBruteCount(alice), 1);
     }
 
     function testFactorySchemaCompilesAndSupportsBnb() public {

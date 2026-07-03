@@ -67,6 +67,11 @@ export async function recordCombatRewardWinner(fightId: string, winnerWallet: st
       throw new HttpError(502, 'reward_contract_missing');
     }
     if (!sameAddress(operator, account.address)) {
+      console.warn('combat_reward_operator_mismatch', {
+        rewardsContract: contractAddress,
+        contractOperator: operator,
+        serverOperator: account.address,
+      });
       throw new HttpError(502, 'operator_not_authorized');
     }
     if (operatorBalance === 0n) {

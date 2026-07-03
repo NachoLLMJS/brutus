@@ -23,6 +23,14 @@ interface IBrutusRewardPoolView {
     function claimable(address user) external view returns (uint256);
 }
 
+interface IBrutusRegistryStatsView {
+    function totalExtraBrutes() external view returns (uint256);
+}
+
+interface IBrutusPetRegistryStatsView {
+    function totalPetsPurchased() external view returns (uint256);
+}
+
 interface IERC20LiteForVault {
     function balanceOf(address account) external view returns (uint256);
     function transfer(address to, uint256 amount) external returns (bool);
@@ -42,11 +50,14 @@ abstract contract VaultReentrancyGuard {
 contract BrutusBloodVault is VaultBaseV2, VaultReentrancyGuard {
     address public taxToken;
     address public rewardReceiver;
+    address public gameRegistry;
+    address public petRegistry;
     address public operator;
     uint256 public totalTaxRewardsReceived;
     uint256 public totalTaxRewardsForwarded;
 
     event RewardReceiverUpdated(address indexed rewardReceiver);
+    event GameContractsUpdated(address indexed gameRegistry, address indexed petRegistry);
     event OperatorUpdated(address indexed operator);
     event TaxRewardsReceived(address indexed from, uint256 amount, uint256 totalReceived);
     event TaxRewardsForwarded(address indexed rewardReceiver, uint256 amount, uint256 totalForwarded);
@@ -73,6 +84,12 @@ contract BrutusBloodVault is VaultBaseV2, VaultReentrancyGuard {
         require(newReceiver != address(0), "reward receiver required");
         rewardReceiver = newReceiver;
         emit RewardReceiverUpdated(newReceiver);
+    }
+
+    function setGameContracts(address newGameRegistry, address newPetRegistry) external onlyOperatorOrGuardian {
+        gameRegistry = newGameRegistry;
+        petRegistry = newPetRegistry;
+        emit GameContractsUpdated(newGameRegistry, newPetRegistry);
     }
 
     function setOperator(address newOperator) external onlyOperatorOrGuardian {
@@ -114,13 +131,16 @@ contract BrutusBloodVault is VaultBaseV2, VaultReentrancyGuard {
         return IBrutusRewardPoolView(rewardReceiver).claimable(user);
     }
 
-    function burn() external nonReentrant {
-        require(msg.sender == operator, "only operator");
-        uint256 bal = address(this).balance;
-        (bool ok,) = payable(operator).call{value: bal}("");
-        require(ok, "native transfer failed");
-        emit EmergencyWithdrawNative(operator, bal);
+    function totalExtraBrawlers() external view returns (uint256) {
+        if (gameRegistry == address(0)) return 0;
+        return IBrutusRegistryStatsView(gameRegistry).totalExtraBrutes();
     }
+
+    function totalPetsPurchased() external view returns (uint256) {
+        if (petRegistry == address(0)) return 0;
+        return IBrutusPetRegistryStatsView(petRegistry).totalPetsPurchased();
+    }
+
 
     function emergencyWithdrawNative(address to) external onlyGuardian nonReentrant {
         require(to != address(0), "to required");
@@ -147,57 +167,56 @@ contract BrutusBloodVault is VaultBaseV2, VaultReentrancyGuard {
 
     function vaultUISchema() public pure override returns (VaultUISchema memory schema) {
         schema.vaultType = "BrutusBloodVault";
-        schema.description = "Receives BNB tax revenue from the Flap-launched Brutus token and forwards it to the Brutus staking reward pool.";
+        schema.description = "Receives BNB tax revenue from the Flap-launched Brutus token. BNB game payments stay in the vault; token payments for extra brawlers and pets go to the configured dev wallet.";
         schema.methods = new VaultMethodSchema[](7);
 
         schema.methods[0].name = "taxToken";
-        schema.methods[0].description = "Brutus token launched through Flap and connected to this vault.";
+        schema.methods[0].description = "Token launched through Flap and connected to this Brutus vault.";
         schema.methods[0].inputs = new FieldDescriptor[](0);
         schema.methods[0].outputs = new FieldDescriptor[](1);
-        schema.methods[0].outputs[0] = FieldDescriptor("taxToken", "address", "Brutus token address", 0);
+        schema.methods[0].outputs[0] = FieldDescriptor("taxToken", "address", "Token address", 0);
         schema.methods[0].approvals = new ApproveAction[](0);
 
         schema.methods[1].name = "vaultBalance";
-        schema.methods[1].description = "Current BNB balance held by the vault before forwarding to rewards.";
+        schema.methods[1].description = "Current BNB held by the vault from taxes and BNB game purchases.";
         schema.methods[1].inputs = new FieldDescriptor[](0);
         schema.methods[1].outputs = new FieldDescriptor[](1);
-        schema.methods[1].outputs[0] = FieldDescriptor("balance", "uint256", "Current vault BNB balance", 18);
+        schema.methods[1].outputs[0] = FieldDescriptor("balance", "uint256", "Current vault BNB", 18);
         schema.methods[1].approvals = new ApproveAction[](0);
 
         schema.methods[2].name = "totalTaxRewardsReceived";
-        schema.methods[2].description = "Lifetime BNB tax revenue received by this vault.";
+        schema.methods[2].description = "Lifetime BNB received by this vault.";
         schema.methods[2].inputs = new FieldDescriptor[](0);
         schema.methods[2].outputs = new FieldDescriptor[](1);
-        schema.methods[2].outputs[0] = FieldDescriptor("amount", "uint256", "Total received BNB", 18);
+        schema.methods[2].outputs[0] = FieldDescriptor("amount", "uint256", "Lifetime BNB received", 18);
         schema.methods[2].approvals = new ApproveAction[](0);
 
         schema.methods[3].name = "totalTaxRewardsForwarded";
-        schema.methods[3].description = "Lifetime BNB forwarded from this vault to the Brutus reward pool.";
+        schema.methods[3].description = "Lifetime BNB forwarded from this vault to the Brutus reward contract.";
         schema.methods[3].inputs = new FieldDescriptor[](0);
         schema.methods[3].outputs = new FieldDescriptor[](1);
-        schema.methods[3].outputs[0] = FieldDescriptor("amount", "uint256", "Total forwarded BNB", 18);
+        schema.methods[3].outputs[0] = FieldDescriptor("amount", "uint256", "Lifetime BNB forwarded", 18);
         schema.methods[3].approvals = new ApproveAction[](0);
 
         schema.methods[4].name = "rewardReceiver";
-        schema.methods[4].description = "Brutus reward pool receiving forwarded BNB tax revenue.";
+        schema.methods[4].description = "Brutus reward contract receiving forwarded BNB.";
         schema.methods[4].inputs = new FieldDescriptor[](0);
         schema.methods[4].outputs = new FieldDescriptor[](1);
-        schema.methods[4].outputs[0] = FieldDescriptor("rewardReceiver", "address", "Reward receiver contract", 0);
+        schema.methods[4].outputs[0] = FieldDescriptor("rewardReceiver", "address", "Reward contract", 0);
         schema.methods[4].approvals = new ApproveAction[](0);
 
-        schema.methods[5].name = "rewardPoolTotalStaked";
-        schema.methods[5].description = "Total Brutus token amount staked for reward eligibility.";
+        schema.methods[5].name = "totalExtraBrawlers";
+        schema.methods[5].description = "Total extra VaultBrawlers bought through the Brutus game registry.";
         schema.methods[5].inputs = new FieldDescriptor[](0);
         schema.methods[5].outputs = new FieldDescriptor[](1);
-        schema.methods[5].outputs[0] = FieldDescriptor("totalStaked", "uint256", "Total staked token amount", 18);
+        schema.methods[5].outputs[0] = FieldDescriptor("totalExtraBrawlers", "uint256", "Extra VaultBrawlers bought", 0);
         schema.methods[5].approvals = new ApproveAction[](0);
 
-        schema.methods[6].name = "rewardPoolClaimable";
-        schema.methods[6].description = "BNB reward amount currently claimable by a staking wallet.";
-        schema.methods[6].inputs = new FieldDescriptor[](1);
-        schema.methods[6].inputs[0] = FieldDescriptor("user", "address", "User wallet", 0);
+        schema.methods[6].name = "totalPetsPurchased";
+        schema.methods[6].description = "Total pets bought through the Brutus pet registry.";
+        schema.methods[6].inputs = new FieldDescriptor[](0);
         schema.methods[6].outputs = new FieldDescriptor[](1);
-        schema.methods[6].outputs[0] = FieldDescriptor("claimable", "uint256", "Claimable BNB", 18);
+        schema.methods[6].outputs[0] = FieldDescriptor("totalPetsPurchased", "uint256", "Pets purchased", 0);
         schema.methods[6].approvals = new ApproveAction[](0);
     }
 }

@@ -27,13 +27,18 @@ function setDefaultEnv(name, value) {
 
 function configureDatabaseUrl() {
   const usedPersistentDefault = setDefaultEnv('DATABASE_URL', 'file:/data/brutus.db');
-  try {
-    ensureSqliteDirectory(process.env.DATABASE_URL);
-  } catch (err) {
-    if (!usedPersistentDefault) throw err;
-    console.warn('[start-production] /data is unavailable; falling back to ephemeral file:/tmp/brutus-railway.db. Mount Railway volume at /data for persistence.');
-    process.env.DATABASE_URL = 'file:/tmp/brutus-railway.db';
-    ensureSqliteDirectory(process.env.DATABASE_URL);
+  ensureSqliteDirectory(process.env.DATABASE_URL);
+  if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL.startsWith('file:')) {
+    const sqlitePath = sqlitePathFromDatabaseUrl(process.env.DATABASE_URL);
+    if (!sqlitePath?.startsWith('/data/')) {
+      throw new Error(
+        `[start-production] Refusing to use non-persistent SQLite path ${process.env.DATABASE_URL} in production. ` +
+          'Set DATABASE_URL=file:/data/brutus.db and mount a Railway volume at /data.',
+      );
+    }
+    if (usedPersistentDefault) {
+      console.warn('[start-production] DATABASE_URL was missing; using file:/data/brutus.db. Verify Railway volume is mounted at /data.');
+    }
   }
 }
 

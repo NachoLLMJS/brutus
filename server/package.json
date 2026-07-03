@@ -6,7 +6,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "npm run build -w core && npm run prisma:generate && tsc -p tsconfig.json",
     "railway:build": "npm run build",
     "start": "node scripts/start-production.mjs",

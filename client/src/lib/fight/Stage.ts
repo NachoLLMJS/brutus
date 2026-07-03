@@ -107,9 +107,9 @@ const POS_RIGHT_X = 520;
 const ATTACK_OFFSET = 130;
 const STEP_BASE_MS = 220;
 const FIGHTER_SCALE = 1.8;
-const PET_SCALE = 1.0;
-const PET_OFFSET_X = 75;          // separación lateral del pet respecto to dueño
-const PET_GAP = 38;               // separación entre pets del mismo dueño
+const PET_SCALE = 1.38;
+const PET_OFFSET_X = 88;          // separación lateral del pet respecto to dueño
+const PET_GAP = 52;               // separación entre pets del mismo dueño
 /** Backgrounds disponibles en /images/game/resources/misc/background/. */
 const BACKGROUND_COUNT = 13;
 
@@ -187,10 +187,11 @@ export class FightStage {
       width: ARENA_W,
       height: ARENA_H,
       backgroundColor: 0x0b0610,
-      antialias: true,
+      antialias: false,
       autoDensity: true,
       resolution: window.devicePixelRatio || 1,
     });
+    PIXI.settings.ROUND_PIXELS = true;
     Tweener.init(this.app.ticker);
 
     const canvas = this.app.view as HTMLCanvasElement;
@@ -404,7 +405,8 @@ export class FightStage {
     hpUi.y = GROUND_Y + PET_HP_OFFSET_Y;
     hpUi.zIndex = 49;
 
-    const hpText = new PIXI.Text(`${p.name}`, {
+    // Pets keep the small HP bar, but no floating name label above them.
+    const hpText = new PIXI.Text('', {
       fontFamily: 'AcmeSa, sans-serif',
       fontSize: 10,
       fill: 0xeae0d2,
@@ -413,8 +415,7 @@ export class FightStage {
       align: 'center',
     });
     hpText.anchor.set(0.5, 1);
-    hpText.y = -PET_HP_BAR_H / 2 - 3;
-    hpUi.addChild(hpText);
+    hpText.visible = false;
 
     const hpBarBg = new PIXI.Graphics();
     hpBarBg.beginFill(0x0b0610, 0.85);
@@ -506,8 +507,8 @@ export class FightStage {
     r.hp = newHp;
     const pct = r.maxHp > 0 ? newHp / r.maxHp : 0;
     drawHpFillSized(r.hpBarFg, pct, r.hpBarW, r.hpBarH);
-    const label = r.isPet ? r.pet?.name ?? '' : r.fighter?.name ?? '';
-    r.hpText.text = r.isPet ? `${label}` : `${label}  ${newHp}`;
+    const label = r.fighter?.name ?? '';
+    r.hpText.text = r.isPet ? '' : `${label}  ${newHp}`;
     this.onHpChange?.(Number(id), newHp, r.maxHp);
     return newHp;
   }
@@ -525,8 +526,8 @@ export class FightStage {
     f.alive = false;
     f.hp = 0;
     drawHpFillSized(f.hpBarFg, 0, f.hpBarW, f.hpBarH);
-    const label = f.isPet ? f.pet?.name ?? '' : f.fighter?.name ?? '';
-    f.hpText.text = f.isPet ? `${label}` : `${label}  0`;
+    const label = f.fighter?.name ?? '';
+    f.hpText.text = f.isPet ? '' : `${label}  0`;
     this.onHpChange?.(id, 0, f.maxHp);
     f.display.setAnimation('death');
     dustCloud(this.stage, f.holder.x, f.holder.y - 6, { count: 8, spread: 40 });

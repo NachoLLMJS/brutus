@@ -25,14 +25,15 @@ export const SUPPORTED_BNB_CHAINS = [BNB_TESTNET.chainId] as const;
 
 export const BRUTUS_BNB_TESTNET_CONTRACTS = {
   chainId: BNB_TESTNET.chainId,
-  token: '0xe7B0C3574C85C5A8C8Bbbfde299B223F68477777',
-  vault: '0xae21b38dD8Ef95aa41824fb840436fc1f049fcFf',
+  token: '0xaB4927a825408b50eccBE25521b7C06f60387777',
+  vault: '0xF69d3769c0ee6E6298c52f1cc0cE53Dc47304A34',
   rewardPool: '0x9b9b801Fef24947D13b850a93B456C03aeed1Aec',
-  registry: '0xd74a0941c441Bac2121992f33bd910059300B2C3',
+  registry: '0xfE0CB932Ec8857bDc5749a96D4008bdE87F7EeFa',
   dailyActions: '0xecF5EA60D706c7D96Bbf1aaE19be8B40E149eB49',
-  combatRewards: '0x9b9b801Fef24947D13b850a93B456C03aeed1Aec',
+  combatRewards: '0x1cBF8b99029bf5cCff449a50DE46B0eae22f2Ef7',
   arenaEscrow: '0x2415248C3adAEc3484E041A741C1BFE1AA9bBC14',
-  vaultFactory: '0x1A641ca0aDeEc88817A5D9E0CCeD281d41AdaE49',
+  petRegistry: '0x7d9836a101ffc6B53f3Db9C04ae62DAbA1F8C3fc',
+  vaultFactory: '0x404910a02D223FB2e1aD6b8B7C06ee075E274a4d',
 } as const;
 
 export function getEthereumProvider(): EthereumProvider | null {
@@ -86,13 +87,28 @@ const MINIMUM_TOKEN_HOLD_SELECTOR = '0xc07e579e';
 const CLAIM_AMOUNT_WEI_SELECTOR = '0x30bbab15';
 const GAME_TOKEN_SELECTOR = '0xc3dfdae6';
 const ERC20_BALANCE_OF_SELECTOR = '0x70a08231';
+const CREATE_EXTRA_BRUTE_WITH_TOKEN_SELECTOR = '0xcc276cff';
 const EXTRA_BRUTE_PRICE_SELECTOR = '0x2cab4165';
+const EXTRA_BRUTE_TOKEN_PRICE_SELECTOR = '0xb4d638b7';
 const NEXT_BRUTE_ID_SELECTOR = '0x0b4dd2a0';
 const BRUTE_CREATED_TOPIC = '0xfbe356727e47cbbe402da96eaae9ef22f838ecffbd2203e8119a4c42cb408e7b';
+const BUY_PET_SELECTOR = '0x95c9878c';
+const BUY_PET_WITH_TOKEN_SELECTOR = '0xf365abda';
+const OWNS_PET_SELECTOR = '0x0ac8071a';
+const PET_PRICE_SELECTOR = '0x081ed191';
+const PET_TOKEN_PRICE_SELECTOR = '0x99397a32';
+const APPROVE_SELECTOR = '0x095ea7b3';
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const BNB_TESTNET_RPC = BNB_TESTNET.rpcUrls[0];
 const VAULT_TOTAL_RECEIVED_SELECTOR = '0x33e4c946';
 const VAULT_BALANCE_SELECTOR = '0x0bf6cc08';
+
+const GAS_APPROVE_ERC20 = '0x186a0'; // 100k
+const GAS_CREATE_EXTRA_BRUTE = '0x61a80'; // 400k
+const GAS_BUY_PET_BNB = '0x493e0'; // 300k
+const GAS_BUY_PET_TOKEN = '0x61a80'; // 400k
 
 const TOKEN_TOTAL_SUPPLY_SELECTOR = '0x18160ddd';
 const TOKEN_SYMBOL_SELECTOR = '0x95d89b41';
@@ -108,6 +124,20 @@ interface TransactionReceipt {
   transactionHash: string;
   status: string;
   logs: TransactionReceiptLog[];
+}
+
+function bytes32String(value: string): string {
+  const bytes = new TextEncoder().encode(value);
+  if (bytes.length > 32) throw new Error('bytes32_string_too_long');
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('').padEnd(64, '0');
+}
+
+function isZeroAddress(address: string): boolean {
+  return address.toLowerCase() === ZERO_ADDRESS;
+}
+
+function hexBool(result: string): boolean {
+  return hexToBigInt(result) === 1n;
 }
 
 function strip0x(value: string): string {
@@ -282,6 +312,26 @@ function parseBruteIdFromReceipt(receipt: TransactionReceipt): number | null {
   return null;
 }
 
+async function approveGameToken(
+  provider: EthereumProvider,
+  walletAddress: string,
+  spender: string,
+  amount: bigint,
+): Promise<void> {
+  if (amount <= 0n) throw new Error('invalid_token_amount');
+  const txHash = await provider.request<string>({
+    method: 'eth_sendTransaction',
+    params: [{
+      from: walletAddress,
+      to: BRUTUS_BNB_TESTNET_CONTRACTS.token,
+      gas: GAS_APPROVE_ERC20,
+      data: `${APPROVE_SELECTOR}${encodeAddress(spender)}${pad64(`0x${amount.toString(16)}`)}`,
+    }],
+  });
+  const receipt = await waitForReceipt(provider, txHash);
+  if (receipt.status !== '0x1') throw new Error('approve_failed');
+}
+
 export async function createPaidExtraBruteOnChain(
   provider: EthereumProvider,
   walletAddress: string,
@@ -299,6 +349,7 @@ export async function createPaidExtraBruteOnChain(
       from: walletAddress,
       to: BRUTUS_BNB_TESTNET_CONTRACTS.registry,
       value: `0x${price.toString(16)}`,
+      gas: GAS_CREATE_EXTRA_BRUTE,
       data: `${CREATE_EXTRA_BRUTE_SELECTOR}${pad64(metadataHash)}`,
     }],
   });
@@ -307,11 +358,154 @@ export async function createPaidExtraBruteOnChain(
   return { txHash, onChainBruteId: parseBruteIdFromReceipt(receipt) ?? predictedId };
 }
 
+export async function readExtraBruteTokenPrice(
+  provider: EthereumProvider,
+  walletAddress: string,
+): Promise<bigint> {
+  await assertBnbTestnet(provider);
+  const result = await provider.request<string>({
+    method: 'eth_call',
+    params: [{
+      to: BRUTUS_BNB_TESTNET_CONTRACTS.registry,
+      data: `${EXTRA_BRUTE_TOKEN_PRICE_SELECTOR}${encodeAddress(walletAddress)}`,
+    }, 'latest'],
+  });
+  return hexToBigInt(result);
+}
+
+export async function createPaidExtraBruteWithTokenOnChain(
+  provider: EthereumProvider,
+  walletAddress: string,
+  metadataHash: string,
+): Promise<{ txHash: string; onChainBruteId: number }> {
+  const [price, predictedId] = await Promise.all([
+    readExtraBruteTokenPrice(provider, walletAddress),
+    readNextOnChainBruteId(provider),
+  ]);
+  if (price <= 0n) throw new Error('invalid_extra_brute_token_price');
+  if (!Number.isSafeInteger(predictedId) || predictedId <= 0) throw new Error('invalid_onchain_brute_id');
+  await approveGameToken(provider, walletAddress, BRUTUS_BNB_TESTNET_CONTRACTS.registry, price);
+  const txHash = await provider.request<string>({
+    method: 'eth_sendTransaction',
+    params: [{
+      from: walletAddress,
+      to: BRUTUS_BNB_TESTNET_CONTRACTS.registry,
+      gas: GAS_CREATE_EXTRA_BRUTE,
+      data: `${CREATE_EXTRA_BRUTE_WITH_TOKEN_SELECTOR}${pad64(metadataHash)}`,
+    }],
+  });
+  const receipt = await waitForReceipt(provider, txHash);
+  if (receipt.status !== '0x1') throw new Error('tx_failed');
+  return { txHash, onChainBruteId: parseBruteIdFromReceipt(receipt) ?? predictedId };
+}
+
+export async function readWalletPetOwnership(
+  provider: EthereumProvider,
+  walletAddress: string,
+  petIds: string[],
+): Promise<Set<string>> {
+  await assertBnbTestnet(provider);
+  const petRegistry = BRUTUS_BNB_TESTNET_CONTRACTS.petRegistry;
+  if (isZeroAddress(petRegistry)) return new Set();
+  const entries = await Promise.all(petIds.map(async (petId) => {
+    const data = `${OWNS_PET_SELECTOR}${encodeAddress(walletAddress)}${bytes32String(petId)}`;
+    const result = await provider.request<string>({
+      method: 'eth_call',
+      params: [{ to: petRegistry, data }, 'latest'],
+    });
+    return [petId, hexBool(result)] as const;
+  }));
+  return new Set(entries.filter(([, owned]) => owned).map(([petId]) => petId));
+}
+
+export async function readOnChainPetPrice(
+  provider: EthereumProvider,
+  petId: string,
+): Promise<bigint | null> {
+  await assertBnbTestnet(provider);
+  const petRegistry = BRUTUS_BNB_TESTNET_CONTRACTS.petRegistry;
+  if (isZeroAddress(petRegistry)) return null;
+  const result = await provider.request<string>({
+    method: 'eth_call',
+    params: [{ to: petRegistry, data: `${PET_PRICE_SELECTOR}${bytes32String(petId)}` }, 'latest'],
+  });
+  return hexToBigInt(result);
+}
+
+export async function readOnChainPetTokenPrice(
+  provider: EthereumProvider,
+  petId: string,
+): Promise<bigint | null> {
+  await assertBnbTestnet(provider);
+  const petRegistry = BRUTUS_BNB_TESTNET_CONTRACTS.petRegistry;
+  if (isZeroAddress(petRegistry)) return null;
+  const result = await provider.request<string>({
+    method: 'eth_call',
+    params: [{ to: petRegistry, data: `${PET_TOKEN_PRICE_SELECTOR}${bytes32String(petId)}` }, 'latest'],
+  });
+  return hexToBigInt(result);
+}
+
+export async function buyPetWithTokenOnChain(
+  provider: EthereumProvider,
+  walletAddress: string,
+  petId: string,
+  fallbackTokenPriceWei: bigint,
+): Promise<{ txHash: string }> {
+  await assertBnbTestnet(provider);
+  const petRegistry = BRUTUS_BNB_TESTNET_CONTRACTS.petRegistry;
+  if (isZeroAddress(petRegistry)) throw new Error('pet_registry_not_deployed');
+  const onChainPrice = await readOnChainPetTokenPrice(provider, petId);
+  const price = onChainPrice && onChainPrice > 0n ? onChainPrice : fallbackTokenPriceWei;
+  if (price <= 0n) throw new Error('invalid_pet_token_price');
+  await approveGameToken(provider, walletAddress, petRegistry, price);
+  const txHash = await provider.request<string>({
+    method: 'eth_sendTransaction',
+    params: [{
+      from: walletAddress,
+      to: petRegistry,
+      gas: GAS_BUY_PET_TOKEN,
+      data: `${BUY_PET_WITH_TOKEN_SELECTOR}${bytes32String(petId)}`,
+    }],
+  });
+  const receipt = await waitForReceipt(provider, txHash);
+  if (receipt.status !== '0x1') throw new Error('tx_failed');
+  return { txHash };
+}
+
+export async function buyPetOnChain(
+  provider: EthereumProvider,
+  walletAddress: string,
+  petId: string,
+  fallbackPriceWei: bigint,
+): Promise<{ txHash: string }> {
+  await assertBnbTestnet(provider);
+  const petRegistry = BRUTUS_BNB_TESTNET_CONTRACTS.petRegistry;
+  if (isZeroAddress(petRegistry)) throw new Error('pet_registry_not_deployed');
+  const onChainPrice = await readOnChainPetPrice(provider, petId);
+  const price = onChainPrice && onChainPrice > 0n ? onChainPrice : fallbackPriceWei;
+  if (price <= 0n) throw new Error('invalid_pet_price');
+  const txHash = await provider.request<string>({
+    method: 'eth_sendTransaction',
+    params: [{
+      from: walletAddress,
+      to: petRegistry,
+      value: `0x${price.toString(16)}`,
+      gas: GAS_BUY_PET_BNB,
+      data: `${BUY_PET_SELECTOR}${bytes32String(petId)}`,
+    }],
+  });
+  const receipt = await waitForReceipt(provider, txHash);
+  if (receipt.status !== '0x1') throw new Error('tx_failed');
+  return { txHash };
+}
+
 export async function readCombatClaimRequirements(
   provider: EthereumProvider,
   walletAddress: string,
 ): Promise<{
   token: string;
+  tokenSymbol: string;
   minimumHold: bigint;
   walletBalance: bigint;
   claimAmount: bigint;
@@ -339,9 +533,14 @@ export async function readCombatClaimRequirements(
     method: 'eth_call',
     params: [{ to: token, data: `${ERC20_BALANCE_OF_SELECTOR}${encodeAddress(walletAddress)}` }, 'latest'],
   });
+  const tokenSymbolResult = await provider.request<string>({
+    method: 'eth_call',
+    params: [{ to: token, data: TOKEN_SYMBOL_SELECTOR }, 'latest'],
+  });
   const walletBalance = hexToBigInt(walletBalanceResult);
   return {
     token,
+    tokenSymbol: decodeAbiStringResult(tokenSymbolResult),
     minimumHold,
     walletBalance,
     claimAmount,
@@ -415,6 +614,11 @@ async function publicEthCallOptional(to: string, data: string): Promise<string |
   } catch {
     return null;
   }
+}
+
+export async function readGameTokenSymbol(): Promise<string> {
+  const result = await publicEthCall(BRUTUS_BNB_TESTNET_CONTRACTS.token, TOKEN_SYMBOL_SELECTOR);
+  return decodeAbiStringResult(result);
 }
 
 async function publicEthGetBalance(address: string): Promise<bigint> {

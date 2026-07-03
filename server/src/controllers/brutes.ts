@@ -66,6 +66,10 @@ export const ListBrutesQuery = z.object({
   walletAddress: z.string().regex(WALLET_REGEX, 'invalid_wallet').optional(),
 });
 
+export const SetPetsBody = z.object({
+  pets: z.array(z.string().min(1).max(40)).max(3),
+});
+
 export const createBrute: RequestHandler = async (req, res, next) => {
   try {
     const body = req.body as z.infer<typeof CreateBruteBody>;
@@ -102,6 +106,17 @@ export const getPupils: RequestHandler = async (req, res, next) => {
     const params = req.params as unknown as z.infer<typeof BruteIdParams>;
     const pupils = await BruteService.listPupils(params.id);
     res.json({ pupils });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const setPets: RequestHandler = async (req, res, next) => {
+  try {
+    const params = req.params as unknown as z.infer<typeof BruteIdParams>;
+    const body = req.body as z.infer<typeof SetPetsBody>;
+    const brute = await BruteService.setBrutePets(params.id, body.pets);
+    res.json(brute);
   } catch (err) {
     next(err);
   }

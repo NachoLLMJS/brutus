@@ -10,6 +10,7 @@ import {
 } from '../lib/serialization.js';
 import { generateInitialStats } from '../lib/coreBridge.js';
 import { maybeResetDaily } from '../lib/dailyReset.js';
+import { getPet } from 'core';
 
 const DEFAULT_LPC_APPEARANCE = {
   head: 'humanMale',
@@ -170,4 +171,25 @@ export async function listPupils(masterId: string): Promise<PupilSummary[]> {
     orderBy: { createdAt: 'asc' },
   });
   return rows;
+}
+
+export async function setBrutePets(bruteId: string, petIds: string[]): Promise<BruteSnapshot> {
+  const unique = Array.from(new Set(petIds)).slice(0, 3);
+  for (const petId of unique) {
+    if (!getPet(petId)) throw new HttpError(400, 'invalid_pet');
+  }
+
+  const serialized = serializeForPrisma({ pets: unique });
+  try {
+    const updated = await prisma.brute.update({
+      where: { id: bruteId },
+      data: { pets: serialized.pets! },
+    });
+    return deserializeBrute(updated);
+  } catch (err) {
+    if (typeof err === 'object' && err && 'code' in err && err.code === 'P2025') {
+      throw new HttpError(404, 'brute_not_found');
+    }
+    throw err;
+  }
 }

@@ -36,7 +36,7 @@ import {
   Symbol942, Symbol943, Symbol944,
 } from 'brutus-fla-parser';
 import * as PIXI from 'pixi.js';
-import { Filter, Matrix, Texture } from 'pixi.js';
+import { Filter, Matrix, Rectangle, Texture } from 'pixi.js';
 
 // ───────────────────────── Animation table ─────────────────────────
 
@@ -49,9 +49,11 @@ export type AnimationName =
   | 'drink' | 'eat' | 'strengthen' | 'equip' | 'trash' | 'monk'
   | 'win' | 'train' | 'train2';
 
-type ModelKey = 'male' | 'female' | 'dog' | 'bear' | 'panther';
+type LegacyModelKey = 'male' | 'female' | 'dog' | 'bear' | 'panther';
+type CustomPetModelKey = 'douxDino' | 'mortDino' | 'tardDino' | 'vitaDino';
+type ModelKey = LegacyModelKey | CustomPetModelKey;
 
-const ANIMATIONS: Record<ModelKey, Partial<Record<AnimationName, LaBruteSymbol>>> = {
+const ANIMATIONS: Record<LegacyModelKey, Partial<Record<AnimationName, LaBruteSymbol>>> = {
   male: {
     idle: Symbol475,
     monk: Symbol476,
@@ -166,7 +168,7 @@ const ANIMATIONS: Record<ModelKey, Partial<Record<AnimationName, LaBruteSymbol>>
  * El consumer se suscribe vía `holder.once('fist:hit', cb)` para sincronizar
  * SFX y daño visual con el frame exacto del impacto.
  */
-const FRAME_EVENTS: Record<ModelKey, Partial<Record<AnimationName, Record<number, string>>>> = {
+const FRAME_EVENTS: Record<LegacyModelKey, Partial<Record<AnimationName, Record<number, string>>>> = {
   male: {
     fist: { 2: 'hit' },
     estoc: { 4: 'hit' },
@@ -196,7 +198,7 @@ const FRAME_EVENTS: Record<ModelKey, Partial<Record<AnimationName, Record<number
   panther: { attack: { 2: 'hit' }, death: { 16: 'drop' } },
 };
 
-const LOOP_START: Record<ModelKey, Partial<Record<AnimationName, number>>> = {
+const LOOP_START: Record<LegacyModelKey, Partial<Record<AnimationName, number>>> = {
   male: {
     idle: 0,
     monk: 6,
@@ -220,7 +222,7 @@ const LOOP_START: Record<ModelKey, Partial<Record<AnimationName, number>>> = {
   panther: { idle: 0, run: 0, death: 16, trapped: 0 },
 };
 
-const ANIMATION_SYMBOL_NAMES: Record<ModelKey, string[]> = {
+const ANIMATION_SYMBOL_NAMES: Record<LegacyModelKey, string[]> = {
   male: Object.values(ANIMATIONS.male).map((a) => a?.name ?? '').filter(Boolean),
   female: Object.values(ANIMATIONS.female).map((a) => a?.name ?? '').filter(Boolean),
   dog: Object.values(ANIMATIONS.dog).map((a) => a?.name ?? '').filter(Boolean),
@@ -233,6 +235,44 @@ const SCALE = 1;
 // Tamaño base de un bruto humanoide, en px lógicos del stage.
 const FIGHTER_BASE_HEIGHT = 160;
 const FIGHTER_BASE_WIDTH = 120;
+
+interface CustomPetAnimationDef {
+  file: string;
+  frames: number;
+  loop: boolean;
+  hitFrame?: number;
+}
+
+interface CustomPetDef {
+  base: string;
+  visualScale: number;
+  /** Pixel-art pets should be scaled to whole-number pixels to avoid blur. */
+  pixelPerfect?: boolean;
+  tint?: number;
+  animations: Partial<Record<AnimationName, CustomPetAnimationDef>>;
+}
+
+const DINO_ANIMS: CustomPetDef['animations'] = {
+  idle: { file: 'idle', frames: 4, loop: true },
+  run: { file: 'run', frames: 6, loop: true },
+  arrive: { file: 'run', frames: 6, loop: true },
+  attack: { file: 'attack', frames: 4, loop: false, hitFrame: 2 },
+  hit: { file: 'hurt', frames: 2, loop: false },
+  evade: { file: 'run', frames: 6, loop: false },
+  death: { file: 'death', frames: 4, loop: false, hitFrame: 3 },
+  trapped: { file: 'crouch', frames: 3, loop: true },
+};
+
+const CUSTOM_PET_MODELS: Record<CustomPetModelKey, CustomPetDef> = {
+  douxDino: { base: '/assets/pets/dinos/doux_dino', visualScale: 1.96, pixelPerfect: true, animations: DINO_ANIMS },
+  mortDino: { base: '/assets/pets/dinos/mort_dino', visualScale: 2.08, pixelPerfect: true, animations: DINO_ANIMS },
+  tardDino: { base: '/assets/pets/dinos/tard_dino', visualScale: 2.22, pixelPerfect: true, animations: DINO_ANIMS },
+  vitaDino: { base: '/assets/pets/dinos/vita_dino', visualScale: 2.36, pixelPerfect: true, animations: DINO_ANIMS },
+};
+
+function isCustomPetModel(model: ModelKey): model is CustomPetModelKey {
+  return model in CUSTOM_PET_MODELS;
+}
 
 type SvgsToLoad = { svg: Svg; count: number }[];
 
@@ -339,7 +379,7 @@ export interface FighterHolderInput {
    *   - 'brute' (default): bruto humanoide; usa gender + body + bodyColors
    *   - 'dog' / 'bear' / 'panther': pets; ignora body/colors/gender
    */
-  model?: 'brute' | 'dog' | 'bear' | 'panther';
+  model?: 'brute' | LegacyModelKey | CustomPetModelKey;
   /** Solo aplica si model='brute' (o no especificado). */
   gender?: BruteGender;
   body?: string;
@@ -380,6 +420,9 @@ export default class FighterHolder {
   #facing: 'left' | 'right' = 'right';
   /** Frame del WEAPON_SYMBOL a renderizar; 0 = sin arma. */
   #weaponFrame = 0;
+  #customSprite: PIXI.Sprite | null = null;
+  #customAnimationDef: CustomPetAnimationDef | null = null;
+  #customOnEnd: (() => void) | null = null;
 
   // Referencias para tick + cleanup
   #app: PIXI.Application;
@@ -434,8 +477,14 @@ export default class FighterHolder {
     this.shadow.alpha = 1;
     this.container.addChild(this.shadow);
 
+    if (isCustomPetModel(this.#model)) {
+      this.#initializeCustomPet();
+      return;
+    }
+
     // Containers + SVGs por animación
-    const animations = ANIMATIONS[this.#model];
+    const legacyModel = this.#model as LegacyModelKey;
+    const animations = ANIMATIONS[legacyModel];
     const maxSvgs: SvgsToLoad = [];
 
     for (const animation of Object.values(animations)) {
@@ -503,7 +552,7 @@ export default class FighterHolder {
       if (this.#timer === 0 || this.#timer >= tickRate) {
         this.#timer %= tickRate;
 
-        const loopStart = LOOP_START[this.#model][this.animation] ?? null;
+        const loopStart = LOOP_START[legacyModel][this.animation] ?? null;
         if (this.#frame >= this.#frameCount && loopStart !== null) {
           this.#frame = loopStart;
         }
@@ -518,7 +567,7 @@ export default class FighterHolder {
         if (this.#frame === 0) {
           this.#triggerEvent(`${this.animation}:start`);
         }
-        const eventTable = FRAME_EVENTS[this.#model]?.[this.animation];
+        const eventTable = FRAME_EVENTS[legacyModel]?.[this.animation];
         if (eventTable) {
           const eventName = eventTable[this.#frame];
           if (eventName) {
@@ -543,9 +592,79 @@ export default class FighterHolder {
 
   // ──────────────────────────── Public API ────────────────────────────
 
+  #initializeCustomPet(): void {
+    this.#customSprite = new PIXI.Sprite();
+    this.#customSprite.anchor.set(0.5, 1);
+    this.#customSprite.roundPixels = true;
+    this.#customSprite.y = 0;
+    this.container.addChild(this.#customSprite);
+    this.setAnimation('idle');
+
+    this.#tickerCb = () => {
+      if (this.#destroyed || this.container.destroyed || !this.#playing || !this.#customSprite || !this.#customAnimationDef) return;
+      const tickRate = 1000 / (12 * this.animationSpeed);
+      this.#timer += this.#app.ticker.elapsedMS;
+      if (this.#timer < tickRate) return;
+      this.#timer %= tickRate;
+
+      if (this.#customAnimationDef.hitFrame === this.#frame) {
+        this.#triggerEvent(`${this.animation}:${this.animation === 'death' ? 'drop' : 'hit'}`);
+      }
+
+      this.#frame += 1;
+      if (this.#frame >= this.#frameCount) {
+        if (this.#customAnimationDef.loop) {
+          this.#frame = 0;
+        } else {
+          this.#playing = false;
+          this.#frame = Math.max(0, this.#frameCount - 1);
+          this.#triggerEvent(`${this.animation}:end`);
+          this.#resolvePending(`${this.animation}:end`);
+          this.#resolvePending('any:end');
+          this.#customOnEnd?.();
+          this.#customOnEnd = null;
+        }
+      }
+      this.#displayCustomPetFrame();
+    };
+    this.#app.ticker.add(this.#tickerCb);
+  }
+
+  #displayCustomPetFrame(): void {
+    if (!isCustomPetModel(this.#model) || !this.#customSprite || !this.#customAnimationDef) return;
+    const petDef = CUSTOM_PET_MODELS[this.#model];
+    const path = `${petDef.base}_${this.#customAnimationDef.file}.png`;
+    const base = Texture.from(path);
+    base.baseTexture.scaleMode = petDef.pixelPerfect ? PIXI.SCALE_MODES.NEAREST : PIXI.SCALE_MODES.LINEAR;
+    const frameWidth = Math.floor(base.width / this.#customAnimationDef.frames) || 100;
+    const texture = new Texture(base.baseTexture, new Rectangle(frameWidth * this.#frame, 0, frameWidth, base.height));
+    texture.baseTexture.scaleMode = base.baseTexture.scaleMode;
+    this.#customSprite.texture = texture;
+    this.#customSprite.tint = petDef.tint ?? 0xffffff;
+    const rawScale = this.#scale * petDef.visualScale * 1.1;
+    const scale = petDef.pixelPerfect ? Math.max(1, Math.round(rawScale)) : rawScale;
+    this.#customSprite.scale.set(scale, scale);
+  }
+
+  // ──────────────────────────── Public API ────────────────────────────
+
   setAnimation(name: AnimationName, frame = 0) {
     if (this.#destroyed) return;
-    const symbol = ANIMATIONS[this.#model][name];
+    if (isCustomPetModel(this.#model)) {
+      const petDef = CUSTOM_PET_MODELS[this.#model];
+      const customDef = petDef.animations[name] ?? petDef.animations.idle;
+      if (!customDef) return;
+      this.animation = name;
+      this.#customAnimationDef = customDef;
+      this.#frame = Math.max(0, Math.min(frame, customDef.frames - 1));
+      this.#frameCount = customDef.frames;
+      this.#timer = 0;
+      this.#playing = true;
+      this.#displayCustomPetFrame();
+      return;
+    }
+    const legacyModel = this.#model as LegacyModelKey;
+    const symbol = ANIMATIONS[legacyModel][name];
     if (!symbol) {
       // Animación no soportada por este modelo: fallback a idle.
       if (name !== 'idle') {
@@ -595,7 +714,25 @@ export default class FighterHolder {
         return;
       }
 
-      const symbol = ANIMATIONS[this.#model][name];
+      if (isCustomPetModel(this.#model)) {
+        const petDef = CUSTOM_PET_MODELS[this.#model];
+        const customDef = petDef.animations[name] ?? petDef.animations.idle;
+        if (!customDef) {
+          resolve();
+          return;
+        }
+        this.setAnimation(name);
+        if (customDef.loop) {
+          const durationMs = (customDef.frames / 12) * 1000;
+          setTimeout(() => resolve(), durationMs / Math.max(0.001, this.animationSpeed));
+        } else {
+          this.#customOnEnd = resolve;
+        }
+        return;
+      }
+
+      const legacyModel = this.#model as LegacyModelKey;
+      const symbol = ANIMATIONS[legacyModel][name];
       if (!symbol) {
         resolve();
         return;
@@ -603,7 +740,7 @@ export default class FighterHolder {
 
       this.setAnimation(name);
 
-      const loopStart = LOOP_START[this.#model][name] ?? null;
+      const loopStart = LOOP_START[legacyModel][name] ?? null;
       if (loopStart === null) {
         // One-shot: esperar to :end.
         this.#queuePending(`${name}:end`, resolve);
@@ -920,7 +1057,7 @@ export default class FighterHolder {
       frameToLoad = this.#weaponFrame;
     } else if (symbol.name === 'Symbol526') {
       frameToLoad = 16;
-    } else if (ANIMATION_SYMBOL_NAMES[this.#model].includes(symbol.name)) {
+    } else if (ANIMATION_SYMBOL_NAMES[this.#model as LegacyModelKey].includes(symbol.name)) {
       frameToLoad = this.#frame;
     } else {
       frameToLoad = 0;

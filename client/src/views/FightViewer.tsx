@@ -62,6 +62,7 @@ export function FightViewer() {
     walletBalance: bigint;
     claimAmount: bigint;
     canHoldClaim: boolean;
+    tokenSymbol: string;
   } | null>(null);
   const [claimInfoLoading, setClaimInfoLoading] = useState(false);
 
@@ -195,7 +196,7 @@ export function FightViewer() {
       if (!info.canHoldClaim) {
         pushToast(
           'error',
-          `You cannot claim yet: you need to hold ${formatTokenUnits(info.minimumHold)} tokens and you currently have ${formatTokenUnits(info.walletBalance)}.`,
+          `You cannot claim yet: you need to hold ${formatTokenUnits(info.minimumHold)} ${info.tokenSymbol} and you currently have ${formatTokenUnits(info.walletBalance)} ${info.tokenSymbol}.`,
         );
         return;
       }
@@ -203,7 +204,7 @@ export function FightViewer() {
       if (!canClaim.ok) {
         const reason = canClaim.reason || 'claim_not_available';
         const readable = reason === 'needs 10000 tokens'
-          ? `You cannot claim yet: you need to hold ${formatTokenUnits(info.minimumHold)} tokens and you currently have ${formatTokenUnits(info.walletBalance)}.`
+          ? `You cannot claim yet: you need to hold ${formatTokenUnits(info.minimumHold)} ${info.tokenSymbol} and you currently have ${formatTokenUnits(info.walletBalance)} ${info.tokenSymbol}.`
           : `You cannot claim yet: ${reason}.`;
         pushToast('error', readable);
         return;
@@ -214,7 +215,7 @@ export function FightViewer() {
     } catch (e) {
       const raw = e instanceof Error ? e.message : 'claim_failed';
       const msg = raw.toLowerCase().includes('minimum token hold')
-        ? 'You cannot claim yet: you need to hold 10,000 tokens to claim the victory.'
+        ? 'You cannot claim yet: you need to hold the required token amount to claim the victory.'
         : raw;
       pushToast('error', `Could not claim: ${msg}`);
     } finally {
@@ -405,8 +406,8 @@ export function FightViewer() {
                   )}
                   {claimInfo && !claimInfo.canHoldClaim && !claimedRewardTx && (
                     <span style={{ color: 'var(--primary)', fontSize: 12, maxWidth: 360, textAlign: 'center' }}>
-                      You cannot claim yet: you need to hold {formatTokenUnits(claimInfo.minimumHold)} tokens.
-                      You currently have {formatTokenUnits(claimInfo.walletBalance)}.
+                      You cannot claim yet: you need to hold {formatTokenUnits(claimInfo.minimumHold)} {claimInfo.tokenSymbol}.
+                      You currently have {formatTokenUnits(claimInfo.walletBalance)} {claimInfo.tokenSymbol}.
                     </span>
                   )}
                   {claimInfo?.canHoldClaim && !claimedRewardTx && (
@@ -453,7 +454,7 @@ function rewardReasonLabel(reason?: string): string {
     case 'reward_contract_missing':
       return 'the rewards contract address has no deployed contract on BNB Testnet.';
     case 'operator_not_authorized':
-      return 'the server operator wallet is not the rewards contract operator.';
+      return 'the victory reward was not registered yet. Start a new fight after refresh, or ask the server to retry this fight.';
     case 'operator_bnb_missing':
       return 'the server operator wallet has no testnet BNB for gas.';
     case 'reward_rpc_failed':

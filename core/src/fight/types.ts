@@ -198,7 +198,9 @@ export interface FightFighter {
  * (wolf/mastiff/panthers/bear) se mapean a uno de estos 3 modelos
  * (dog comparte sprite con wolf y mastiff; panther tiene su propio modelo).
  */
-export type PetModel = 'dog' | 'bear' | 'panther';
+export type PetModel =
+  | 'dog' | 'bear' | 'panther'
+  | 'douxDino' | 'mortDino' | 'tardDino' | 'vitaDino';
 
 /**
  * Pet visible en la arena. Cada entrada es UN sprite (e.g. una pantera de las 3).

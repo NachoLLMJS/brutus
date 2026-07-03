@@ -42,7 +42,7 @@ JWT_SECRET=<real-long-random-secret>
 LOG_LEVEL=info
 WALLET_AUTH_ENABLED=false
 BNB_TESTNET_RPC_URL=https://data-seed-prebsc-1-s1.binance.org:8545/
-BRUTUS_COMBAT_REWARDS=0x9b9b801Fef24947D13b850a93B456C03aeed1Aec
+BRUTUS_COMBAT_REWARDS=0x1cBF8b99029bf5cCff449a50DE46B0eae22f2Ef7
 BRUTUS_OPERATOR_PRIVATE_KEY=<operator-private-key>
 ```
 
@@ -65,22 +65,26 @@ Railway UI steps:
 
 6. Redeploy the `server` service.
 
-The production start script now also defaults missing `DATABASE_URL` to:
+The production start script defaults missing `DATABASE_URL` to:
 
 `file:/data/brutus.db`
 
-and creates the parent directory before Prisma runs. This only becomes truly persistent when Railway has a volume mounted at `/data`.
+and creates the parent directory before Prisma runs. It refuses non-`/data` SQLite paths in production so it does not silently save game state to ephemeral local storage.
 
-Without a volume, SQLite data is still ephemeral and can disappear on redeploy/restart.
+Without a volume mounted at `/data`, production startup should fail clearly instead of pretending persistence is safe.
 
 For real production/mainnet, consider a controlled migration to Postgres before depending on persistent data.
 
-## Build/start validation already proven locally
+## Build/start validation
+
+Production persistence is intentionally fail-closed: `NODE_ENV=production` refuses SQLite paths outside `/data`. On Railway, `/data` must be the mounted persistent volume path.
+
+The non-persistent local smoke below is only for validating the built server/client shape with a throwaway DB; it is not the Railway persistence mode.
 
 The Railway-style production smoke was tested locally with:
 
 ```bash
-NODE_ENV=production \
+NODE_ENV=development \
 PORT=4187 \
 HOST=127.0.0.1 \
 DATABASE_URL=file:./railway-smoke.db \

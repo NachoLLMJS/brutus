@@ -77,6 +77,11 @@ const SKILL_FILE: Record<string, string> = {
 };
 
 const PET_FILE: Record<string, string> = {
+  doux_dino: 'dinos/doux_dino_preview.png',
+  mort_dino: 'dinos/mort_dino_preview.png',
+  tard_dino: 'dinos/tard_dino_preview.png',
+  vita_dino: 'dinos/vita_dino_preview.png',
+  // Legacy fallbacks for old local DB rows.
   wolf: 'dog.svg',
   bear: 'bear.svg',
   panthers: 'panther.svg',
@@ -85,7 +90,7 @@ const PET_FILE: Record<string, string> = {
 
 export const FALLBACK_WEAPON = `${W}/knife.png`;
 export const FALLBACK_SKILL = `${S}/herculeanStrength.png`;
-export const FALLBACK_PET = `${P}/dog.svg`;
+export const FALLBACK_PET = `${P}/dinos/doux_dino_preview.png`;
 
 export function weaponAsset(id: string): string {
   const file = WEAPON_FILE[id];

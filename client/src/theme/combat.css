@@ -144,7 +144,7 @@
 .fighter-card.right .fc-rank { color: var(--hp-full); border-color: var(--hp-full); }
 
 /* HP BAR v2 (combat) */
-.hpbar { display: flex; flex-direction: column; gap: 4px; }
+.hpbar { display: block; }
 .hpbar.right { align-items: flex-end; }
 .hpbar-track {
   position: relative;
@@ -163,8 +163,7 @@
   transition: width 0.4s cubic-bezier(0.34, 1.2, 0.6, 1), background 0.3s;
   position: relative;
 }
-.hpbar.right .hpbar-track { transform: scaleX(-1); }
-.hpbar.right .hpbar-tick { transform: scaleX(-1); }
+.hpbar.right .hpbar-fill { margin-left: auto; }
 
 .hpbar-tick {
   position: absolute;
@@ -175,16 +174,24 @@
   pointer-events: none;
 }
 .hpbar-num {
+  position: absolute;
+  inset: 0;
   display: flex;
   gap: 4px;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-display);
   font-size: 13px;
   letter-spacing: 0.06em;
+  line-height: 1;
+  color: #fff6df;
+  text-shadow: 0 1px 0 #000, 0 0 3px #000, 1px 0 0 #000;
+  pointer-events: none;
+  z-index: 3;
 }
-.hpbar.right .hpbar-num { justify-content: flex-end; }
-.hpbar-cur { color: var(--text-strong); }
-.hpbar-sep { color: var(--text-secondary); }
-.hpbar-max { color: var(--text-secondary); }
+.hpbar-cur { color: #fffdf0; }
+.hpbar-sep { color: #f2e3bf; }
+.hpbar-max { color: #f2e3bf; }
 
 .fc-skills {
   display: flex;

@@ -9,6 +9,8 @@ import {
   getBrute,
   getPupils,
   listBrutes,
+  setPets,
+  SetPetsBody,
 } from '../controllers/brutes.js';
 
 export const brutesRouter: Router = Router();
@@ -22,3 +24,4 @@ brutesRouter.post(
 );
 brutesRouter.get('/:id', validate({ params: BruteIdParams }), getBrute);
 brutesRouter.get('/:id/pupils', validate({ params: BruteIdParams }), getPupils);
+brutesRouter.put('/:id/pets', mutationRateLimit, validate({ params: BruteIdParams, body: SetPetsBody }), setPets);

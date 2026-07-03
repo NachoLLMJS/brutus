@@ -63,9 +63,17 @@ function startWeapon(brute: Brute): string | undefined {
 
 /** Mapea un id del catálogo de Brutus al modelo visual (set de Symbols FLA). */
 function petModelFor(petId: string): PetModel {
+  const modelByPetId: Record<string, PetModel> = {
+    doux_dino: 'douxDino',
+    mort_dino: 'mortDino',
+    tard_dino: 'tardDino',
+    vita_dino: 'vitaDino',
+  };
+  const custom = modelByPetId[petId];
+  if (custom) return custom;
+  // Legacy/local fallback for old DB rows.
   if (petId === 'bear') return 'bear';
   if (petId === 'panthers') return 'panther';
-  // wolf, mastiff y cualquier otro caen al modelo dog.
   return 'dog';
 }
 

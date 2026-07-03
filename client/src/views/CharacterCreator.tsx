@@ -40,11 +40,15 @@ import { useToastStore } from '@/store/useToastStore';
 import { useWalletStore } from '@/store/useWalletStore';
 import {
   createPaidExtraBruteOnChain,
+  createPaidExtraBruteWithTokenOnChain,
   formatBnbWei,
+  formatTokenUnits,
   getEthereumProvider,
   isSupportedBnbChain,
   metadataHashForBrute,
   readExtraBrutePrice,
+  readExtraBruteTokenPrice,
+  readGameTokenSymbol,
 } from '@/lib/web3';
 
 export function CharacterCreator() {
@@ -85,7 +89,21 @@ export function CharacterCreator() {
   const [lpcArmorColor, setLpcArmorColor] = useState<LpcArmorColorKey>('black');
   const [paidForgeNeeded, setPaidForgeNeeded] = useState<boolean>(false);
   const [paidForgePrice, setPaidForgePrice] = useState<bigint | null>(null);
+  const [paidForgeTokenPrice, setPaidForgeTokenPrice] = useState<bigint | null>(null);
+  const [gameTokenSymbol, setGameTokenSymbol] = useState<string>('TOKEN');
   const [paidForgeBusy, setPaidForgeBusy] = useState<boolean>(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void readGameTokenSymbol()
+      .then((symbol) => {
+        if (!cancelled && symbol) setGameTokenSymbol(symbol);
+      })
+      .catch(() => {
+        if (!cancelled) setGameTokenSymbol('TOKEN');
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     const rng = mulberry32(hashStringToSeed(`gender-switch-${gender}-${Date.now()}`));
@@ -174,7 +192,12 @@ export function CharacterCreator() {
         const provider = getEthereumProvider();
         if (provider && walletAddress) {
           try {
-            setPaidForgePrice(await readExtraBrutePrice(provider, walletAddress));
+            const [bnbPrice, tokenPrice] = await Promise.all([
+              readExtraBrutePrice(provider, walletAddress),
+              readExtraBruteTokenPrice(provider, walletAddress),
+            ]);
+            setPaidForgePrice(bnbPrice);
+            setPaidForgeTokenPrice(tokenPrice);
           } catch {
             setPaidForgePrice(null);
           }
@@ -188,7 +211,7 @@ export function CharacterCreator() {
     }
   };
 
-  const submitPaidExtra = async () => {
+  const submitPaidExtra = async (payment: 'bnb' | 'token' = 'bnb') => {
     if (paidForgeBusy || !walletAddress || !walletReady || !nameValid) return;
     const provider = getEthereumProvider();
     if (!provider) {
@@ -204,7 +227,9 @@ export function CharacterCreator() {
         body,
         bodyColors,
       });
-      const paid = await createPaidExtraBruteOnChain(provider, walletAddress, metadataHash);
+      const paid = payment === 'token'
+        ? await createPaidExtraBruteWithTokenOnChain(provider, walletAddress, metadataHash)
+        : await createPaidExtraBruteOnChain(provider, walletAddress, metadataHash);
       const brute = await api.brutes.create({
         name: name.trim(),
         gender,
@@ -219,7 +244,7 @@ export function CharacterCreator() {
       rememberBrute({ id: brute.id, name: brute.name, level: brute.level });
       setPaidForgeNeeded(false);
       setCurrent(brute.id);
-      pushToast('success', 'Extra Vault Brawler created by paying BNB.');
+      pushToast('success', payment === 'token' ? 'Extra Vault Brawler created by paying token.' : 'Extra Vault Brawler created by paying BNB.');
       navigate(`/brute/${brute.id}`);
     } catch (e) {
       const code = e instanceof ApiError ? e.code : e instanceof Error ? e.message : 'paid_forge_failed';
@@ -330,16 +355,26 @@ export function CharacterCreator() {
               >
                 <b>You already have 3 base Vault Brawlers.</b>
                 <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                  You can create this extra Vault Brawler by paying {paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}.
-                  The contract splits 50% to the vault and 50% to burn.
+                  You can create this extra Vault Brawler by paying {paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}
+                  {paidForgeTokenPrice ? ` or ${formatTokenUnits(paidForgeTokenPrice)} ${gameTokenSymbol}` : ` or ${gameTokenSymbol}`}.
+                  BNB goes to the vault; {gameTokenSymbol} goes to the dev wallet.
                 </span>
                 <button
                   type="button"
                   className="creator-cta"
-                  onClick={() => void submitPaidExtra()}
+                  onClick={() => void submitPaidExtra('bnb')}
                   disabled={paidForgeBusy || !nameValid}
                 >
-                  <span>{paidForgeBusy ? 'Waiting for MetaMask…' : `Create extra Vault Brawler by paying ${paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}`}</span>
+                  <span>{paidForgeBusy ? 'Waiting for MetaMask…' : `Pay ${paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}`}</span>
+                  {!paidForgeBusy && <span className="arrow">›</span>}
+                </button>
+                <button
+                  type="button"
+                  className="creator-cta"
+                  onClick={() => void submitPaidExtra('token')}
+                  disabled={paidForgeBusy || !nameValid}
+                >
+                  <span>{paidForgeBusy ? 'Waiting for MetaMask…' : `Pay ${paidForgeTokenPrice ? `${formatTokenUnits(paidForgeTokenPrice)} ${gameTokenSymbol}` : gameTokenSymbol}`}</span>
                   {!paidForgeBusy && <span className="arrow">›</span>}
                 </button>
               </div>

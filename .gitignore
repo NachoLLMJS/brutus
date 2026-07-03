@@ -19,6 +19,7 @@ build/
 *.db
 *.db-journal
 prisma/dev.db
+prisma/brute-pets-before-*.json
 prisma/migrations/dev_*
 
 # logs

@@ -513,6 +513,9 @@
   gap: 10px;
 }
 .beastv2 {
+  appearance: none;
+  width: 100%;
+  text-align: left;
   display: grid;
   grid-template-columns: 86px 1fr;
   gap: 12px;
@@ -521,13 +524,30 @@
   border: 1px solid var(--border-shadow);
   border-radius: 4px;
   align-items: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.beastv2:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 14px rgba(230, 180, 80, 0.18);
 }
 .beastv2-art {
   height: 70px;
   border: 1px solid var(--border-shadow);
   border-radius: 3px;
   overflow: hidden;
-  background: var(--paper-dark);
+  background: radial-gradient(circle at 50% 68%, #4a2631, var(--paper-dark) 72%);
+  display: grid;
+  place-items: center;
+}
+.beastv2-art img {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
+  object-position: center center;
+  image-rendering: pixelated;
+  transform: translateY(-2px) scale(1.28);
 }
 .beastv2-name {
   font-family: var(--font-display);
@@ -545,6 +565,8 @@
   text-transform: uppercase;
 }
 .beast-empty {
+  appearance: none;
+  width: 100%;
   padding: 14px 12px;
   text-align: center;
   font-family: var(--font-display);
@@ -552,8 +574,339 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-secondary);
+  background: rgba(16, 10, 18, 0.35);
   border: 1px dashed var(--border-shadow);
   border-radius: 4px;
+  cursor: pointer;
+}
+.beast-empty:hover,
+.beast-market-link:hover {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+.beast-market-link {
+  appearance: none;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid rgba(230, 180, 80, 0.3);
+  border-radius: 4px;
+  background: rgba(230, 180, 80, 0.08);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.pet-market-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 3, 8, 0.72);
+  backdrop-filter: blur(6px);
+}
+.pet-market-modal {
+  width: min(1240px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px);
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(13, 22, 29, 0.98), rgba(9, 13, 19, 0.98));
+  border: 2px solid #0c5a73;
+  border-radius: 4px;
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.78), 0 0 0 2px #061018 inset, 0 0 0 4px rgba(16, 126, 154, 0.28) inset;
+  padding: 10px;
+}
+.pet-market-shop {
+  color: #e9f8ff;
+  font-family: var(--font-display);
+}
+.pet-shop-topbar {
+  display: grid;
+  grid-template-columns: 160px 88px 190px 110px 142px 46px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.pet-shop-search,
+.pet-shop-pill,
+.pet-shop-balance,
+.pet-shop-close {
+  height: 44px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  border: 2px solid #0b5a75;
+  background: #071018;
+  color: #f5fbff;
+  box-shadow: 3px 3px 0 #020509, 0 0 0 2px rgba(89, 206, 236, 0.09) inset;
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 12px;
+}
+.pet-shop-search {
+  padding: 0 14px;
+  color: #78919c;
+  background: #183139;
+}
+.pet-shop-pill { justify-content: center; }
+.pet-shop-pill.wide { justify-content: flex-start; padding-left: 14px; }
+.pet-shop-balance {
+  justify-content: center;
+  margin-left: auto;
+  width: 110px;
+  color: #fdf9e8;
+}
+.pet-shop-balance.strong { width: 142px; }
+.pet-shop-close {
+  appearance: none;
+  justify-content: center;
+  width: 46px;
+  color: var(--accent-gold);
+  cursor: pointer;
+}
+.pet-market-error {
+  margin: 0 0 10px;
+  color: var(--primary);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.pet-shop-layout {
+  display: grid;
+  grid-template-columns: minmax(470px, 1.1fr) minmax(390px, 0.75fr);
+  gap: 16px;
+  min-height: min(620px, calc(100vh - 124px));
+}
+.pet-shop-inventory {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  grid-auto-rows: 112px;
+  gap: 10px;
+  align-content: start;
+  padding: 22px 22px 18px;
+  overflow: auto;
+  border: 2px solid #0b5a75;
+  background: radial-gradient(circle at 50% -20%, rgba(39, 94, 105, 0.18), transparent 34%), #091721;
+  box-shadow: 0 0 0 2px #03080c inset;
+}
+.pet-shop-item {
+  position: relative;
+  appearance: none;
+  min-width: 0;
+  border: 2px solid #15394a;
+  background: #071017;
+  box-shadow: 4px 4px 0 #020407, 0 0 0 4px #0d1d27 inset;
+  padding: 6px;
+  cursor: pointer;
+  image-rendering: pixelated;
+}
+.pet-shop-item:hover,
+.pet-shop-item.selected {
+  border-color: #7edcf0;
+  box-shadow: 4px 4px 0 #020407, 0 0 0 4px #153442 inset, 0 0 14px rgba(36, 196, 226, 0.25);
+}
+.pet-shop-item.owned { border-color: var(--accent-gold); }
+.pet-shop-item.wallet-owned:not(.owned)::after {
+  content: 'OWNED';
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  color: var(--accent-gold);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+.pet-shop-item:disabled { cursor: wait; opacity: .7; }
+.pet-shop-icon {
+  display: grid;
+  place-items: center;
+  height: 66px;
+  border: 2px solid #02070b;
+  background: #111923;
+}
+.pet-shop-icon img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform: scale(2.25);
+}
+.pet-shop-count,
+.pet-shop-price {
+  position: absolute;
+  right: 6px;
+  height: 20px;
+  min-width: 36px;
+  padding: 2px 6px 0;
+  border: 2px solid #0b5a75;
+  background: #03090d;
+  color: #f5fbff;
+  box-shadow: 2px 2px 0 #020407;
+  font-size: 10px;
+  text-align: center;
+}
+.pet-shop-count { top: -8px; color: #20f0ff; }
+.pet-shop-price { bottom: 6px; left: 9px; right: 9px; }
+.pet-shop-detail {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(82px, auto) auto auto 1fr;
+  gap: 14px;
+  padding: 0 6px 0 0;
+  color: #e7f7ff;
+}
+.pet-shop-tabs {
+  display: flex;
+  gap: 38px;
+  height: 30px;
+  align-items: center;
+  color: #7b929c;
+  font-size: 12px;
+}
+.pet-shop-tabs span.active { color: #f3fbff; }
+.pet-shop-titlebar {
+  border: 2px solid #0b5a75;
+  background: #050a10;
+  box-shadow: 4px 4px 0 #020407, 0 0 0 2px rgba(89, 206, 236, 0.08) inset;
+  padding: 10px 16px 8px;
+  color: #fdf9e8;
+  font-size: 14px;
+}
+.pet-shop-tags {
+  display: flex;
+  gap: 12px;
+}
+.pet-shop-tags span {
+  border: 2px solid #0b5a75;
+  background: #071018;
+  box-shadow: 3px 3px 0 #020407;
+  padding: 7px 12px 5px;
+  color: #f5fbff;
+  font-size: 11px;
+  text-transform: lowercase;
+}
+.pet-shop-copy {
+  max-width: 330px;
+  color: #d8f0f6;
+  font-family: var(--font-sans);
+  line-height: 1.45;
+  font-size: 14px;
+}
+.pet-shop-copy p { margin: 0 0 10px; }
+.pet-shop-copy em {
+  color: #879ca4;
+  font-size: 12px;
+}
+.pet-shop-preview-card {
+  position: absolute;
+  right: 0;
+  top: 96px;
+  width: 126px;
+  display: grid;
+  gap: 12px;
+}
+.pet-shop-preview,
+.pet-shop-floor,
+.pet-shop-listed {
+  border: 2px solid #0b5a75;
+  background: #071018;
+  box-shadow: 4px 4px 0 #020407, 0 0 0 3px #0d1d27 inset;
+}
+.pet-shop-preview {
+  height: 122px;
+  display: grid;
+  place-items: center;
+}
+.pet-shop-preview img {
+  width: 92px;
+  height: 92px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transform: scale(2.1);
+}
+.pet-shop-floor,
+.pet-shop-listed {
+  padding: 10px 8px 8px;
+  font-size: 10px;
+  text-align: center;
+  color: #fdf9e8;
+}
+.pet-shop-listed { display: flex; justify-content: space-between; }
+.pet-shop-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  margin-right: 142px;
+}
+.pet-shop-stats span {
+  border: 1px solid rgba(126, 220, 240, 0.34);
+  background: rgba(8, 18, 26, 0.84);
+  padding: 8px 6px 6px;
+  color: #8da9b2;
+  font-size: 10px;
+  text-align: center;
+}
+.pet-shop-stats b { display: block; color: #fff5c8; font-size: 13px; margin-top: 3px; }
+.pet-shop-buy-row {
+  align-self: end;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 18px;
+  align-items: end;
+  margin-top: auto;
+}
+.pet-shop-qty {
+  display: grid;
+  grid-template-columns: 38px 1fr 38px;
+  gap: 8px;
+  align-items: center;
+}
+.pet-shop-qty button,
+.pet-shop-qty span,
+.pet-shop-buy {
+  height: 42px;
+  border: 2px solid #0b5a75;
+  background: #061017;
+  color: #f5fbff;
+  box-shadow: 3px 3px 0 #020407;
+  font-family: var(--font-display);
+}
+.pet-shop-qty span {
+  display: grid;
+  place-items: center;
+}
+.pet-shop-total {
+  border: 2px solid #0b5a75;
+  background: #071018;
+  box-shadow: 3px 3px 0 #020407;
+  padding: 7px 9px;
+  color: #7f99a3;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  text-align: right;
+}
+.pet-shop-total strong { color: #f5fbff; font-family: var(--font-display); font-size: 12px; }
+.pet-shop-buy {
+  background: linear-gradient(180deg, #0c8a92, #06545f);
+  color: #bffcff;
+  cursor: pointer;
+}
+.pet-shop-buy:disabled { opacity: .45; cursor: not-allowed; }
+@media (max-width: 980px) {
+  .pet-shop-topbar { grid-template-columns: 1fr 90px 48px; }
+  .pet-shop-pill.wide,
+  .pet-shop-balance { display: none; }
+  .pet-shop-layout { grid-template-columns: 1fr; overflow: auto; }
+  .pet-shop-detail { min-height: 430px; }
+}
+@media (max-width: 720px) {
+  .pet-shop-inventory { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pet-shop-preview-card { position: static; width: auto; grid-template-columns: 120px 1fr 1fr; }
+  .pet-shop-stats { margin-right: 0; }
+  .pet-shop-buy-row { grid-template-columns: 1fr; }
 }
 
 /* BATTLE LOG v2 */
@@ -1141,4 +1494,176 @@
 @media (max-width: 1120px) {
   .temple-rpg-layout { grid-template-columns: 1fr; }
   .temple-warrior-card { position: static; min-height: auto; }
+}
+
+/* Dino marketplace polish: align modal containers with Brutus temple UI. */
+.pet-market-modal.pet-market-shop {
+  position: relative;
+  background: linear-gradient(180deg, rgba(24, 14, 22, 0.98), rgba(13, 8, 16, 0.98));
+  border: 2px solid var(--border-inner);
+  border-radius: 8px;
+  box-shadow:
+    0 26px 80px rgba(0, 0, 0, 0.78),
+    0 0 0 1px var(--border-outer) inset,
+    0 0 0 3px rgba(230, 180, 80, 0.08) inset;
+  padding: 14px;
+}
+.pet-market-shop .pet-shop-topbar {
+  grid-template-columns: 160px 88px 190px 110px 142px;
+  padding-right: 58px;
+}
+.pet-market-shop .pet-shop-search,
+.pet-market-shop .pet-shop-pill,
+.pet-market-shop .pet-shop-balance,
+.pet-market-shop .pet-shop-close,
+.pet-market-shop .pet-shop-titlebar,
+.pet-market-shop .pet-shop-tags span,
+.pet-market-shop .pet-shop-preview,
+.pet-market-shop .pet-shop-floor,
+.pet-market-shop .pet-shop-listed,
+.pet-market-shop .pet-shop-qty button,
+.pet-market-shop .pet-shop-qty span,
+.pet-market-shop .pet-shop-total,
+.pet-market-shop .pet-shop-buy {
+  border-color: var(--border-inner);
+  box-shadow: 3px 3px 0 var(--border-outer), 0 0 0 1px rgba(230, 180, 80, 0.10) inset;
+}
+.pet-market-shop .pet-shop-search,
+.pet-market-shop .pet-shop-pill,
+.pet-market-shop .pet-shop-balance,
+.pet-market-shop .pet-shop-titlebar,
+.pet-market-shop .pet-shop-tags span,
+.pet-market-shop .pet-shop-preview,
+.pet-market-shop .pet-shop-floor,
+.pet-market-shop .pet-shop-listed,
+.pet-market-shop .pet-shop-total,
+.pet-market-shop .pet-shop-qty button,
+.pet-market-shop .pet-shop-qty span {
+  background: rgba(17, 10, 20, 0.94);
+}
+.pet-shop-tags span,
+.pet-pay-toggle {
+  border: 1px solid var(--border-shadow);
+  padding: 8px 12px;
+  color: var(--text-secondary);
+  background: rgba(9, 5, 11, 0.65);
+}
+.pet-pay-toggle {
+  cursor: pointer;
+  font-family: var(--font-display);
+}
+.pet-pay-toggle.active {
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+  background: rgba(230, 180, 80, 0.1);
+}
+.pet-market-shop .pet-shop-balance,
+.pet-market-shop .pet-shop-tabs span.active,
+.pet-market-shop .pet-shop-floor,
+.pet-market-shop .pet-shop-listed,
+.pet-market-shop .pet-shop-stats b {
+  color: var(--accent-gold);
+}
+.pet-market-shop .pet-shop-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  color: var(--primary-light);
+}
+.pet-market-shop .pet-shop-layout {
+  grid-template-columns: minmax(520px, 1.05fr) minmax(390px, 0.72fr);
+}
+.pet-market-shop .pet-shop-inventory {
+  border-color: var(--border-inner);
+  background: radial-gradient(circle at 50% -20%, rgba(230, 180, 80, 0.10), transparent 34%), rgba(13, 8, 16, 0.78);
+  box-shadow: 0 0 0 1px var(--border-outer) inset;
+  align-content: start;
+}
+.pet-market-shop .pet-shop-item {
+  overflow: hidden;
+  border-color: var(--border-inner);
+  background: var(--paper-accent);
+  box-shadow: 4px 4px 0 var(--border-outer), 0 0 0 3px rgba(13, 8, 16, 0.72) inset;
+}
+.pet-market-shop .pet-shop-item:hover,
+.pet-market-shop .pet-shop-item.selected {
+  border-color: var(--accent-gold);
+  box-shadow: 4px 4px 0 var(--border-outer), 0 0 0 3px rgba(230, 180, 80, 0.10) inset, 0 0 14px rgba(230, 180, 80, 0.28);
+}
+.pet-market-shop .pet-shop-icon {
+  height: 72px;
+  overflow: hidden;
+  border: 1px solid var(--border-shadow);
+  background: radial-gradient(circle at 50% 70%, rgba(230, 180, 80, 0.10), var(--paper-dark) 70%);
+}
+.pet-market-shop .pet-shop-icon img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(1.72);
+}
+.pet-market-shop .pet-shop-preview {
+  overflow: hidden;
+}
+.pet-market-shop .pet-shop-preview img {
+  width: 64px;
+  height: 64px;
+  object-position: center;
+  transform: scale(1.55);
+}
+.pet-market-shop .pet-shop-count,
+.pet-market-shop .pet-shop-price {
+  border-color: var(--border-inner);
+  background: var(--paper-dark);
+  box-shadow: 2px 2px 0 var(--border-outer);
+}
+.pet-market-shop .pet-shop-count {
+  color: var(--accent-gold);
+}
+.pet-market-shop .pet-shop-tabs,
+.pet-market-shop .pet-shop-copy em,
+.pet-market-shop .pet-shop-stats span,
+.pet-market-shop .pet-shop-total {
+  color: var(--text-secondary);
+}
+.pet-market-shop .pet-shop-copy {
+  color: var(--text-strong);
+}
+.pet-market-shop .pet-shop-stats span {
+  border-color: var(--border-inner);
+  background: rgba(18, 10, 18, 0.84);
+}
+.pet-market-shop .pet-shop-buy {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border-color: #5a0a0a;
+}
+@media (max-width: 980px) {
+  .pet-market-shop .pet-shop-topbar { grid-template-columns: 1fr 90px 48px; padding-right: 0; }
+  .pet-market-shop .pet-shop-close { position: static; }
+}
+
+.pet-idle-sprite {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-size: 96px 24px;
+  background-position: 0 0;
+  image-rendering: pixelated;
+  transform: scale(2.35);
+  animation: pet-dino-idle 760ms steps(4) infinite;
+}
+.pet-idle-sprite.large {
+  transform: scale(3.15);
+}
+.pet-market-shop .pet-shop-icon img,
+.pet-market-shop .pet-shop-preview img {
+  display: none;
+}
+@keyframes pet-dino-idle {
+  from { background-position: 0 0; }
+  to { background-position: -96px 0; }
 }

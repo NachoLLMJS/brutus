@@ -17,7 +17,7 @@ contract BrutusGameV3Test is Test {
 
     function setUp() public {
         token = new MockERC20();
-        registry = new BrutusRegistryV3(address(token), vault, 0.01 ether, operator);
+        registry = new BrutusRegistryV3(address(token), vault, operator, 0.01 ether, operator);
         rewards = new BrutusCombatRewardsV3(address(token), 10_000 ether, 0.001 ether, operator, 0.0002 ether);
         token.mint(alice, 100_000 ether);
         token.mint(bob, 5_000 ether);

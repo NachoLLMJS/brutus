@@ -5,8 +5,25 @@
 // dev sees it immediately.
 
 import { z } from 'zod';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-const FINAL_BRUTUS_COMBAT_REWARDS = '0x9b9b801Fef24947D13b850a93B456C03aeed1Aec';
+const FINAL_BRUTUS_COMBAT_REWARDS = '0x1cBF8b99029bf5cCff449a50DE46B0eae22f2Ef7';
+
+function preloadLocalEnv(): void {
+  for (const envPath of [resolve(process.cwd(), '.env'), resolve(process.cwd(), 'server/.env')]) {
+    if (!existsSync(envPath)) continue;
+    for (const rawLine of readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith('#') || !line.includes('=')) continue;
+      const [key, ...valueParts] = line.split('=');
+      if (!key || process.env[key] !== undefined) continue;
+      process.env[key] = valueParts.join('=').trim().replace(/^['"]|['"]$/g, '');
+    }
+  }
+}
+
+preloadLocalEnv();
 
 function defaultHost(): string {
   return process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
@@ -30,7 +47,7 @@ const EnvSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   BNB_TESTNET_RPC_URL: z.string().url().default('https://data-seed-prebsc-1-s1.binance.org:8545/'),
   BRUTUS_OPERATOR_PRIVATE_KEY: z.string().regex(/^0x[0-9a-fA-F]{64}$/).optional(),
-  BRUTUS_COMBAT_REWARDS: z.string().regex(/^0x[0-9a-fA-F]{40}$/).default('0x9b9b801Fef24947D13b850a93B456C03aeed1Aec'),
+  BRUTUS_COMBAT_REWARDS: z.string().regex(/^0x[0-9a-fA-F]{40}$/).default(FINAL_BRUTUS_COMBAT_REWARDS),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

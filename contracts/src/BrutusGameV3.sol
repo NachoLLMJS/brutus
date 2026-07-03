@@ -3,6 +3,7 @@ pragma solidity ^0.8.26;
 
 interface IERC20LiteV3 {
     function balanceOf(address account) external view returns (uint256);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
 
 abstract contract ReentrancyGuardV3 {
@@ -21,9 +22,12 @@ contract BrutusRegistryV3 is ReentrancyGuardV3 {
 
     IERC20LiteV3 public immutable gameToken;
     address payable public vaultReceiver;
+    address public tokenPaymentReceiver;
     address public operator;
     uint256 public nextBruteId = 1;
+    uint256 public totalExtraBrutes;
     uint256 public extraBrutePriceWei;
+    uint256 public extraBruteTokenPriceWei;
 
     mapping(uint256 => address) public ownerOfBrute;
     mapping(uint256 => bytes32) public metadataHashOf;
@@ -32,19 +36,25 @@ contract BrutusRegistryV3 is ReentrancyGuardV3 {
 
     event BruteCreated(address indexed owner, uint256 indexed bruteId, bytes32 metadataHash, bool extra, uint256 bnbPaid);
     event ExtraBrutePayment(address indexed owner, uint256 indexed bruteId, uint256 toVault, uint256 burned);
+    event ExtraBruteTokenPayment(address indexed owner, uint256 indexed bruteId, address indexed tokenReceiver, uint256 tokenAmount);
+    event ExtraBruteTokenPriceUpdated(uint256 tokenPriceWei);
+    event TokenPaymentReceiverUpdated(address indexed tokenPaymentReceiver);
 
     modifier onlyOperator() {
         require(msg.sender == operator, "only operator");
         _;
     }
 
-    constructor(address token_, address payable vaultReceiver_, uint256 extraBrutePriceWei_, address operator_) {
+    constructor(address token_, address payable vaultReceiver_, address tokenPaymentReceiver_, uint256 extraBrutePriceWei_, address operator_) {
         require(token_ != address(0), "token required");
         require(vaultReceiver_ != address(0), "vault required");
+        require(tokenPaymentReceiver_ != address(0), "token receiver required");
         require(extraBrutePriceWei_ > 0, "price required");
         gameToken = IERC20LiteV3(token_);
         vaultReceiver = vaultReceiver_;
+        tokenPaymentReceiver = tokenPaymentReceiver_;
         extraBrutePriceWei = extraBrutePriceWei_;
+        extraBruteTokenPriceWei = extraBrutePriceWei_ * 1_000_000;
         operator = operator_ == address(0) ? msg.sender : operator_;
     }
 
@@ -67,6 +77,7 @@ contract BrutusRegistryV3 is ReentrancyGuardV3 {
         require(okVault, "vault transfer failed");
 
         paidExtraBruteCount[msg.sender] += 1;
+        totalExtraBrutes += 1;
         bruteId = _mintBrute(msg.sender, metadataHash, true, msg.value);
         emit ExtraBrutePayment(msg.sender, bruteId, toVault, burned);
     }
@@ -75,6 +86,36 @@ contract BrutusRegistryV3 is ReentrancyGuardV3 {
         uint256 extras = paidExtraBruteCount[user];
         if (extras >= 16) return extraBrutePriceWei * 65536;
         return extraBrutePriceWei * (2 ** extras);
+    }
+
+    function createExtraBruteWithToken(bytes32 metadataHash) external nonReentrant returns (uint256 bruteId) {
+        require(metadataHash != bytes32(0), "metadata hash required");
+        uint256 price = extraBruteTokenPrice(msg.sender);
+        require(price > 0, "token price required");
+        require(gameToken.transferFrom(msg.sender, tokenPaymentReceiver, price), "token transfer failed");
+
+        paidExtraBruteCount[msg.sender] += 1;
+        totalExtraBrutes += 1;
+        bruteId = _mintBrute(msg.sender, metadataHash, true, 0);
+        emit ExtraBruteTokenPayment(msg.sender, bruteId, tokenPaymentReceiver, price);
+    }
+
+    function extraBruteTokenPrice(address user) public view returns (uint256) {
+        uint256 extras = paidExtraBruteCount[user];
+        if (extras >= 16) return extraBruteTokenPriceWei * 65536;
+        return extraBruteTokenPriceWei * (2 ** extras);
+    }
+
+    function setExtraBruteTokenPrice(uint256 tokenPriceWei) external onlyOperator {
+        require(tokenPriceWei > 0, "price required");
+        extraBruteTokenPriceWei = tokenPriceWei;
+        emit ExtraBruteTokenPriceUpdated(tokenPriceWei);
+    }
+
+    function setTokenPaymentReceiver(address newTokenPaymentReceiver) external onlyOperator {
+        require(newTokenPaymentReceiver != address(0), "token receiver required");
+        tokenPaymentReceiver = newTokenPaymentReceiver;
+        emit TokenPaymentReceiverUpdated(newTokenPaymentReceiver);
     }
 
     function setOperator(address newOperator) external onlyOperator {
@@ -88,6 +129,166 @@ contract BrutusRegistryV3 is ReentrancyGuardV3 {
         metadataHashOf[bruteId] = metadataHash;
         bruteCount[owner] += 1;
         emit BruteCreated(owner, bruteId, metadataHash, extra, bnbPaid);
+    }
+}
+
+contract BrutusPetRegistryV1 is ReentrancyGuardV3 {
+    IERC20LiteV3 public immutable gameToken;
+    address payable public vaultReceiver;
+    address public tokenPaymentReceiver;
+    address public operator;
+    uint256 public totalPetsPurchased;
+
+    struct PetConfig {
+        uint256 priceWei;
+        uint256 tokenPriceWei;
+        bool active;
+    }
+
+    mapping(bytes32 => PetConfig) public petConfig;
+    mapping(address => mapping(bytes32 => bool)) public ownsPet;
+    mapping(address => bytes32[]) private _ownedPetIds;
+
+    event PetConfigured(bytes32 indexed petId, uint256 priceWei, bool active);
+    event PetTokenPriceConfigured(bytes32 indexed petId, uint256 tokenPriceWei);
+    event PetPurchased(address indexed owner, bytes32 indexed petId, uint256 priceWei);
+    event PetPurchasedWithToken(address indexed owner, bytes32 indexed petId, address indexed tokenReceiver, uint256 tokenPriceWei);
+    event PetGranted(address indexed owner, bytes32 indexed petId);
+    event VaultReceiverUpdated(address indexed vaultReceiver);
+    event TokenPaymentReceiverUpdated(address indexed tokenPaymentReceiver);
+    event OperatorUpdated(address indexed operator);
+
+    modifier onlyOperator() {
+        require(msg.sender == operator, "only operator");
+        _;
+    }
+
+    constructor(address token_, address payable vaultReceiver_, address tokenPaymentReceiver_, address operator_) {
+        require(token_ != address(0), "token required");
+        require(vaultReceiver_ != address(0), "vault required");
+        require(tokenPaymentReceiver_ != address(0), "token receiver required");
+        gameToken = IERC20LiteV3(token_);
+        vaultReceiver = vaultReceiver_;
+        tokenPaymentReceiver = tokenPaymentReceiver_;
+        operator = operator_ == address(0) ? msg.sender : operator_;
+    }
+
+    function configurePet(bytes32 petId, uint256 priceWei, bool active) external onlyOperator {
+        require(petId != bytes32(0), "pet id required");
+        require(priceWei > 0, "price required");
+        petConfig[petId].priceWei = priceWei;
+        petConfig[petId].active = active;
+        emit PetConfigured(petId, priceWei, active);
+    }
+
+    function configurePetTokenPrice(bytes32 petId, uint256 tokenPriceWei) external onlyOperator {
+        require(petId != bytes32(0), "pet id required");
+        require(tokenPriceWei > 0, "price required");
+        petConfig[petId].tokenPriceWei = tokenPriceWei;
+        emit PetTokenPriceConfigured(petId, tokenPriceWei);
+    }
+
+    function configurePets(bytes32[] calldata petIds, uint256[] calldata pricesWei, bool[] calldata activeFlags)
+        external
+        onlyOperator
+    {
+        require(petIds.length == pricesWei.length, "length mismatch");
+        require(petIds.length == activeFlags.length, "length mismatch");
+        for (uint256 i = 0; i < petIds.length; i++) {
+            require(petIds[i] != bytes32(0), "pet id required");
+            require(pricesWei[i] > 0, "price required");
+            petConfig[petIds[i]].priceWei = pricesWei[i];
+            petConfig[petIds[i]].active = activeFlags[i];
+            emit PetConfigured(petIds[i], pricesWei[i], activeFlags[i]);
+        }
+    }
+
+    function configurePetTokenPrices(bytes32[] calldata petIds, uint256[] calldata tokenPricesWei)
+        external
+        onlyOperator
+    {
+        require(petIds.length == tokenPricesWei.length, "length mismatch");
+        for (uint256 i = 0; i < petIds.length; i++) {
+            require(petIds[i] != bytes32(0), "pet id required");
+            require(tokenPricesWei[i] > 0, "price required");
+            petConfig[petIds[i]].tokenPriceWei = tokenPricesWei[i];
+            emit PetTokenPriceConfigured(petIds[i], tokenPricesWei[i]);
+        }
+    }
+
+    function buyPet(bytes32 petId) external payable nonReentrant {
+        PetConfig memory cfg = petConfig[petId];
+        require(cfg.active, "pet inactive");
+        require(!ownsPet[msg.sender][petId], "pet already owned");
+        require(msg.value == cfg.priceWei, "wrong BNB amount");
+        _recordPetOwner(msg.sender, petId);
+        totalPetsPurchased += 1;
+        (bool ok,) = vaultReceiver.call{value: msg.value}("");
+        require(ok, "vault transfer failed");
+        emit PetPurchased(msg.sender, petId, msg.value);
+    }
+
+    function buyPetWithToken(bytes32 petId) external nonReentrant {
+        PetConfig memory cfg = petConfig[petId];
+        require(cfg.active, "pet inactive");
+        require(!ownsPet[msg.sender][petId], "pet already owned");
+        require(cfg.tokenPriceWei > 0, "token price required");
+        _recordPetOwner(msg.sender, petId);
+        totalPetsPurchased += 1;
+        require(gameToken.transferFrom(msg.sender, tokenPaymentReceiver, cfg.tokenPriceWei), "token transfer failed");
+        emit PetPurchasedWithToken(msg.sender, petId, tokenPaymentReceiver, cfg.tokenPriceWei);
+    }
+
+    function grantPet(address owner, bytes32 petId) external onlyOperator {
+        require(owner != address(0), "owner required");
+        PetConfig memory cfg = petConfig[petId];
+        require(cfg.active, "pet inactive");
+        require(!ownsPet[owner][petId], "pet already owned");
+        _recordPetOwner(owner, petId);
+        emit PetGranted(owner, petId);
+    }
+
+    function ownedPetCount(address owner) external view returns (uint256) {
+        return _ownedPetIds[owner].length;
+    }
+
+    function ownedPetIdAt(address owner, uint256 index) external view returns (bytes32) {
+        return _ownedPetIds[owner][index];
+    }
+
+    function ownedPetIds(address owner) external view returns (bytes32[] memory) {
+        return _ownedPetIds[owner];
+    }
+
+    function petPrice(bytes32 petId) external view returns (uint256) {
+        return petConfig[petId].priceWei;
+    }
+
+    function petTokenPrice(bytes32 petId) external view returns (uint256) {
+        return petConfig[petId].tokenPriceWei;
+    }
+
+    function setVaultReceiver(address payable newVaultReceiver) external onlyOperator {
+        require(newVaultReceiver != address(0), "vault required");
+        vaultReceiver = newVaultReceiver;
+        emit VaultReceiverUpdated(newVaultReceiver);
+    }
+
+    function setTokenPaymentReceiver(address newTokenPaymentReceiver) external onlyOperator {
+        require(newTokenPaymentReceiver != address(0), "token receiver required");
+        tokenPaymentReceiver = newTokenPaymentReceiver;
+        emit TokenPaymentReceiverUpdated(newTokenPaymentReceiver);
+    }
+
+    function setOperator(address newOperator) external onlyOperator {
+        require(newOperator != address(0), "operator required");
+        operator = newOperator;
+        emit OperatorUpdated(newOperator);
+    }
+
+    function _recordPetOwner(address owner, bytes32 petId) private {
+        ownsPet[owner][petId] = true;
+        _ownedPetIds[owner].push(petId);
     }
 }
 

@@ -28,6 +28,26 @@ import { combatRewardFightId, recordCombatRewardWinner } from './OnChainService.
 
 export type FightType = 'normal' | 'training';
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function recordCombatRewardWinnerWithRetry(fightId: string, winnerWallet: string): Promise<string> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      return await recordCombatRewardWinner(fightId, winnerWallet);
+    } catch (err) {
+      lastError = err;
+      const code = err instanceof HttpError ? err.code : 'unknown_reward_record_error';
+      logger.warn({ fightId, winnerWallet, attempt, code }, 'combat_reward_record_attempt_failed');
+      if (code === 'fight_already_recorded') throw err;
+      if (attempt < 3) await sleep(750 * attempt);
+    }
+  }
+  throw lastError;
+}
+
 export interface FightResult {
   combat: {
     id: string;
@@ -215,7 +235,7 @@ export async function runFight(input: FightInput): Promise<FightResult> {
     } else {
       const fightId = combatRewardFightId(combatRow.id);
       try {
-        const recordedTxHash = await recordCombatRewardWinner(fightId, player.ownerWallet);
+        const recordedTxHash = await recordCombatRewardWinnerWithRetry(fightId, player.ownerWallet);
         await prisma.combat.update({
           where: { id: combatRow.id },
           data: {

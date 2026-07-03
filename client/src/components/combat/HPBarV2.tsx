@@ -22,11 +22,11 @@ export function HPBarV2({ value, max, side }: HPBarV2Props) {
         {ticks.map((t) => (
           <div key={t} className="hpbar-tick" style={{ left: `${t}%` }} />
         ))}
-      </div>
-      <div className="hpbar-num">
-        <span className="hpbar-cur">{Math.max(0, Math.round(value))}</span>
-        <span className="hpbar-sep">/</span>
-        <span className="hpbar-max">{max}</span>
+        <div className="hpbar-num">
+          <span className="hpbar-cur">{Math.max(0, Math.round(value))}</span>
+          <span className="hpbar-sep">/</span>
+          <span className="hpbar-max">{max}</span>
+        </div>
       </div>
     </div>
   );
