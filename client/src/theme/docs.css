@@ -729,3 +729,15 @@
     grid-template-rows: auto;
   }
 }
+
+
+/* Intro video exact aspect ratio. */
+.docs-hero-grid .docs-media-frame {
+  width: min(640px, 100%);
+}
+.docs-hero-grid .docs-media-frame video {
+  aspect-ratio: 16 / 9;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+}
