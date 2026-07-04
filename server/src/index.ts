@@ -20,7 +20,7 @@ const bnbTestnetRpcOrigin = new URL(env.BNB_TESTNET_RPC_URL).origin;
 
 app.disable('x-powered-by');
 // Touch server bundle when client-only deploys need Railway to rebuild the served UI.
-// Profile fights-today badge ships with the served client bundle.
+// Docs visual refresh ships with the served client bundle.
 if (env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
