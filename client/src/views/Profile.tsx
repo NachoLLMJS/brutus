@@ -353,6 +353,7 @@ export function Profile() {
         <section className="temple-rpg-layout">
           <aside className="temple-warrior-card">
             <div className="temple-card-kicker">◇ Vault Brawler Profile ◇</div>
+            <DailyFightsBadge remaining={fightsRemaining} total={fightsTotal} />
             <div className="temple-avatar-stage" aria-label={`Vault Brawler ${brute.name}`}>
               <BruteAvatar brute={brute} size="sm" />
             </div>
@@ -384,8 +385,7 @@ export function Profile() {
               <button type="button" className="btn-hero gold" onClick={goTrain}>Train</button>
               <button type="button" className="btn-hero primary" onClick={goFight} disabled={noNormalFights}>Fight</button>
             </div>
-            <div className="temple-card-footer">
-              <span>{fightsRemaining}/{fightsTotal} today</span>
+            <div className="temple-card-footer single">
               <span>Defeats {brute.defeatsToday}/3</span>
               <Link to="/">Change Brawler</Link>
             </div>
@@ -507,6 +507,22 @@ export function Profile() {
 }
 
 /* ─── Sub-components ─── */
+
+function DailyFightsBadge({ remaining, total }: { remaining: number; total: number }) {
+  const safeTotal = Math.max(1, total);
+  const safeRemaining = Math.max(0, Math.min(safeTotal, remaining));
+  return (
+    <div className="temple-fights-today-card" aria-label={`${safeRemaining} fights remaining today`}>
+      <div className="temple-fights-label">Fights today</div>
+      <div className="temple-fights-value">{safeRemaining}/{safeTotal}</div>
+      <div className="temple-fights-pips" aria-hidden>
+        {Array.from({ length: safeTotal }).map((_, index) => (
+          <span key={index} className={clsx('pip', index < safeRemaining && 'on')} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Glass({
   num,

@@ -1199,6 +1199,65 @@
   text-transform: uppercase;
   text-align: center;
   margin-bottom: 10px;
+  padding-right: 118px;
+}
+.temple-fights-today-card {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 118px;
+  min-height: 74px;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: center;
+  justify-items: end;
+  gap: 3px;
+  padding: 9px 11px 8px;
+  border: 1px solid var(--accent-gold);
+  border-radius: 4px;
+  background: rgba(22, 9, 18, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(20, 9, 18, 0.92) inset,
+    0 8px 18px rgba(0, 0, 0, 0.32);
+  z-index: 4;
+}
+.temple-fights-label {
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-align: left;
+}
+.temple-fights-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--accent-gold);
+  text-shadow: 0 0 9px rgba(230, 180, 80, 0.25);
+}
+.temple-fights-pips {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.temple-fights-pips .pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(42, 31, 36, 0.92);
+  border: 1px solid var(--border-shadow);
+}
+.temple-fights-pips .pip.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  box-shadow: 0 0 7px rgba(168, 85, 247, 0.75);
+}
+.temple-fights-today-card + .temple-avatar-stage {
+  margin-top: 6px;
 }
 .temple-avatar-stage {
   height: 150px;
@@ -1350,6 +1409,9 @@
   padding: 6px;
   text-decoration: none;
 }
+.temple-card-footer.single {
+  grid-template-columns: 1fr;
+}
 .temple-main-stack,
 .temple-side-stack {
   display: flex;
@@ -1487,6 +1549,10 @@
   .temple-avatar-stage { height: 130px; }
   .temple-avatar-stage > * { transform: translateY(2px); }
   .temple-warrior-name { font-size: clamp(38px, 3vw, 54px); }
+  .temple-card-kicker { padding-right: 108px; font-size: 16px; }
+  .temple-fights-today-card { width: 106px; min-height: 68px; padding: 8px 9px; }
+  .temple-fights-label { font-size: 8px; letter-spacing: 0.2em; }
+  .temple-fights-value { font-size: 22px; }
   .temple-card-stats .bigstat { min-height: 82px; padding: 9px 8px 8px; }
   .temple-card-stats .bigstat-value { font-size: 28px; }
   .temple-skills-grid, .temple-weapons-grid { grid-template-columns: repeat(9, minmax(36px, 1fr)); gap: 7px; }
@@ -1494,6 +1560,17 @@
 @media (max-width: 1120px) {
   .temple-rpg-layout { grid-template-columns: 1fr; }
   .temple-warrior-card { position: static; min-height: auto; }
+}
+@media (max-width: 520px) {
+  .temple-card-kicker { padding-right: 0; }
+  .temple-fights-today-card {
+    position: static;
+    align-self: flex-end;
+    width: 124px;
+    min-height: 68px;
+    margin: -2px 0 8px;
+  }
+  .temple-fights-today-card + .temple-avatar-stage { margin-top: 0; }
 }
 
 /* Dino marketplace polish: align modal containers with Brutus temple UI. */
