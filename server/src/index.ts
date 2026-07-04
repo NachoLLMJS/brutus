@@ -26,15 +26,45 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        "script-src": ["'self'", "'unsafe-eval'", 'https://translate.google.com', 'https://translate.googleapis.com'],
+        "script-src": [
+          "'self'",
+          "'unsafe-eval'",
+          "'unsafe-inline'",
+          'https://translate.google.com',
+          'https://translate.googleapis.com',
+          'https://translate-pa.googleapis.com',
+          'https://www.gstatic.com',
+          'https://www.google.com',
+        ],
         "connect-src": [
           "'self'",
           bnbTestnetRpcOrigin,
+          'https://translate.google.com',
           'https://translate.googleapis.com',
           'https://translate-pa.googleapis.com',
+          'https://www.gstatic.com',
+          'https://www.google.com',
         ],
-        "frame-src": ["'self'", 'https://translate.google.com'],
-        "img-src": ["'self'", 'data:', 'https://www.google.com', 'https://translate.google.com', 'https://translate.googleapis.com'],
+        "frame-src": [
+          "'self'",
+          'https://translate.google.com',
+          'https://translate.googleapis.com',
+          'https://www.google.com',
+        ],
+        "child-src": [
+          "'self'",
+          'https://translate.google.com',
+          'https://translate.googleapis.com',
+          'https://www.google.com',
+        ],
+        "img-src": [
+          "'self'",
+          'data:',
+          'https://www.google.com',
+          'https://www.gstatic.com',
+          'https://translate.google.com',
+          'https://translate.googleapis.com',
+        ],
       },
     },
   }),

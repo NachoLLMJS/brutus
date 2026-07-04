@@ -90,6 +90,15 @@ async function setPageLanguage(language: 'original' | 'zh-CN') {
   const select = await waitForTranslateSelect();
   select.value = 'zh-CN';
   select.dispatchEvent(new Event('change', { bubbles: true }));
+
+  window.setTimeout(() => {
+    const htmlLang = document.documentElement.lang.toLowerCase();
+    const translatedFrame = document.querySelector('iframe.goog-te-banner-frame, iframe.skiptranslate');
+    const translatedBody = document.body.className.includes('translated') || htmlLang.includes('zh');
+    if (!translatedFrame && !translatedBody) {
+      window.location.reload();
+    }
+  }, 1200);
 }
 import { api } from '@/api/apiClient';
 import { router } from '@/routes';
@@ -201,6 +210,15 @@ function LanguageTranslateButton() {
     return document.cookie.includes(`${GOOGLE_TRANSLATE_COOKIE}=${CHINESE_TRANSLATE_COOKIE_VALUE}`);
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isChinese) return;
+    void setPageLanguage('zh-CN').catch((error) => {
+      console.error(error);
+      setTranslateCookie(null);
+      setIsChinese(false);
+    });
+  }, [isChinese]);
 
   const buttonText = isLoading ? 'Translating' : isChinese ? 'Original' : '中文';
   const buttonTitle = isChinese ? 'Show original English site' : 'Translate site to Chinese';
