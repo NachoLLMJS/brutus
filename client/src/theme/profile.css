@@ -28,7 +28,7 @@
   inset: 0;
   background:
     radial-gradient(ellipse 80% 60% at 50% 30%, transparent 30%, rgba(13, 10, 20, 0.7) 75%, rgba(13, 10, 20, 1) 100%),
-    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(196, 26, 26, 0.18), transparent 60%);
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(168, 85, 247, 0.18), transparent 60%);
 }
 
 /* Profile-only grain (encima del body porque body grain global no existe) */
@@ -83,13 +83,13 @@
   text-transform: uppercase;
   line-height: 1;
   text-shadow:
-    0 0 50px rgba(196, 26, 26, 0.4),
+    0 0 50px rgba(168, 85, 247, 0.4),
     0 0 22px rgba(230, 180, 80, 0.3),
     0 4px 0 rgba(0, 0, 0, 0.8);
 }
 .profile-hero h1 .accent {
   color: var(--primary);
-  text-shadow: 0 0 30px rgba(196, 26, 26, 0.85), 0 4px 0 rgba(0, 0, 0, 0.7);
+  text-shadow: 0 0 30px rgba(168, 85, 247, 0.85), 0 4px 0 rgba(0, 0, 0, 0.7);
 }
 .profile-hero .meta {
   margin-top: 14px;
@@ -168,13 +168,13 @@
 .profile-hero-actions .btn-hero.primary {
   background: var(--btn-primary-bg);
   color: var(--btn-primary-text);
-  border-color: #5a0a0a;
+  border-color: #2e0854;
   font-size: 22px;
   padding: 18px 44px;
   box-shadow:
     0 0 0 1px var(--btn-primary-shadow) inset,
     0 4px 0 var(--btn-primary-shadow),
-    0 0 30px rgba(196, 26, 26, 0.6);
+    0 0 30px rgba(168, 85, 247, 0.6);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 .profile-hero-actions .btn-hero.primary:hover:not(:disabled) {
@@ -182,7 +182,7 @@
   box-shadow:
     0 0 0 1px var(--btn-primary-shadow) inset,
     0 4px 0 var(--btn-primary-shadow),
-    0 0 50px rgba(196, 26, 26, 0.95);
+    0 0 50px rgba(168, 85, 247, 0.95);
 }
 .fights-pill {
   display: inline-flex;
@@ -213,7 +213,7 @@
 .fights-pill .fights-pips .p.on {
   background: var(--primary);
   border-color: var(--primary);
-  box-shadow: 0 0 6px rgba(196, 26, 26, 0.7);
+  box-shadow: 0 0 6px rgba(168, 85, 247, 0.7);
 }
 
 /* Pending level-up banner */
@@ -233,7 +233,7 @@
   box-shadow:
     inset 0 0 0 1px var(--border-outer),
     0 0 22px rgba(230, 180, 80, 0.55),
-    0 0 36px rgba(196, 26, 26, 0.25);
+    0 0 36px rgba(168, 85, 247, 0.25);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.25);
   animation: pulse-bg 2.4s ease-in-out infinite;
 }
@@ -942,7 +942,7 @@
 .battlev2.loss .battlev2-r {
   color: var(--primary);
   border-color: var(--primary);
-  background: rgba(196, 26, 26, 0.12);
+  background: rgba(168, 85, 247, 0.12);
 }
 .battlev2-foe {
   font-family: var(--font-display);
@@ -1067,7 +1067,7 @@
   inset: 16px 34px 44px;
   border: 1px solid rgba(230, 180, 80, 0.3);
   border-radius: 50%;
-  box-shadow: 0 0 34px rgba(196, 26, 26, 0.22) inset, 0 0 22px rgba(230, 180, 80, 0.16);
+  box-shadow: 0 0 34px rgba(168, 85, 247, 0.22) inset, 0 0 22px rgba(230, 180, 80, 0.16);
 }
 .profile-idle-aura {
   position: relative;
@@ -1217,7 +1217,7 @@
   border: 1px solid rgba(230, 180, 80, 0.24);
   border-radius: 50%;
   bottom: 14px;
-  box-shadow: 0 0 34px rgba(230, 180, 80, 0.12) inset, 0 0 28px rgba(196, 26, 26, 0.15);
+  box-shadow: 0 0 34px rgba(230, 180, 80, 0.12) inset, 0 0 28px rgba(168, 85, 247, 0.15);
 }
 .temple-avatar-stage > * {
   position: relative;
@@ -1328,7 +1328,7 @@
   text-transform: uppercase;
 }
 .temple-action-row .btn-hero.gold { color: var(--accent-gold); border-color: var(--accent-gold); }
-.temple-action-row .btn-hero.primary { background: var(--btn-primary-bg); border-color: #5a0a0a; }
+.temple-action-row .btn-hero.primary { background: var(--btn-primary-bg); border-color: #2e0854; }
 .temple-action-row .btn-hero:disabled { opacity: .45; }
 .temple-card-footer {
   margin-top: 10px;
@@ -1410,7 +1410,7 @@
 .vaultinfo-hero {
   padding: 12px;
   border: 1px solid rgba(230, 180, 80, 0.28);
-  background: radial-gradient(circle at 50% 0%, rgba(196, 26, 26, 0.18), rgba(17, 10, 20, 0.72));
+  background: radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.18), rgba(17, 10, 20, 0.72));
   text-align: center;
 }
 .vaultinfo-hero span,
@@ -1638,7 +1638,7 @@
 .pet-market-shop .pet-shop-buy {
   background: var(--btn-primary-bg);
   color: var(--btn-primary-text);
-  border-color: #5a0a0a;
+  border-color: #2e0854;
 }
 @media (max-width: 980px) {
   .pet-market-shop .pet-shop-topbar { grid-template-columns: 1fr 90px 48px; padding-right: 0; }

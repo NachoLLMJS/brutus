@@ -122,7 +122,7 @@ function ChoiceCard({ choice, onSelect, disabled }: ChoiceCardProps) {
 
 function glyphColor(kind: LevelUpChoice['kind']): string {
   switch (kind) {
-    case 'stat': return '#c41a1a';
+    case 'stat': return '#a855f7';
     case 'skill': return '#e6b450';
     case 'weapon': return '#8a6038';
     case 'pet': return '#5fb04a';

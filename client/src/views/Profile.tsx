@@ -375,7 +375,7 @@ export function Profile() {
 
             <div className="temple-card-stats">
               <BigStat label="Vitality" value={effectiveStats.hp} max={Math.max(MAX_HP, effectiveStats.hp)} color="#5fb04a" sub={statSub('hp', `+${Math.max(1, Math.floor(effectiveStats.hp / 12))} to level up`)} />
-              <BigStat label="Strength" value={effectiveStats.strength} max={Math.max(MAX_STAT, effectiveStats.strength)} color="#c41a1a" sub={statSub('strength', `Base damage ${Math.floor(effectiveStats.strength * 0.4) + 4}`)} />
+              <BigStat label="Strength" value={effectiveStats.strength} max={Math.max(MAX_STAT, effectiveStats.strength)} color="#a855f7" sub={statSub('strength', `Base damage ${Math.floor(effectiveStats.strength * 0.4) + 4}`)} />
               <BigStat label="Agility" value={effectiveStats.agility} max={Math.max(MAX_STAT, effectiveStats.agility)} color="#e6b450" sub={statSub('agility', `Dodge ${Math.min(50, Math.floor(effectiveStats.agility * 0.3))}%`)} />
               <BigStat label="Speed" value={effectiveStats.speed} max={Math.max(MAX_STAT, effectiveStats.speed)} color="#9b5cc9" sub={statSub('speed', effectiveStats.speed > 50 ? 'Acts first' : 'Average initiative')} />
             </div>

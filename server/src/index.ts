@@ -26,11 +26,15 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        "script-src": ["'self'", "'unsafe-eval'"],
+        "script-src": ["'self'", "'unsafe-eval'", 'https://translate.google.com', 'https://translate.googleapis.com'],
         "connect-src": [
           "'self'",
           bnbTestnetRpcOrigin,
+          'https://translate.googleapis.com',
+          'https://translate-pa.googleapis.com',
         ],
+        "frame-src": ["'self'", 'https://translate.google.com'],
+        "img-src": ["'self'", 'data:', 'https://www.google.com', 'https://translate.google.com', 'https://translate.googleapis.com'],
       },
     },
   }),

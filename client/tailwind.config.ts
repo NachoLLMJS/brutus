@@ -46,7 +46,7 @@ const config: Config = {
         // Aliases reinterpretados para dark fantasy: glow + drop sutil.
         rune: '0 0 0 1px var(--border-outer), 0 0 12px rgba(95, 176, 74, 0.25)',
         'rune-strong': '0 0 0 2px var(--border-outer), 0 0 18px rgba(95, 176, 74, 0.4)',
-        blood: '0 0 0 1px var(--accent-blood), 0 0 22px rgba(196, 26, 26, 0.55)',
+        blood: '0 0 0 1px var(--accent-blood), 0 0 22px rgba(168, 85, 247, 0.55)',
         gold: '0 0 0 1px var(--accent-gold), 0 0 18px rgba(230, 180, 80, 0.45)',
         paper: '0 0 0 1px var(--border-outer) inset, 0 0 12px rgba(0, 0, 0, 0.55)',
       },

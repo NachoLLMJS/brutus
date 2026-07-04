@@ -116,14 +116,14 @@
     box-shadow:
       0 0 0 1px var(--btn-primary-shadow) inset,
       0 2px 0 var(--btn-primary-shadow),
-      0 0 14px rgba(196, 26, 26, 0.4);
+      0 0 14px rgba(168, 85, 247, 0.4);
   }
   .btn-primary:hover:not(:disabled) {
     background: var(--btn-primary-hover);
     box-shadow:
       0 0 0 1px var(--btn-primary-shadow) inset,
       0 2px 0 var(--btn-primary-shadow),
-      0 0 22px rgba(196, 26, 26, 0.6);
+      0 0 22px rgba(168, 85, 247, 0.6);
   }
 
   /* Botón dorado/cuero — variante secundaria */
@@ -444,7 +444,8 @@
 }
 
 .twitter-floating-button,
-.music-floating-button {
+.music-floating-button,
+.translate-floating-button {
   position: fixed;
   right: 22px;
   bottom: 22px;
@@ -474,8 +475,34 @@
   right: 158px;
   cursor: pointer;
 }
+.translate-floating-button {
+  left: 22px;
+  right: auto;
+  cursor: pointer;
+}
+.translate-floating-button:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+#google_translate_element {
+  position: fixed;
+  left: -9999px;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+body > .skiptranslate,
+.goog-te-banner-frame,
+.goog-te-gadget {
+  display: none !important;
+}
+body {
+  top: 0 !important;
+}
 .twitter-floating-button:hover,
-.music-floating-button:hover {
+.music-floating-button:hover,
+.translate-floating-button:hover {
   transform: translateY(-2px);
   color: var(--accent-gold);
   border-color: var(--accent-gold);
@@ -503,13 +530,18 @@
 }
 @media (max-width: 640px) {
   .twitter-floating-button,
-  .music-floating-button {
+  .music-floating-button,
+  .translate-floating-button {
     right: 14px;
     bottom: 14px;
     padding: 10px;
   }
   .music-floating-button {
     right: 64px;
+  }
+  .translate-floating-button {
+    left: 14px;
+    right: auto;
   }
   .twitter-floating-button__text {
     display: none;

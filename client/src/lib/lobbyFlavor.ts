@@ -72,7 +72,7 @@ function pick<T>(rng: () => number, arr: readonly T[]): T {
 const KINDS: FlavorKind[] = ['vorgath', 'bone', 'plague', 'crimson', 'iron', 'witch', 'sand', 'rune'];
 
 const KIND_COLORS: Record<FlavorKind, string> = {
-  vorgath: '#c41a1a',
+  vorgath: '#a855f7',
   bone:    '#e6b450',
   plague:  '#a0e08a',
   crimson: '#ff5a3c',

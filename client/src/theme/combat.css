@@ -23,7 +23,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 60% 100% at 0% 50%, rgba(196, 26, 26, 0.10), transparent 50%),
+    radial-gradient(ellipse 60% 100% at 0% 50%, rgba(168, 85, 247, 0.10), transparent 50%),
     radial-gradient(ellipse 60% 100% at 100% 50%, rgba(95, 176, 74, 0.08), transparent 50%);
   pointer-events: none;
 }
@@ -307,7 +307,7 @@
   .combat-bottom .cb-center { justify-content: center; }
   .cb-rewards { text-align: center; }
   .cb-btn { padding: 10px 16px; font-size: 12px; letter-spacing: 0.12em; }
-  .canvas-frame { box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 0 3px var(--paper-dark), 0 0 0 4px var(--border-shadow), 0 0 30px rgba(196, 26, 26, 0.2); }
+  .canvas-frame { box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 0 3px var(--paper-dark), 0 0 0 4px var(--border-shadow), 0 0 30px rgba(168, 85, 247, 0.2); }
   .turn-strip { padding: 8px 10px; font-size: 11px; }
 }
 
@@ -328,7 +328,7 @@
     0 0 0 1px var(--border-outer) inset,
     0 0 0 6px var(--paper-dark),
     0 0 0 7px var(--border-shadow),
-    0 0 60px rgba(196, 26, 26, 0.25),
+    0 0 60px rgba(168, 85, 247, 0.25),
     0 30px 60px rgba(0, 0, 0, 0.7);
   overflow: hidden;
   display: flex;
@@ -376,7 +376,7 @@
   color: var(--accent-gold);
   text-transform: uppercase;
   text-shadow:
-    0 0 30px rgba(196, 26, 26, 0.9),
+    0 0 30px rgba(168, 85, 247, 0.9),
     0 0 12px rgba(230, 180, 80, 0.6),
     0 4px 0 rgba(0, 0, 0, 0.8);
   pointer-events: none;
@@ -523,7 +523,7 @@
 .log-row.hit { border-left-color: var(--primary); }
 .log-row.skill { border-left-color: var(--accent-gold); }
 .log-row.block, .log-row.dodge { border-left-color: var(--hp-full); }
-.log-row.end { border-left-color: var(--accent-gold); background: rgba(196, 26, 26, 0.1); }
+.log-row.end { border-left-color: var(--accent-gold); background: rgba(168, 85, 247, 0.1); }
 .log-icon { font-size: 11px; opacity: 0.85; width: 14px; }
 .log-actor {
   font-family: var(--font-display);
@@ -645,7 +645,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 0% 50%, rgba(196, 26, 26, 0.55) 0%, transparent 45%),
+    radial-gradient(ellipse at 0% 50%, rgba(168, 85, 247, 0.55) 0%, transparent 45%),
     radial-gradient(ellipse at 100% 50%, rgba(95, 176, 74, 0.5) 0%, transparent 45%),
     repeating-linear-gradient(90deg, transparent 0 40px, rgba(13, 10, 20, 0.4) 40px 41px);
   animation: vs-bg-zoom var(--vs-duration, 1.9s) ease-out;
@@ -665,7 +665,7 @@
   top: 0;
   width: 60vw;
   height: 60vw;
-  background: radial-gradient(circle, rgba(196, 26, 26, 0.6), transparent 60%);
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.6), transparent 60%);
   transform: translate(-30%, -30%);
   animation: vs-spark1 var(--vs-duration, 1.9s) ease-out;
 }
@@ -846,7 +846,7 @@
 .combat-stage::before {
   background:
     linear-gradient(90deg, rgba(230, 180, 80, 0.08), transparent 22%, transparent 78%, rgba(230, 180, 80, 0.08)),
-    radial-gradient(ellipse 45% 90% at 0% 30%, rgba(196, 26, 26, 0.10), transparent 58%),
+    radial-gradient(ellipse 45% 90% at 0% 30%, rgba(168, 85, 247, 0.10), transparent 58%),
     radial-gradient(ellipse 45% 90% at 100% 30%, rgba(95, 176, 74, 0.09), transparent 58%);
 }
 .combat-top {

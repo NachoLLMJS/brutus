@@ -22,8 +22,8 @@ export function VSOverlayV2({ visible, leftName, rightName, durationMs = 1900 }:
         <svg viewBox="0 0 240 240" width="100%" height="100%" aria-hidden>
           <defs>
             <radialGradient id="vs-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0" stopColor="#c41a1a" stopOpacity="0.8" />
-              <stop offset="1" stopColor="#c41a1a" stopOpacity="0" />
+              <stop offset="0" stopColor="#a855f7" stopOpacity="0.8" />
+              <stop offset="1" stopColor="#a855f7" stopOpacity="0" />
             </radialGradient>
           </defs>
           <circle cx="120" cy="120" r="110" fill="url(#vs-glow)" />
@@ -36,8 +36,8 @@ export function VSOverlayV2({ visible, leftName, rightName, durationMs = 1900 }:
             />
             <ellipse cx="-18" cy="-12" rx="10" ry="14" fill="#0d0a14" />
             <ellipse cx="18" cy="-12" rx="10" ry="14" fill="#0d0a14" />
-            <circle cx="-18" cy="-12" r="3" fill="#c41a1a" />
-            <circle cx="18" cy="-12" r="3" fill="#c41a1a" />
+            <circle cx="-18" cy="-12" r="3" fill="#a855f7" />
+            <circle cx="18" cy="-12" r="3" fill="#a855f7" />
             <path d="M-6 8 L0 18 L6 8" fill="#0d0a14" stroke="#e6b450" strokeWidth="1.2" />
             <line x1="-22" y1="36" x2="-22" y2="48" stroke="#e6b450" strokeWidth="1" />
             <line x1="-14" y1="36" x2="-14" y2="48" stroke="#e6b450" strokeWidth="1" />

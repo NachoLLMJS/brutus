@@ -135,9 +135,7 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
             Every Vault Brawler that leaves the Vault is <strong>unique</strong>. Its name summons a destiny forged in blood and steel. What happens in the arena is carved into its flesh.
           </p>
         </div>
-        <div className="anvil-art">
-          <AnvilHammer />
-        </div>
+        <div className="forge-orb-rule" aria-hidden />
         <div className="splatter splatter-bl" aria-hidden />
       </aside>
 
@@ -169,38 +167,6 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
         <div className="fine">Cada Vault Brawler es unique e irrepetible</div>
       </form>
     </section>
-  );
-}
-
-function AnvilHammer() {
-  return (
-    <svg viewBox="0 0 200 120" width="100%" preserveAspectRatio="xMidYMax meet" aria-hidden>
-      <defs>
-        <linearGradient id="anvil-grad" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#3d2530" />
-          <stop offset="1" stopColor="#0d0a14" />
-        </linearGradient>
-        <radialGradient id="ember" cx="50%" cy="100%" r="60%">
-          <stop offset="0" stopColor="#c41a1a" stopOpacity="0.55" />
-          <stop offset="1" stopColor="#c41a1a" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <ellipse cx="100" cy="118" rx="80" ry="22" fill="url(#ember)" />
-      <g>
-        <rect x="40" y="76" width="120" height="14" fill="url(#anvil-grad)" stroke="#8a6038" strokeWidth="1.2" />
-        <path d="M30 60 L170 60 L160 76 L40 76 Z" fill="url(#anvil-grad)" stroke="#8a6038" strokeWidth="1.2" />
-        <path d="M22 56 L40 60 L40 64 L22 60 Z" fill="#1a1014" stroke="#6a4528" strokeWidth="1" />
-        <rect x="80" y="90" width="40" height="14" fill="#1a1014" stroke="#6a4528" strokeWidth="1.2" />
-        <rect x="68" y="104" width="64" height="10" fill="url(#anvil-grad)" stroke="#8a6038" strokeWidth="1.2" />
-      </g>
-      <g transform="rotate(-20 130 50)">
-        <rect x="50" y="48" width="80" height="4" fill="#3d2530" stroke="#6a4528" strokeWidth="0.8" />
-        <rect x="124" y="40" width="20" height="20" fill="#1a1014" stroke="#8a6038" strokeWidth="1.2" />
-      </g>
-      <circle cx="150" cy="60" r="2" fill="#e6b450" />
-      <circle cx="156" cy="64" r="1" fill="#e6b450" opacity="0.7" />
-      <circle cx="146" cy="66" r="1" fill="#c41a1a" opacity="0.8" />
-    </svg>
   );
 }
 

@@ -162,7 +162,7 @@ export function Tournament() {
             style={{
               color: 'var(--accent-blood)',
               textShadow:
-                '4px 4px 0 var(--btn-primary-shadow), -3px -3px 0 var(--text-strong), 0 8px 0 var(--btn-primary-shadow), 0 0 24px rgba(196, 26, 26, 0.55)',
+                '4px 4px 0 var(--btn-primary-shadow), -3px -3px 0 var(--text-strong), 0 8px 0 var(--btn-primary-shadow), 0 0 24px rgba(168, 85, 247, 0.55)',
               animation: 'vs-pop 0.6s ease-out both',
               letterSpacing: '0.05em',
               fontWeight: 900,
@@ -380,7 +380,7 @@ function MatchCard({
             : 'var(--paper)',
         border: '2px solid var(--border-inner)',
         boxShadow: current
-          ? 'inset 0 0 0 2px var(--accent-blood), 0 0 14px rgba(196, 26, 26, 0.45)'
+          ? 'inset 0 0 0 2px var(--accent-blood), 0 0 14px rgba(168, 85, 247, 0.45)'
           : 'inset 0 0 0 1px var(--border-outer), 0 0 8px rgba(0, 0, 0, 0.5)',
       }}
     >

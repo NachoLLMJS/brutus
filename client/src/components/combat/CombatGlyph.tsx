@@ -94,7 +94,7 @@ export function CombatGlyph({ kind, color = '#e6b450' }: CombatGlyphProps) {
         <g>
           <circle cx="22" cy="28" r="14" fill={fill} stroke={color} strokeWidth="1.5" />
           <line x1="28" y1="14" x2="36" y2="6" stroke={color} strokeWidth="1.5" />
-          <circle cx="38" cy="6" r="2.5" fill="#c41a1a" />
+          <circle cx="38" cy="6" r="2.5" fill="#a855f7" />
         </g>
       )}
       {kind === 'fury' && (

@@ -29,7 +29,7 @@
   --paper-accent: #3d2530;     /* cuero elevado (cells, hovers) */
 
   /* Brand */
-  --primary: #c41a1a;          /* rojo demoníaco */
+  --primary: #a855f7;          /* púrpura arcano */
   --secondary: #e6b450;        /* oro vibrante */
   --divider: #5a3a2a;          /* línea bronceada */
 
@@ -48,16 +48,16 @@
   /* Estados */
   --hp-full: #5fb04a;          /* verde tóxico */
   --hp-mid: #e6b450;           /* oro */
-  --hp-low: #c41a1a;           /* rojo demonio */
+  --hp-low: #a855f7;           /* rojo demonio */
   --xp-fill: #e6b450;          /* oro */
   --success: #5fb04a;
   --error: #ff5a3c;
 
   /* Surfaces específicas */
   --surface-tooltip: #050308;  /* tooltip aún más oscuro que el bg */
-  --btn-primary-bg: #c41a1a;
-  --btn-primary-hover: #e02828;
-  --btn-primary-shadow: #5a0a0a;
+  --btn-primary-bg: linear-gradient(180deg, #7c2dcb 0%, #581c87 52%, #3b0764 100%);
+  --btn-primary-hover: linear-gradient(180deg, #9333ea 0%, #6d28d9 52%, #4c1d95 100%);
+  --btn-primary-shadow: #2e0854;
   --btn-primary-text: #fff5e0;
   --btn-arena-bg: #6a4528;     /* bronce profundo */
   --btn-arena-bg-edge: #3d2718;
@@ -68,9 +68,9 @@
   --bg-deep: var(--bg-default);
   --bg-panel: var(--paper);
   --bg-elevated: var(--paper-accent);
-  --accent-blood: #c41a1a;
+  --accent-blood: #a855f7;
   --accent-gold: #e6b450;
-  --accent-rune: #5fb04a;       /* verde tóxico (era púrpura runa) */
+  --accent-rune: #c084fc;       /* púrpura runa */
   --text-muted: var(--text-secondary);
   --border-arcane: var(--border-shadow);
 

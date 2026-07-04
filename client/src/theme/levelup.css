@@ -31,7 +31,7 @@
 .levelup-shell::after {
   background:
     radial-gradient(ellipse 80% 60% at 50% 30%, rgba(230, 180, 80, 0.10), transparent 60%),
-    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(196, 26, 26, 0.08), transparent 60%);
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(168, 85, 247, 0.08), transparent 60%);
 }
 .levelup-shell > * {
   position: relative;
@@ -72,7 +72,7 @@
   margin: 0;
   text-shadow:
     0 0 38px rgba(230, 180, 80, 0.55),
-    0 0 18px rgba(196, 26, 26, 0.35),
+    0 0 18px rgba(168, 85, 247, 0.35),
     0 4px 0 rgba(0, 0, 0, 0.7);
   animation: levelup-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
 }
@@ -156,7 +156,7 @@
     0 0 0 1px var(--border-outer) inset,
     0 0 0 4px var(--paper-dark),
     0 16px 36px rgba(0, 0, 0, 0.7),
-    0 0 30px rgba(196, 26, 26, 0.5);
+    0 0 30px rgba(168, 85, 247, 0.5);
 }
 .levelup-card[data-kind="skill"]:hover:not(:disabled) {
   border-color: var(--accent-gold);
@@ -214,7 +214,7 @@
 .levelup-card[data-kind="stat"] .levelup-kind {
   color: var(--primary);
   border-color: var(--primary);
-  background: rgba(196, 26, 26, 0.08);
+  background: rgba(168, 85, 247, 0.08);
 }
 .levelup-card[data-kind="skill"] .levelup-kind {
   color: var(--accent-gold);
@@ -245,7 +245,7 @@
   margin: 4px 0 8px;
   align-self: center;
 }
-.levelup-card[data-kind="stat"] .levelup-icon { border-color: var(--primary); box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 14px rgba(196, 26, 26, 0.35); }
+.levelup-card[data-kind="stat"] .levelup-icon { border-color: var(--primary); box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 14px rgba(168, 85, 247, 0.35); }
 .levelup-card[data-kind="skill"] .levelup-icon { border-color: var(--accent-gold); box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 14px rgba(230, 180, 80, 0.4); }
 .levelup-card[data-kind="weapon"] .levelup-icon { border-color: var(--border-main); box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 14px rgba(138, 96, 56, 0.4); }
 .levelup-card[data-kind="pet"] .levelup-icon { border-color: var(--hp-full); box-shadow: 0 0 0 1px var(--border-outer) inset, 0 0 14px rgba(95, 176, 74, 0.4); }

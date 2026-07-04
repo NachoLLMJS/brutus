@@ -1,5 +1,96 @@
 import { useEffect, useRef, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
+
+declare global {
+  interface Window {
+    googleTranslateElementInit?: () => void;
+    google?: {
+      translate?: {
+        TranslateElement?: new (
+          options: { pageLanguage: string; includedLanguages: string; autoDisplay: boolean },
+          element: string,
+        ) => unknown;
+      };
+    };
+  }
+}
+
+const GOOGLE_TRANSLATE_SCRIPT_ID = 'google-translate-script';
+const GOOGLE_TRANSLATE_COOKIE = 'googtrans';
+const CHINESE_TRANSLATE_COOKIE_VALUE = '/en/zh-CN';
+
+function setTranslateCookie(value: string | null) {
+  const expires = value ? 'max-age=31536000' : 'expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  const cookieValue = value ?? '';
+  const host = window.location.hostname;
+  const domains = ['', host, `.${host}`];
+
+  for (const domain of domains) {
+    const domainPart = domain ? ` domain=${domain};` : '';
+    document.cookie = `${GOOGLE_TRANSLATE_COOKIE}=${cookieValue}; path=/;${domainPart} ${expires}; SameSite=Lax`;
+  }
+}
+
+function waitForTranslateSelect(): Promise<HTMLSelectElement> {
+  return new Promise((resolve, reject) => {
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      const select = document.querySelector<HTMLSelectElement>('.goog-te-combo');
+      if (select) {
+        window.clearInterval(timer);
+        resolve(select);
+        return;
+      }
+      if (Date.now() - startedAt > 8000) {
+        window.clearInterval(timer);
+        reject(new Error('Google Translate widget did not load'));
+      }
+    }, 100);
+  });
+}
+
+function loadGoogleTranslateWidget(): Promise<void> {
+  if (window.google?.translate?.TranslateElement) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    window.googleTranslateElementInit = () => {
+      const TranslateElement = window.google?.translate?.TranslateElement;
+      if (!TranslateElement) {
+        reject(new Error('Google Translate widget is unavailable'));
+        return;
+      }
+      new TranslateElement(
+        { pageLanguage: 'en', includedLanguages: 'zh-CN', autoDisplay: false },
+        'google_translate_element',
+      );
+      resolve();
+    };
+
+    const existingScript = document.getElementById(GOOGLE_TRANSLATE_SCRIPT_ID) as HTMLScriptElement | null;
+    if (existingScript) return;
+
+    const script = document.createElement('script');
+    script.id = GOOGLE_TRANSLATE_SCRIPT_ID;
+    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.async = true;
+    script.onerror = () => reject(new Error('Could not load Google Translate'));
+    document.head.appendChild(script);
+  });
+}
+
+async function setPageLanguage(language: 'original' | 'zh-CN') {
+  if (language === 'original') {
+    setTranslateCookie(null);
+    window.location.reload();
+    return;
+  }
+
+  setTranslateCookie(CHINESE_TRANSLATE_COOKIE_VALUE);
+  await loadGoogleTranslateWidget();
+  const select = await waitForTranslateSelect();
+  select.value = 'zh-CN';
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+}
 import { api } from '@/api/apiClient';
 import { router } from '@/routes';
 import { ToastContainer } from '@/components/Toast';
@@ -104,6 +195,50 @@ function TwitterFloatingButton() {
   );
 }
 
+function LanguageTranslateButton() {
+  const [isChinese, setIsChinese] = useState(() => {
+    if (typeof document === 'undefined') return false;
+    return document.cookie.includes(`${GOOGLE_TRANSLATE_COOKIE}=${CHINESE_TRANSLATE_COOKIE_VALUE}`);
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const buttonText = isLoading ? 'Translating' : isChinese ? 'Original' : '中文';
+  const buttonTitle = isChinese ? 'Show original English site' : 'Translate site to Chinese';
+
+  const handleClick = async () => {
+    const nextIsChinese = !isChinese;
+    setIsLoading(true);
+    try {
+      await setPageLanguage(nextIsChinese ? 'zh-CN' : 'original');
+      setIsChinese(nextIsChinese);
+    } catch (error) {
+      console.error(error);
+      setTranslateCookie(null);
+      setIsChinese(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <div id="google_translate_element" aria-hidden="true" />
+      <button
+        type="button"
+        className="translate-floating-button"
+        aria-label={buttonTitle}
+        aria-pressed={isChinese}
+        title={buttonTitle}
+        onClick={handleClick}
+        disabled={isLoading}
+      >
+        <span className="twitter-floating-button__icon" aria-hidden>文</span>
+        <span className="twitter-floating-button__text">{buttonText}</span>
+      </button>
+    </>
+  );
+}
+
 function MusicMuteButton() {
   const [musicStatus, setMusicStatus] = useState(() => getMusicStatus());
 
@@ -144,6 +279,7 @@ export function App() {
       <WalletBootstrap />
       <SoundtrackBootstrap />
       <RouterProvider router={router} />
+      <LanguageTranslateButton />
       <MusicMuteButton />
       <TwitterFloatingButton />
       <ToastContainer />
