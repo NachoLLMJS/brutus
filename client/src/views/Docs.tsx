@@ -246,7 +246,7 @@ export function Docs() {
               </div>
             </div>
             <MediaFrame label="Intro video">
-              <video src={DOC_ASSETS.introVideo} controls muted playsInline preload="metadata" poster={DOC_ASSETS.banner} />
+              <video src={DOC_ASSETS.introVideo} controls muted playsInline preload="metadata" />
             </MediaFrame>
           </div>
         </section>
