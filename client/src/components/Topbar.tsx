@@ -42,6 +42,11 @@ const NAV: NavItem[] = [
     to: () => '/docs',
     matches: (p) => p === '/docs',
   },
+  {
+    label: 'Ranking',
+    to: () => '/ranking',
+    matches: (p) => p === '/ranking',
+  },
 ];
 
 export function Topbar() {

@@ -143,6 +143,69 @@ export async function listBrutes(limit = 50, walletAddress?: string): Promise<Br
   return rows.map(deserializeBrute);
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  id: string;
+  name: string;
+  ownerWallet: string | null;
+  victories: number;
+  defeats: number;
+  level: number;
+  gender: 'male' | 'female';
+  body: string;
+  bodyColors: string;
+  appearance: Appearance;
+  createdAt: string;
+}
+
+function parseAppearance(value: string): Appearance {
+  try {
+    return JSON.parse(value) as Appearance;
+  } catch {
+    return DEFAULT_APPEARANCE;
+  }
+}
+
+export async function listLeaderboard(limit = 100): Promise<LeaderboardEntry[]> {
+  const rows = await prisma.brute.findMany({
+    select: {
+      id: true,
+      name: true,
+      ownerWallet: true,
+      victories: true,
+      defeats: true,
+      level: true,
+      gender: true,
+      body: true,
+      bodyColors: true,
+      appearance: true,
+      createdAt: true,
+    },
+    orderBy: [
+      { victories: 'desc' },
+      { level: 'desc' },
+      { defeats: 'asc' },
+      { createdAt: 'asc' },
+    ],
+    take: Math.min(Math.max(limit, 1), 100),
+  });
+
+  return rows.map((row, index) => ({
+    rank: index + 1,
+    id: row.id,
+    name: row.name,
+    ownerWallet: row.ownerWallet,
+    victories: row.victories,
+    defeats: row.defeats,
+    level: row.level,
+    gender: row.gender === 'female' ? 'female' : 'male',
+    body: row.body,
+    bodyColors: row.bodyColors,
+    appearance: parseAppearance(row.appearance),
+    createdAt: row.createdAt.toISOString(),
+  }));
+}
+
 export async function getBruteById(id: string): Promise<BruteSnapshot> {
   const found = await prisma.brute.findUnique({ where: { id } });
   if (!found) throw new HttpError(404, 'brute_not_found');

@@ -150,6 +150,21 @@ export interface TournamentResponse {
   ascended: boolean;
 }
 
+export interface LeaderboardEntry {
+  rank: number;
+  id: string;
+  name: string;
+  ownerWallet: string | null;
+  victories: number;
+  defeats: number;
+  level: number;
+  gender: 'male' | 'female';
+  body: string;
+  bodyColors: string;
+  appearance: Appearance;
+  createdAt: string;
+}
+
 // ---------- API surface ----------
 
 export const api = {
@@ -158,6 +173,11 @@ export const api = {
       const query = walletAddress ? `?walletAddress=${encodeURIComponent(walletAddress)}` : '';
       const res = await request<{ brutes: Brute[] }>(`/brutes${query}`);
       return res.brutes;
+    },
+
+    leaderboard: async (): Promise<LeaderboardEntry[]> => {
+      const res = await request<{ entries: LeaderboardEntry[] }>('/brutes/leaderboard?limit=100');
+      return res.entries;
     },
 
     create: (body: CreateBruteBody): Promise<Brute> =>

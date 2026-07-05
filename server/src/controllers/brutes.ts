@@ -66,6 +66,14 @@ export const ListBrutesQuery = z.object({
   walletAddress: z.string().regex(WALLET_REGEX, 'invalid_wallet').optional(),
 });
 
+export const LeaderboardQuery = z.object({
+  limit: z
+    .string()
+    .optional()
+    .transform((v) => (v === undefined ? undefined : Number.parseInt(v, 10)))
+    .pipe(z.number().int().positive().max(100).optional()),
+});
+
 export const SetPetsBody = z.object({
   pets: z.array(z.string().min(1).max(40)).max(3),
 });
@@ -85,6 +93,16 @@ export const listBrutes: RequestHandler = async (req, res, next) => {
     const q = req.query as z.infer<typeof ListBrutesQuery>;
     const list = await BruteService.listBrutes(q.limit, q.walletAddress);
     res.json({ brutes: list });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const leaderboard: RequestHandler = async (req, res, next) => {
+  try {
+    const q = req.query as z.infer<typeof LeaderboardQuery>;
+    const entries = await BruteService.listLeaderboard(q.limit ?? 100);
+    res.json({ entries });
   } catch (err) {
     next(err);
   }

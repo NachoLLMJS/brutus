@@ -4,10 +4,12 @@ import { mutationRateLimit } from '../middleware/rateLimit.js';
 import {
   BruteIdParams,
   CreateBruteBody,
+  LeaderboardQuery,
   ListBrutesQuery,
   createBrute,
   getBrute,
   getPupils,
+  leaderboard,
   listBrutes,
   setPets,
   SetPetsBody,
@@ -16,6 +18,7 @@ import {
 export const brutesRouter: Router = Router();
 
 brutesRouter.get('/', validate({ query: ListBrutesQuery }), listBrutes);
+brutesRouter.get('/leaderboard', validate({ query: LeaderboardQuery }), leaderboard);
 brutesRouter.post(
   '/',
   mutationRateLimit,
