@@ -6,6 +6,8 @@ import {
   isSupportedBnbChain,
   switchToBnbTestnet,
 } from '@/lib/web3';
+import { ensureWalletAuth } from '@/lib/walletAuth';
+import { clearAuthToken, hasAuthForWallet } from '@/api/apiClient';
 
 interface WalletState {
   address: string | null;
@@ -65,6 +67,7 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
       const accounts = await provider.request<string[]>({ method: 'eth_requestAccounts' });
       const chainId = await readChainId();
       const address = accounts[0] ?? null;
+      if (address && !hasAuthForWallet(address)) await ensureWalletAuth(address);
       set({
         address,
         chainId,
@@ -90,6 +93,7 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
     } catch {
       // Some providers do not support permission revocation. Local session is still cleared.
     }
+    clearAuthToken();
     set({ address: null, chainId: null, connected: false, connecting: false, error: null });
   },
 

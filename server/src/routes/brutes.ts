@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { mutationRateLimit } from '../middleware/rateLimit.js';
+import { requireWallet } from '../middleware/auth.js';
 import {
   BruteIdParams,
   CreateBruteBody,
@@ -22,9 +23,10 @@ brutesRouter.get('/leaderboard', validate({ query: LeaderboardQuery }), leaderbo
 brutesRouter.post(
   '/',
   mutationRateLimit,
+  requireWallet,
   validate({ body: CreateBruteBody }),
   createBrute,
 );
 brutesRouter.get('/:id', validate({ params: BruteIdParams }), getBrute);
 brutesRouter.get('/:id/pupils', validate({ params: BruteIdParams }), getPupils);
-brutesRouter.put('/:id/pets', mutationRateLimit, validate({ params: BruteIdParams, body: SetPetsBody }), setPets);
+brutesRouter.put('/:id/pets', mutationRateLimit, requireWallet, validate({ params: BruteIdParams, body: SetPetsBody }), setPets);

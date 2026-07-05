@@ -73,7 +73,7 @@ export interface FightResult {
 }
 
 const XP_WIN_NORMAL = 2;
-const XP_WIN_TRAINING = 1;
+const XP_WIN_TRAINING = 0;
 const XP_LOSS = 0;
 const DAILY_DEFEAT_LIMIT = 3;
 const OPPONENT_SUGGESTION_LIMIT = 8;
@@ -176,15 +176,11 @@ export async function runFight(input: FightInput): Promise<FightResult> {
       : XP_WIN_NORMAL
     : XP_LOSS;
 
-  // Compute level / xp deltas server-side.
-  let newXp = player.xp + xpGain;
-  let newLevel = player.level;
-  let leveledUp = false;
-  while (newXp >= xpToNext(newLevel)) {
-    newXp -= xpToNext(newLevel);
-    newLevel += 1;
-    leveledUp = true;
-  }
+  // Accumulate XP server-side. The actual level increment happens only when the
+  // owner applies one of the server-issued pending choices.
+  const newXp = player.xp + xpGain;
+  const newLevel = player.level;
+  const leveledUp = newXp >= xpToNext(player.level);
 
   const fightsRemainingDelta = input.fightType === 'normal' ? -1 : 0;
   const newDefeatsToday = input.fightType === 'normal' && !playerWon
@@ -195,8 +191,35 @@ export async function runFight(input: FightInput): Promise<FightResult> {
     player.fightsRemaining + fightsRemainingDelta <= 0
   );
 
-  const [combatRow, updated] = await prisma.$transaction([
-    prisma.combat.create({
+  const [combatRow, updated] = await prisma.$transaction(async (tx) => {
+    if (input.fightType === 'normal') {
+      const consumed = await tx.brute.updateMany({
+        where: {
+          id: player.id,
+          fightsRemaining: { gt: 0 },
+          defeatsToday: { lt: DAILY_DEFEAT_LIMIT },
+        },
+        data: {
+          xp: newXp,
+          level: newLevel,
+          victories: { increment: playerWon ? 1 : 0 },
+          defeats: { increment: playerWon ? 0 : 1 },
+          defeatsToday: { increment: playerWon ? 0 : 1 },
+          fightsRemaining: { decrement: 1 },
+        },
+      });
+      if (consumed.count === 0) throw new HttpError(429, 'no_fights_remaining');
+    } else {
+      await tx.brute.update({
+        where: { id: player.id },
+        data: {
+          xp: newXp,
+          level: newLevel,
+        },
+      });
+    }
+
+    const combat = await tx.combat.create({
       data: {
         bruteAId: player.id,
         bruteBId: opponent.id,
@@ -204,26 +227,25 @@ export async function runFight(input: FightInput): Promise<FightResult> {
         log: JSON.stringify(result.log),
         fightType: input.fightType,
       },
-    }),
-    prisma.brute.update({
-      where: { id: player.id },
-      data: {
-        xp: newXp,
-        level: newLevel,
-        victories: { increment: playerWon ? 1 : 0 },
-        defeats: { increment: playerWon ? 0 : 1 },
-        defeatsToday: { increment: input.fightType === 'normal' && !playerWon ? 1 : 0 },
-        fightsRemaining: { increment: fightsRemainingDelta },
-      },
-    }),
-  ]);
+    });
+    const fresh = await tx.brute.findUniqueOrThrow({ where: { id: player.id } });
+    return [combat, fresh] as const;
+  });
 
   const snapshot = deserializeBrute(updated);
   let choices: LevelUpOffer | undefined;
   if (leveledUp) {
     const updatedCore = bruteSnapshotToCore(snapshot);
-    const choiceSeed = (updated.seed ^ (newLevel * 0x9e3779b1)) >>> 0;
+    const choiceSeed = (updated.seed ^ ((newLevel + 1) * 0x9e3779b1)) >>> 0;
     choices = computeChoices(updatedCore, mulberry32(choiceSeed));
+    await prisma.brute.update({
+      where: { id: player.id },
+      data: {
+        pendingLevelUpChoices: JSON.stringify(choices),
+        pendingLevelUpLevel: player.level,
+        pendingLevelUpNonce: combatRow.id,
+      },
+    });
   }
 
   const fightLog = toFightLog(playerCore, opponentCore, result);
@@ -296,6 +318,22 @@ export async function applyLevelUp(
 ): Promise<BruteSnapshot> {
   const row = await prisma.brute.findUnique({ where: { id: bruteId } });
   if (!row) throw new HttpError(404, 'brute_not_found');
+  if (!row.pendingLevelUpChoices || row.pendingLevelUpLevel !== row.level) {
+    throw new HttpError(400, 'no_pending_levelup');
+  }
+  if (row.xp < xpToNext(row.level)) {
+    throw new HttpError(400, 'not_enough_xp_for_levelup');
+  }
+
+  let offer: LevelUpOffer;
+  try {
+    offer = JSON.parse(row.pendingLevelUpChoices) as LevelUpOffer;
+  } catch {
+    throw new HttpError(500, 'pending_levelup_corrupt');
+  }
+  if (!choiceMatches(choice, offer.first) && !choiceMatches(choice, offer.second)) {
+    throw new HttpError(400, 'invalid_levelup_choice');
+  }
 
   const snap = deserializeBrute(row);
   const before = bruteSnapshotToCore(snap);
@@ -319,7 +357,14 @@ export async function applyLevelUp(
       skills: serialized.skills ?? row.skills,
       weapons: serialized.weapons ?? row.weapons,
       pets: serialized.pets ?? row.pets,
+      pendingLevelUpChoices: null,
+      pendingLevelUpLevel: null,
+      pendingLevelUpNonce: null,
     },
   });
   return deserializeBrute(updated);
+}
+
+function choiceMatches(a: LevelUpChoice, b: LevelUpChoice): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
 }

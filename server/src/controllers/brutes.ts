@@ -1,6 +1,8 @@
 import type { RequestHandler } from 'express';
 import { z } from 'zod';
 import * as BruteService from '../services/BruteService.js';
+import { assertBruteOwner } from '../middleware/auth.js';
+import { HttpError } from '../middleware/errorHandler.js';
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 const NAME_REGEX = /^[a-zA-Z0-9 ]+$/;
@@ -81,6 +83,8 @@ export const SetPetsBody = z.object({
 export const createBrute: RequestHandler = async (req, res, next) => {
   try {
     const body = req.body as z.infer<typeof CreateBruteBody>;
+    if (!req.wallet) throw new HttpError(401, 'auth_required');
+    if (body.walletAddress.toLowerCase() !== req.wallet) throw new HttpError(403, 'wallet_body_mismatch');
     const brute = await BruteService.createBrute(body);
     res.status(201).json(brute);
   } catch (err) {
@@ -133,6 +137,8 @@ export const setPets: RequestHandler = async (req, res, next) => {
   try {
     const params = req.params as unknown as z.infer<typeof BruteIdParams>;
     const body = req.body as z.infer<typeof SetPetsBody>;
+    if (!req.wallet) throw new HttpError(401, 'auth_required');
+    await assertBruteOwner(params.id, req.wallet);
     const brute = await BruteService.setBrutePets(params.id, body.pets);
     res.json(brute);
   } catch (err) {

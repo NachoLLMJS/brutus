@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { mutationRateLimit } from '../middleware/rateLimit.js';
+import { requireWallet } from '../middleware/auth.js';
 import { TournamentIdParams, runTournament } from '../controllers/tournaments.js';
 
 export const tournamentsRouter: Router = Router();
@@ -8,6 +9,7 @@ export const tournamentsRouter: Router = Router();
 tournamentsRouter.post(
   '/:id/tournaments',
   mutationRateLimit,
+  requireWallet,
   validate({ params: TournamentIdParams }),
   runTournament,
 );

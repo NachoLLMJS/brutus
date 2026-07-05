@@ -7,6 +7,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api, ApiError } from '@/api/apiClient';
+import { ensureWalletAuth } from '@/lib/walletAuth';
+import { useWalletStore } from '@/store/useWalletStore';
 import type { LevelUpChoice } from 'core';
 import { getPet, getSkill, getWeapon } from 'core';
 import { useToastStore } from '@/store/useToastStore';
@@ -19,6 +21,7 @@ export function LevelUp() {
   const pushToast = useToastStore((s) => s.push);
   const pending = useGameStore((s) => s.pendingLevelUp);
   const setPendingLevelUp = useGameStore((s) => s.setPendingLevelUp);
+  const walletAddress = useWalletStore((s) => s.address);
   const offer = pending && pending.bruteId === id ? pending.offer : null;
 
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -27,6 +30,8 @@ export function LevelUp() {
     if (submitting) return;
     setSubmitting(true);
     try {
+      if (!walletAddress) throw new ApiError('auth_required', 401);
+      await ensureWalletAuth(walletAddress);
       await api.brutes.levelup(id, { choice });
       setPendingLevelUp(null);
       pushToast('success', 'Blessing forged!');

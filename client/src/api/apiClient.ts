@@ -22,7 +22,10 @@ const railwayClientApiBase =
   typeof window !== 'undefined' && window.location.hostname === 'client-production-efa8.up.railway.app'
     ? 'https://server-production-3079.up.railway.app/api'
     : undefined;
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? railwayClientApiBase ?? '/api';
+export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? railwayClientApiBase ?? '/api';
+
+const AUTH_TOKEN_KEY = 'vaultbrawl.authToken';
+const AUTH_WALLET_KEY = 'vaultbrawl.authWallet';
 
 export class ApiError extends Error {
   readonly code: string;
@@ -41,11 +44,13 @@ interface ErrorBody {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const authToken = typeof window !== 'undefined' ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       ...(init?.headers ?? {}),
     },
   });
@@ -167,7 +172,32 @@ export interface LeaderboardEntry {
 
 // ---------- API surface ----------
 
+export function clearAuthToken(): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(AUTH_TOKEN_KEY);
+  window.localStorage.removeItem(AUTH_WALLET_KEY);
+}
+
+export function hasAuthForWallet(wallet: string | null): boolean {
+  if (!wallet || typeof window === 'undefined') return false;
+  const token = window.localStorage.getItem(AUTH_TOKEN_KEY);
+  const storedWallet = window.localStorage.getItem(AUTH_WALLET_KEY);
+  return Boolean(token && storedWallet?.toLowerCase() === wallet.toLowerCase());
+}
+
+export function storeAuthToken(wallet: string, token: string): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+  window.localStorage.setItem(AUTH_WALLET_KEY, wallet.toLowerCase());
+}
+
 export const api = {
+  auth: {
+    nonce: (wallet: string): Promise<{ wallet: string; nonce: string; message: string; expiresAt: string }> =>
+      request('/auth/nonce', { method: 'POST', body: JSON.stringify({ wallet }) }),
+    verify: (body: { wallet: string; nonce: string; signature: string }): Promise<{ wallet: string; token: string; expiresAt: string }> =>
+      request('/auth/verify', { method: 'POST', body: JSON.stringify(body) }),
+  },
   brutes: {
     list: async (walletAddress?: string): Promise<Brute[]> => {
       const query = walletAddress ? `?walletAddress=${encodeURIComponent(walletAddress)}` : '';

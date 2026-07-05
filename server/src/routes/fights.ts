@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { mutationRateLimit } from '../middleware/rateLimit.js';
+import { requireWallet } from '../middleware/auth.js';
 import {
   FightIdParams,
   LevelUpBody,
@@ -15,6 +16,7 @@ export const fightsRouter: Router = Router();
 fightsRouter.post(
   '/:id/fights',
   mutationRateLimit,
+  requireWallet,
   validate({ params: FightIdParams, body: StartFightBody }),
   startFight,
 );
@@ -22,6 +24,7 @@ fightsRouter.post(
 fightsRouter.post(
   '/:id/levelup',
   mutationRateLimit,
+  requireWallet,
   validate({ params: FightIdParams, body: LevelUpBody }),
   applyLevelUp,
 );

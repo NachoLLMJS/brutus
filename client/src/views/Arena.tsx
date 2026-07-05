@@ -19,6 +19,8 @@ import { useToastStore } from '@/store/useToastStore';
 import { useGameStore } from '@/store/useGameStore';
 import { useLobbySettings, type LobbyFilter } from '@/store/useLobbySettings';
 import { flavorFor, type WeaponIcon, type BeastIcon, type FlavorStatus } from '@/lib/lobbyFlavor';
+import { ensureWalletAuth } from '@/lib/walletAuth';
+import { useWalletStore } from '@/store/useWalletStore';
 import type { Brute } from 'core';
 
 const FILTERS: { id: LobbyFilter; label: string }[] = [
@@ -34,6 +36,7 @@ export function Arena() {
   const { brute } = useBrute(id);
   const navigate = useNavigate();
   const pushToast = useToastStore((s) => s.push);
+  const walletAddress = useWalletStore((s) => s.address);
 
   // Settings de sesión (training, filter, sidebar).
   const trainingMode = useLobbySettings((s) => s.trainingMode);
@@ -59,6 +62,8 @@ export function Arena() {
     setLoading(true);
     void (async () => {
       try {
+        if (!walletAddress) throw new ApiError('auth_required', 401);
+        await ensureWalletAuth(walletAddress);
         const list = await api.brutes.opponents(id, trainingMode);
         if (!cancelled) setOpponents(list);
       } catch (e) {
@@ -71,7 +76,7 @@ export function Arena() {
     return () => {
       cancelled = true;
     };
-  }, [id, trainingMode, refreshNonce, pushToast]);
+  }, [id, trainingMode, refreshNonce, walletAddress, pushToast]);
 
   // Filter por nivel/online relativo to bruto actual.
   const myLevel = brute?.level ?? 1;
@@ -95,6 +100,8 @@ export function Arena() {
     if (submittingId) return;
     setSubmittingId(op.id);
     try {
+      if (!walletAddress) throw new ApiError('auth_required', 401);
+      await ensureWalletAuth(walletAddress);
       const res = await api.brutes.fight(id, { opponentId: op.id, training: trainingMode });
       setLastFight(res);
       if (res.leveledUp && res.levelUpChoices) {

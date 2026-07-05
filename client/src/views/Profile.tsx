@@ -12,7 +12,8 @@ import { BruteCard } from '@/components/BruteCard';
 import { BruteAvatar } from '@/components/BruteAvatar';
 import { BgPortrait } from '@/components/BgPortrait';
 import { PaperPanel } from '@/components/PaperPanel';
-import { api } from '@/api/apiClient';
+import { api, ApiError } from '@/api/apiClient';
+import { ensureWalletAuth } from '@/lib/walletAuth';
 import type { Brute } from 'core';
 import { applySkillStatBonuses, xpToNext, WEAPONS, SKILLS, PETS, getSkill, getWeapon, getPet } from 'core';
 import { skillAsset, weaponAsset, petAsset } from '@/lib/assets';
@@ -265,6 +266,8 @@ export function Profile() {
     setPetMarketSaving(true);
     setPetMarketError(null);
     try {
+      if (!walletAddress) throw new ApiError('auth_required', 401);
+      await ensureWalletAuth(walletAddress);
       const updated = await api.brutes.setPets(brute.id, pets);
       setBrute(updated);
     } catch (e) {

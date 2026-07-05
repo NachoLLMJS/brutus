@@ -26,6 +26,7 @@ import {
   type LpcWingsKey,
 } from '@/components/LpcAvatarPreview';
 import { api, ApiError } from '@/api/apiClient';
+import { ensureWalletAuth } from '@/lib/walletAuth';
 import {
   generateColorString,
   getRandomBody,
@@ -172,6 +173,7 @@ export function CharacterCreator() {
     if (!nameValid) return;
     setSubmitting(true);
     try {
+      await ensureWalletAuth(walletAddress);
       const brute = await api.brutes.create({
         name: name.trim(),
         gender,
@@ -220,6 +222,7 @@ export function CharacterCreator() {
     }
     setPaidForgeBusy(true);
     try {
+      await ensureWalletAuth(walletAddress);
       const metadataHash = await metadataHashForBrute({
         name: name.trim(),
         walletAddress,

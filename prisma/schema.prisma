@@ -50,6 +50,9 @@ model Brute {
   trainingFightsRemaining Int      @default(10)
   defeatsToday            Int      @default(0)
   lastFightReset          DateTime @default(now())
+  pendingLevelUpChoices   String?
+  pendingLevelUpLevel     Int?
+  pendingLevelUpNonce     String?
   masterId                String?
   master                  Brute?   @relation("Pupils", fields: [masterId], references: [id])
   pupils                  Brute[]  @relation("Pupils")

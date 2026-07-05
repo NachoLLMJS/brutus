@@ -1,6 +1,8 @@
 import type { RequestHandler } from 'express';
 import { z } from 'zod';
 import * as FightService from '../services/FightService.js';
+import { assertBruteOwner } from '../middleware/auth.js';
+import { HttpError } from '../middleware/errorHandler.js';
 
 const ID_REGEX = /^[a-z0-9]{20,40}$/;
 
@@ -48,6 +50,8 @@ export const startFight: RequestHandler = async (req, res, next) => {
   try {
     const params = req.params as unknown as z.infer<typeof FightIdParams>;
     const body = req.body as z.infer<typeof StartFightBody>;
+    if (!req.wallet) throw new HttpError(401, 'auth_required');
+    await assertBruteOwner(params.id, req.wallet);
 
     if (!body.opponentId) {
       // Phase 1: client first calls without opponent → server returns
@@ -72,6 +76,8 @@ export const applyLevelUp: RequestHandler = async (req, res, next) => {
   try {
     const params = req.params as unknown as z.infer<typeof FightIdParams>;
     const body = req.body as z.infer<typeof LevelUpBody>;
+    if (!req.wallet) throw new HttpError(401, 'auth_required');
+    await assertBruteOwner(params.id, req.wallet);
     const brute = await FightService.applyLevelUp(params.id, body.choice);
     res.json(brute);
   } catch (err) {
