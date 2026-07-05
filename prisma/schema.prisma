@@ -44,8 +44,10 @@ model Brute {
   gender                  String   @default("male") // "male" | "female"
   body                    String   @default("") // 11 hex chars
   bodyColors              String   @default("") // 32 hex chars
-  victories               Int      @default(0)
-  defeats                 Int      @default(0)
+  victories               Int      @default(0) // legacy aggregate displayed on old profiles
+  defeats                 Int      @default(0) // legacy aggregate displayed on old profiles
+  normalVictories         Int      @default(0) // official normal-fight wins for leaderboard/rewards
+  normalDefeats           Int      @default(0) // official normal-fight losses for leaderboard
   fightsRemaining         Int      @default(3)
   trainingFightsRemaining Int      @default(10)
   defeatsToday            Int      @default(0)

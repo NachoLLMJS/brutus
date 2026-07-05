@@ -139,7 +139,7 @@ export const setPets: RequestHandler = async (req, res, next) => {
     const body = req.body as z.infer<typeof SetPetsBody>;
     if (!req.wallet) throw new HttpError(401, 'auth_required');
     await assertBruteOwner(params.id, req.wallet);
-    const brute = await BruteService.setBrutePets(params.id, body.pets);
+    const brute = await BruteService.setBrutePets(params.id, body.pets, req.wallet);
     res.json(brute);
   } catch (err) {
     next(err);

@@ -204,6 +204,8 @@ export async function runFight(input: FightInput): Promise<FightResult> {
           level: newLevel,
           victories: { increment: playerWon ? 1 : 0 },
           defeats: { increment: playerWon ? 0 : 1 },
+          normalVictories: { increment: playerWon ? 1 : 0 },
+          normalDefeats: { increment: playerWon ? 0 : 1 },
           defeatsToday: { increment: playerWon ? 0 : 1 },
           fightsRemaining: { decrement: 1 },
         },

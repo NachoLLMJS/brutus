@@ -9,6 +9,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const FINAL_BRUTUS_COMBAT_REWARDS = '0x1cBF8b99029bf5cCff449a50DE46B0eae22f2Ef7';
+const FINAL_BRUTUS_REGISTRY = '0xfE0CB932Ec8857bDc5749a96D4008bdE87F7EeFa';
+const FINAL_BRUTUS_PET_REGISTRY = '0x7d9836a101ffc6B53f3Db9C04ae62DAbA1F8C3fc';
 
 function preloadLocalEnv(): void {
   for (const envPath of [resolve(process.cwd(), '.env'), resolve(process.cwd(), 'server/.env')]) {
@@ -48,6 +50,8 @@ const EnvSchema = z.object({
   BNB_TESTNET_RPC_URL: z.string().url().default('https://data-seed-prebsc-1-s1.binance.org:8545/'),
   BRUTUS_OPERATOR_PRIVATE_KEY: z.string().regex(/^0x[0-9a-fA-F]{64}$/).optional(),
   BRUTUS_COMBAT_REWARDS: z.string().regex(/^0x[0-9a-fA-F]{40}$/).default(FINAL_BRUTUS_COMBAT_REWARDS),
+  BRUTUS_REGISTRY: z.string().regex(/^0x[0-9a-fA-F]{40}$/).default(FINAL_BRUTUS_REGISTRY),
+  BRUTUS_PET_REGISTRY: z.string().regex(/^0x[0-9a-fA-F]{40}$/).default(FINAL_BRUTUS_PET_REGISTRY),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
@@ -81,6 +85,8 @@ function loadEnv(): Env {
   return {
     ...parsed.data,
     BRUTUS_COMBAT_REWARDS: FINAL_BRUTUS_COMBAT_REWARDS,
+    BRUTUS_REGISTRY: FINAL_BRUTUS_REGISTRY,
+    BRUTUS_PET_REGISTRY: FINAL_BRUTUS_PET_REGISTRY,
   };
 }
 

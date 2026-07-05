@@ -1,5 +1,6 @@
 // Orchestrates Brute persistence + core generation.
 
+import { createHash } from 'node:crypto';
 import { prisma } from '../db.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import {
@@ -10,6 +11,7 @@ import {
 } from '../lib/serialization.js';
 import { generateInitialStats } from '../lib/coreBridge.js';
 import { maybeResetDaily } from '../lib/dailyReset.js';
+import { verifyExtraBrutePayment, verifyWalletOwnsPets } from './OnChainService.js';
 import { getPet } from 'core';
 
 const DEFAULT_LPC_APPEARANCE = {
@@ -55,6 +57,17 @@ function normalizeWallet(address: string): string {
   return address.toLowerCase();
 }
 
+function metadataHashForBrute(input: CreateBruteInput): string {
+  const payload = JSON.stringify({
+    name: input.name,
+    walletAddress: input.walletAddress,
+    gender: input.gender ?? 'male',
+    body: input.body ?? '',
+    bodyColors: input.bodyColors ?? '',
+  });
+  return `0x${createHash('sha256').update(payload).digest('hex')}`;
+}
+
 export async function createBrute(input: CreateBruteInput): Promise<BruteSnapshot> {
   const ownerWallet = normalizeWallet(input.walletAddress);
   if (input.createTxHash && !TX_HASH_REGEX.test(input.createTxHash)) {
@@ -82,10 +95,20 @@ export async function createBrute(input: CreateBruteInput): Promise<BruteSnapsho
   }
 
   const existingWalletBrutes = await prisma.brute.count({ where: { ownerWallet } });
-  if (existingWalletBrutes >= BASE_BRUTE_LIMIT) {
-    if (!input.onChainBruteId || !input.createTxHash) {
-      throw new HttpError(402, 'base_brute_limit_reached_extra_requires_onchain_payment');
-    }
+  const hasOnChainExtraProof = Boolean(input.onChainBruteId && input.createTxHash);
+  if (existingWalletBrutes >= BASE_BRUTE_LIMIT && !hasOnChainExtraProof) {
+    throw new HttpError(402, 'base_brute_limit_reached_extra_requires_onchain_payment');
+  }
+  if ((input.onChainBruteId && !input.createTxHash) || (!input.onChainBruteId && input.createTxHash)) {
+    throw new HttpError(400, 'incomplete_onchain_extra_proof');
+  }
+  if (hasOnChainExtraProof) {
+    await verifyExtraBrutePayment({
+      wallet: ownerWallet,
+      txHash: input.createTxHash!,
+      onChainBruteId: input.onChainBruteId!,
+      metadataHash: metadataHashForBrute(input),
+    });
   }
 
   const stats = generateInitialStats(input.name, {
@@ -166,6 +189,15 @@ function parseAppearance(value: string): Appearance {
   }
 }
 
+function safeParseStringArray(value: string): string[] {
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function listLeaderboard(limit = 100): Promise<LeaderboardEntry[]> {
   const rows = await prisma.brute.findMany({
     select: {
@@ -174,6 +206,8 @@ export async function listLeaderboard(limit = 100): Promise<LeaderboardEntry[]> 
       ownerWallet: true,
       victories: true,
       defeats: true,
+      normalVictories: true,
+      normalDefeats: true,
       level: true,
       gender: true,
       body: true,
@@ -182,9 +216,9 @@ export async function listLeaderboard(limit = 100): Promise<LeaderboardEntry[]> 
       createdAt: true,
     },
     orderBy: [
-      { victories: 'desc' },
+      { normalVictories: 'desc' },
       { level: 'desc' },
-      { defeats: 'asc' },
+      { normalDefeats: 'asc' },
       { createdAt: 'asc' },
     ],
     take: Math.min(Math.max(limit, 1), 100),
@@ -195,8 +229,8 @@ export async function listLeaderboard(limit = 100): Promise<LeaderboardEntry[]> 
     id: row.id,
     name: row.name,
     ownerWallet: row.ownerWallet,
-    victories: row.victories,
-    defeats: row.defeats,
+    victories: row.normalVictories,
+    defeats: row.normalDefeats,
     level: row.level,
     gender: row.gender === 'female' ? 'female' : 'male',
     body: row.body,
@@ -236,11 +270,18 @@ export async function listPupils(masterId: string): Promise<PupilSummary[]> {
   return rows;
 }
 
-export async function setBrutePets(bruteId: string, petIds: string[]): Promise<BruteSnapshot> {
+export async function setBrutePets(bruteId: string, petIds: string[], ownerWallet: string): Promise<BruteSnapshot> {
+  const row = await prisma.brute.findUnique({ where: { id: bruteId } });
+  if (!row) throw new HttpError(404, 'brute_not_found');
+
   const unique = Array.from(new Set(petIds)).slice(0, 3);
   for (const petId of unique) {
     if (!getPet(petId)) throw new HttpError(400, 'invalid_pet');
   }
+
+  const currentlyEquipped = new Set(safeParseStringArray(row.pets));
+  const newlyEquipped = unique.filter((petId) => !currentlyEquipped.has(petId));
+  await verifyWalletOwnsPets(ownerWallet, newlyEquipped);
 
   const serialized = serializeForPrisma({ pets: unique });
   try {
