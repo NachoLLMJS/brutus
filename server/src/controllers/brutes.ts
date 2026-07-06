@@ -27,7 +27,7 @@ const LpcAppearanceSchema = z.object({
   ]),
   armsArmor: z.enum(['none', 'plate', 'bracers']),
   gloves: z.literal('none').optional(),
-  torsoArmor: z.enum(['none', 'trenchCoat', 'plate', 'legion', 'chainmail', 'leather', 'binanceJacket', 'flapMerch', 'collaredCoat']),
+  torsoArmor: z.enum(['none', 'trenchCoat', 'plate', 'legion', 'chainmail', 'leather', 'flapMerch', 'collaredCoat']),
   legsArmor: z.enum(['none', 'plate']),
   feetArmor: z.enum(['none', 'plate', 'slippers', 'sandals', 'rimmedBoots']),
   armorColor: z.enum(['steel', 'yellow', 'iron', 'bronze', 'copper', 'pink', 'purple', 'silver', 'black']),

@@ -28,7 +28,6 @@ import torsoArmorPlateIdle from '@/assets/lpc-test/torso-armor-plate-idle.png?ur
 import torsoArmorLegionIdle from '@/assets/lpc-test/torso-armor-legion-idle.png?url';
 import torsoChainmailIdle from '@/assets/lpc-test/torso-chainmail-idle.png?url';
 import torsoArmorLeatherIdle from '@/assets/lpc-test/torso-armor-leather-idle.png?url';
-import torsoBinanceJacketIdle from '@/assets/lpc-test/torso-binance-jacket-idle.png?url';
 import torsoFlapMerchIdle from '@/assets/lpc-test/torso-flap-merch-idle.png?url';
 import legsArmorPlateIdle from '@/assets/lpc-test/legs-armor-plate-idle.png?url';
 import feetArmorPlateSteelIdle from '@/assets/lpc-test/feet-armor-plate-steel-idle.png?url';
@@ -52,7 +51,7 @@ export type LpcWingsKey = 'none' | 'monarchPurple' | 'pixiePurple';
 export type LpcHeadwearKey = 'none' | 'armet' | 'barbuta' | 'greathelm' | 'maximus' | 'cedricHelmet' | 'jasonHelmet';
 export type LpcArmorColorKey = 'steel' | 'yellow' | 'iron' | 'bronze' | 'copper' | 'pink' | 'purple' | 'silver' | 'black';
 export type LpcArmsArmorKey = 'none' | 'plate' | 'bracers';
-export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail' | 'leather' | 'binanceJacket' | 'flapMerch' | 'collaredCoat';
+export type LpcTorsoArmorKey = 'none' | 'trenchCoat' | 'plate' | 'legion' | 'chainmail' | 'leather' | 'flapMerch' | 'collaredCoat';
 export type LpcLegsArmorKey = 'none' | 'plate';
 export type LpcFeetArmorKey = 'none' | 'plate' | 'slippers' | 'sandals' | 'rimmedBoots';
 export type LpcWeaponKey = 'none';
@@ -150,7 +149,6 @@ export const LPC_TORSO_ARMOR_OPTIONS = [
   { key: 'legion', label: 'Torso legion', src: torsoArmorLegionIdle },
   { key: 'chainmail', label: 'Chainmail', src: torsoChainmailIdle },
   { key: 'leather', label: 'Leather armour', src: torsoArmorLeatherIdle },
-  { key: 'binanceJacket', label: 'Binance jacket', src: torsoBinanceJacketIdle },
   { key: 'flapMerch', label: 'Flap merch', src: torsoFlapMerchIdle },
   { key: 'collaredCoat', label: 'Collared coat', src: '/lpc-combat/torso/collaredCoat/black/idle.png' },
 ] as const satisfies ReadonlyArray<LpcOption<LpcTorsoArmorKey>>;
@@ -212,7 +210,7 @@ function feetLayer(feetArmor: LpcFeetArmorKey, armorColor: LpcArmorColorKey): La
 
 function torsoLayer(torsoArmor: LpcTorsoArmorKey, armorColor: LpcArmorColorKey): Layer | undefined {
   if (torsoArmor === 'none') return undefined;
-  if (torsoArmor === 'binanceJacket' || torsoArmor === 'flapMerch') return toLayer(pick(LPC_TORSO_ARMOR_OPTIONS, torsoArmor));
+  if (torsoArmor === 'flapMerch') return toLayer(pick(LPC_TORSO_ARMOR_OPTIONS, torsoArmor));
   if (torsoArmor === 'collaredCoat') return { src: `/lpc-combat/torso/collaredCoat/${officialAssetColor(armorColor, 'cloth')}/idle.png` };
   return paletteLayer(pick(LPC_TORSO_ARMOR_OPTIONS, torsoArmor), armorColor, torsoArmor === 'trenchCoat' || torsoArmor === 'leather' ? 'cloth' : 'metal');
 }

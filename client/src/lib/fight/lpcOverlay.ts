@@ -132,7 +132,7 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
   const customHeadSkin = headwear === 'cedricHelmet' || headwear === 'jasonHelmet';
   const wings = value(lpc.wings, ['none', 'monarchPurple', 'pixiePurple'] as const, 'none');
   const armsArmor = value(lpc.armsArmor, ['none', 'plate', 'bracers'] as const, 'none');
-  const torsoArmor = value(lpc.torsoArmor, ['none', 'trenchCoat', 'plate', 'legion', 'chainmail', 'leather', 'binanceJacket', 'flapMerch', 'collaredCoat'] as const, 'trenchCoat');
+  const torsoArmor = value(lpc.torsoArmor, ['none', 'trenchCoat', 'plate', 'legion', 'chainmail', 'leather', 'flapMerch', 'collaredCoat'] as const, 'trenchCoat');
   const legsArmor = value(lpc.legsArmor, ['none', 'plate'] as const, 'plate');
   const feetArmor = value(lpc.feetArmor, ['none', 'plate', 'slippers', 'sandals', 'rimmedBoots'] as const, 'plate');
   const armorColor = value(lpc.armorColor, ['steel', 'yellow', 'iron', 'bronze', 'copper', 'pink', 'purple', 'silver', 'black'] as const, 'black');
@@ -150,7 +150,6 @@ function layerList(lpc: Partial<LpcAppearance>, action: LpcAction): Layer[] {
     torsoArmor === 'legion' ? { src: p(`armor/torsoLegion/${a}.png`), palette: 'metal', color: armorColor } : undefined,
     torsoArmor === 'chainmail' ? { src: p(`armor/torsoChainmail/${a}.png`), palette: 'metal', color: armorColor } : undefined,
     torsoArmor === 'leather' ? { src: p(`armor/torsoLeather/${a}.png`), palette: 'cloth', color: armorColor } : undefined,
-    torsoArmor === 'binanceJacket' ? { src: p(`armor/binanceJacket/${a}.png`) } : undefined,
     torsoArmor === 'flapMerch' ? { src: p(`armor/flapMerch/${a}.png`) } : undefined,
     torsoArmor === 'collaredCoat' ? { src: p(`torso/collaredCoat/${officialFeetColor(armorColor, 'cloth')}/${a}.png`) } : undefined,
     armsArmor === 'plate' ? { src: p(`armor/armsPlate/${a}.png`), palette: 'metal', color: armorColor } : undefined,
