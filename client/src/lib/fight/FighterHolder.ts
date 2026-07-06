@@ -248,8 +248,10 @@ interface CustomPetAnimationDef {
 interface CustomPetDef {
   base: string;
   visualScale: number;
-  /** Pixel-art pets should be scaled to whole-number pixels to avoid blur. */
+  /** Pixel-art pets should use nearest-neighbor texture filtering. */
   pixelPerfect?: boolean;
+  /** Default true for pixel pets; false allows finer visual-size tuning. */
+  snapScale?: boolean;
   tint?: number;
   animations: Partial<Record<AnimationName, CustomPetAnimationDef>>;
 }
@@ -283,11 +285,11 @@ const CUSTOM_PET_MODELS: Record<CustomPetModelKey, CustomPetDef> = {
   tardDino: { base: '/assets/pets/dinos/tard_dino', visualScale: 2.22, pixelPerfect: true, animations: DINO_ANIMS },
   vitaDino: { base: '/assets/pets/dinos/vita_dino', visualScale: 2.36, pixelPerfect: true, animations: DINO_ANIMS },
   bnbDino: { base: '/assets/pets/dinos/bnb_dino', visualScale: 2.5, pixelPerfect: true, animations: DINO_ANIMS },
-  blueMegaDino: { base: '/assets/pets/dinos/blue_mega_dino', visualScale: 2.7, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
-  limeMegaDino: { base: '/assets/pets/dinos/lime_mega_dino', visualScale: 2.85, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
-  darkMegaDino: { base: '/assets/pets/dinos/dark_mega_dino', visualScale: 3.0, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
-  redMegaDino: { base: '/assets/pets/dinos/red_mega_dino', visualScale: 3.15, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
-  yellowMegaDino: { base: '/assets/pets/dinos/yellow_mega_dino', visualScale: 3.3, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
+  blueMegaDino: { base: '/assets/pets/dinos/blue_mega_dino', visualScale: 2.35, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  limeMegaDino: { base: '/assets/pets/dinos/lime_mega_dino', visualScale: 2.45, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  darkMegaDino: { base: '/assets/pets/dinos/dark_mega_dino', visualScale: 2.55, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  redMegaDino: { base: '/assets/pets/dinos/red_mega_dino', visualScale: 2.65, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  yellowMegaDino: { base: '/assets/pets/dinos/yellow_mega_dino', visualScale: 2.75, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
 };
 
 function isCustomPetModel(model: ModelKey): model is CustomPetModelKey {
@@ -662,7 +664,7 @@ export default class FighterHolder {
     this.#customSprite.texture = texture;
     this.#customSprite.tint = petDef.tint ?? 0xffffff;
     const rawScale = this.#scale * petDef.visualScale * 1.1;
-    const scale = petDef.pixelPerfect ? Math.max(1, Math.round(rawScale)) : rawScale;
+    const scale = petDef.pixelPerfect && petDef.snapScale !== false ? Math.max(1, Math.round(rawScale)) : rawScale;
     this.#customSprite.scale.set(scale, scale);
   }
 
