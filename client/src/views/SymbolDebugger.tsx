@@ -469,7 +469,7 @@ function SymbolDetail({
           textTransform: 'uppercase',
         }}
       >
-        Cerrar
+        Close
       </button>
     </div>
   );

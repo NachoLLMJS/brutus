@@ -9,12 +9,12 @@ interface PetBadgeProps {
 export function PetBadge({ petId }: PetBadgeProps) {
   const p = getPet(petId);
   const name = p?.name ?? petId;
-  const description = p?.description ?? 'Mascota desconocida.';
+  const description = p?.description ?? 'Unknown pet.';
   return (
     <span
       className="badge group relative cursor-help inline-flex items-center gap-1.5"
       tabIndex={0}
-      aria-label={`Mascota: ${name}`}
+      aria-label={`Pet: ${name}`}
     >
       <img
         src={petAsset(petId)}

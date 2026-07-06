@@ -263,7 +263,7 @@ function YourBrawlerCard({ brute }: { brute: Brute }) {
         </div>
       </div>
       <Link className="side-link" to={`/brute/${brute.id}`}>
-        Ir to perfil →
+        Go to profile →
       </Link>
     </div>
   );
