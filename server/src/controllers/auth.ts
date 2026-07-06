@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express';
 import { z } from 'zod';
 import { createLoginChallenge, verifyLoginChallenge } from '../services/AuthService.js';
+import { audit } from '../services/AuditService.js';
 
 const WALLET_REGEX = /^0x[0-9a-fA-F]{40}$/;
 const SIG_REGEX = /^0x[0-9a-fA-F]+$/;
@@ -27,7 +28,14 @@ export const authNonce: RequestHandler = (req, res, next) => {
 export const authVerify: RequestHandler = async (req, res, next) => {
   try {
     const body = req.body as z.infer<typeof AuthVerifyBody>;
-    res.json(await verifyLoginChallenge(body));
+    const result = await verifyLoginChallenge(body);
+    await audit({
+      wallet: result.wallet,
+      action: 'wallet_login',
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
+    res.json(result);
   } catch (err) {
     next(err);
   }

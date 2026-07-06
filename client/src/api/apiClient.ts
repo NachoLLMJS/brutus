@@ -86,6 +86,7 @@ export interface CreateBruteBody {
 
 export interface FightBody {
   opponentId: string;
+  matchTicket: string;
   training?: boolean;
 }
 
@@ -113,9 +114,13 @@ export interface FightResponse {
   dayEnded: boolean;
 }
 
+export interface SuggestedOpponent extends Brute {
+  matchTicket: string;
+}
+
 // Shape devuelto por POST /fights sin opponentId.
 interface OpponentsEnvelope {
-  opponents: Brute[];
+  opponents: SuggestedOpponent[];
 }
 
 export interface LevelUpBody {
@@ -223,7 +228,7 @@ export const api = {
     },
 
     /** Pide 3 oponentes sugeridos (POST a /fights sin opponentId). */
-    opponents: async (id: string, training = false): Promise<Brute[]> => {
+    opponents: async (id: string, training = false): Promise<SuggestedOpponent[]> => {
       const res = await request<OpponentsEnvelope>(
         `/brutes/${encodeURIComponent(id)}/fights`,
         {
@@ -241,6 +246,7 @@ export const api = {
         body: JSON.stringify({
           fightType: body.training ? 'training' : 'normal',
           opponentId: body.opponentId,
+          matchTicket: body.matchTicket,
         }),
       }),
 

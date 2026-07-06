@@ -58,8 +58,10 @@ model Brute {
   masterId                String?
   master                  Brute?   @relation("Pupils", fields: [masterId], references: [id])
   pupils                  Brute[]  @relation("Pupils")
-  combatsAsA              Combat[] @relation("CombatA")
-  combatsAsB              Combat[] @relation("CombatB")
+  combatsAsA              Combat[]      @relation("CombatA")
+  combatsAsB              Combat[]      @relation("CombatB")
+  matchTicketsAsPlayer    MatchTicket[] @relation("MatchTicketPlayer")
+  matchTicketsAsOpponent  MatchTicket[] @relation("MatchTicketOpponent")
   createdAt               DateTime @default(now())
 
   @@index([userId])
@@ -97,4 +99,38 @@ model Tournament {
   createdAt DateTime @default(now())
 
   @@index([playerId])
+}
+
+model MatchTicket {
+  id         String    @id @default(cuid())
+  playerId   String
+  player     Brute     @relation("MatchTicketPlayer", fields: [playerId], references: [id], onDelete: Cascade)
+  opponentId String
+  opponent   Brute     @relation("MatchTicketOpponent", fields: [opponentId], references: [id], onDelete: Cascade)
+  wallet     String
+  fightType  String    @default("normal")
+  usedAt     DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+
+  @@index([playerId])
+  @@index([opponentId])
+  @@index([wallet])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  wallet    String?
+  bruteId   String?
+  action    String
+  metadata  String?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([wallet])
+  @@index([bruteId])
+  @@index([action])
+  @@index([createdAt])
 }

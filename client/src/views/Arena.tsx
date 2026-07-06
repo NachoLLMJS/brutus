@@ -12,7 +12,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
-import { api, ApiError } from '@/api/apiClient';
+import { api, ApiError, type SuggestedOpponent } from '@/api/apiClient';
 import { useBrute } from '@/hooks/useBrute';
 import { BruteAvatar } from '@/components/BruteAvatar';
 import { useToastStore } from '@/store/useToastStore';
@@ -46,7 +46,7 @@ export function Arena() {
 
   // Estado local: filtro activo, oponentes cargados, toast.
   const [filter, setFilter] = useState<LobbyFilter>(defaultFilter);
-  const [opponents, setOpponents] = useState<Brute[]>([]);
+  const [opponents, setOpponents] = useState<SuggestedOpponent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
@@ -96,13 +96,13 @@ export function Arena() {
     window.setTimeout(() => setLocalToast(null), 2200);
   };
 
-  const challenge = async (op: Brute) => {
+  const challenge = async (op: SuggestedOpponent) => {
     if (submittingId) return;
     setSubmittingId(op.id);
     try {
       if (!walletAddress) throw new ApiError('auth_required', 401);
       await ensureWalletAuth(walletAddress);
-      const res = await api.brutes.fight(id, { opponentId: op.id, training: trainingMode });
+      const res = await api.brutes.fight(id, { opponentId: op.id, matchTicket: op.matchTicket, training: trainingMode });
       setLastFight(res);
       if (res.leveledUp && res.levelUpChoices) {
         setPendingLevelUp({ bruteId: id, offer: res.levelUpChoices });

@@ -2,6 +2,7 @@
 // log, applies XP/level-up deltas. The client only ever receives the
 // resulting log + updated brute snapshot.
 
+import { createHash, randomBytes } from 'node:crypto';
 import { prisma } from '../db.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { logger } from '../logger.js';
@@ -77,6 +78,26 @@ const XP_WIN_TRAINING = 0;
 const XP_LOSS = 0;
 const DAILY_DEFEAT_LIMIT = 3;
 const OPPONENT_SUGGESTION_LIMIT = 8;
+const MATCH_TICKET_TTL_MS = 5 * 60 * 1000;
+const NORMAL_REMATCH_COOLDOWN_MS = 6 * 60 * 60 * 1000;
+
+export type SuggestedOpponent = BruteSnapshot & { matchTicket: string };
+
+function secureFightSeed(playerSeed: number, opponentSeed: number, fightType: FightType): number {
+  const digest = createHash('sha256')
+    .update(`${playerSeed}:${opponentSeed}:${fightType}:${Date.now()}:${randomBytes(16).toString('hex')}`)
+    .digest();
+  return digest.readUInt32BE(0);
+}
+
+function pairWhere(a: string, b: string) {
+  return {
+    OR: [
+      { bruteAId: a, bruteBId: b },
+      { bruteAId: b, bruteBId: a },
+    ],
+  };
+}
 
 /**
  * Returns visible lobby opponents from real saved brutes.
@@ -84,7 +105,7 @@ const OPPONENT_SUGGESTION_LIMIT = 8;
  * created skins appear on the board immediately. If the pool is too small,
  * widen progressively and only then allow same-wallet fallbacks.
  */
-export async function suggestOpponents(playerId: string): Promise<BruteSnapshot[]> {
+export async function suggestOpponents(playerId: string, wallet: string, fightType: FightType): Promise<SuggestedOpponent[]> {
   const found = await prisma.brute.findUnique({ where: { id: playerId } });
   if (!found) throw new HttpError(404, 'brute_not_found');
   const player = await maybeResetDaily(found);
@@ -135,13 +156,32 @@ export async function suggestOpponents(playerId: string): Promise<BruteSnapshot[
     if (byId.size >= OPPONENT_SUGGESTION_LIMIT) break;
   }
 
-  return [...byId.values()].slice(0, OPPONENT_SUGGESTION_LIMIT).map((row) => deserializeBrute(row));
+  const candidates = [...byId.values()].filter((row) => {
+    if (fightType !== 'normal') return true;
+    if (!player.ownerWallet || !row.ownerWallet) return true;
+    return row.ownerWallet.toLowerCase() !== player.ownerWallet.toLowerCase();
+  });
+  const selected = candidates.slice(0, OPPONENT_SUGGESTION_LIMIT);
+  await prisma.matchTicket.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+  const expiresAt = new Date(Date.now() + MATCH_TICKET_TTL_MS);
+  const tickets = await Promise.all(selected.map((row) => prisma.matchTicket.create({
+    data: {
+      playerId,
+      opponentId: row.id,
+      wallet: wallet.toLowerCase(),
+      fightType,
+      expiresAt,
+    },
+  })));
+  return selected.map((row, index) => ({ ...deserializeBrute(row), matchTicket: tickets[index]!.id }));
 }
 
 export interface FightInput {
   playerId: string;
   opponentId: string;
   fightType: FightType;
+  wallet: string;
+  matchTicket: string;
 }
 
 export async function runFight(input: FightInput): Promise<FightResult> {
@@ -151,6 +191,36 @@ export async function runFight(input: FightInput): Promise<FightResult> {
   const opponent = await prisma.brute.findUnique({ where: { id: input.opponentId } });
   if (!opponent) throw new HttpError(404, 'opponent_not_found');
   if (player.id === opponent.id) throw new HttpError(400, 'cannot_fight_self');
+
+  const now = new Date();
+  const ticket = await prisma.matchTicket.findUnique({ where: { id: input.matchTicket } });
+  if (!ticket) throw new HttpError(400, 'match_ticket_required');
+  if (ticket.usedAt) throw new HttpError(409, 'match_ticket_used');
+  if (ticket.expiresAt <= now) throw new HttpError(410, 'match_ticket_expired');
+  if (
+    ticket.playerId !== player.id
+    || ticket.opponentId !== opponent.id
+    || ticket.fightType !== input.fightType
+    || ticket.wallet.toLowerCase() !== input.wallet.toLowerCase()
+  ) {
+    throw new HttpError(403, 'match_ticket_mismatch');
+  }
+
+  if (input.fightType === 'normal') {
+    if (player.ownerWallet && opponent.ownerWallet && player.ownerWallet.toLowerCase() === opponent.ownerWallet.toLowerCase()) {
+      throw new HttpError(400, 'same_wallet_fights_disabled');
+    }
+    const recent = await prisma.combat.findFirst({
+      where: {
+        fightType: 'normal',
+        createdAt: { gte: new Date(Date.now() - NORMAL_REMATCH_COOLDOWN_MS) },
+        ...pairWhere(player.id, opponent.id),
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true },
+    });
+    if (recent) throw new HttpError(429, 'opponent_cooldown_active');
+  }
 
   // Daily caps only apply to normal reward-eligible fights. Training is sparring:
   // it never consumes daily attempts and remains available even after the normal day ends.
@@ -166,7 +236,7 @@ export async function runFight(input: FightInput): Promise<FightResult> {
   const playerCore = bruteSnapshotToCore(playerSnap);
   const opponentCore = bruteSnapshotToCore(opponentSnap);
 
-  const fightSeed = (player.seed ^ opponent.seed) >>> 0;
+  const fightSeed = secureFightSeed(player.seed, opponent.seed, input.fightType);
   const result: CombatResult = simulate(playerCore, opponentCore, mulberry32(fightSeed));
 
   const playerWon = result.winner === 'A';
@@ -192,6 +262,12 @@ export async function runFight(input: FightInput): Promise<FightResult> {
   );
 
   const [combatRow, updated] = await prisma.$transaction(async (tx) => {
+    const consumedTicket = await tx.matchTicket.updateMany({
+      where: { id: ticket.id, usedAt: null, expiresAt: { gt: new Date() } },
+      data: { usedAt: new Date() },
+    });
+    if (consumedTicket.count === 0) throw new HttpError(409, 'match_ticket_used');
+
     if (input.fightType === 'normal') {
       const consumed = await tx.brute.updateMany({
         where: {

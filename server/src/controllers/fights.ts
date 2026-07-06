@@ -3,6 +3,7 @@ import { z } from 'zod';
 import * as FightService from '../services/FightService.js';
 import { assertBruteOwner } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
+import { audit } from '../services/AuditService.js';
 
 const ID_REGEX = /^[a-z0-9]{20,40}$/;
 
@@ -13,6 +14,7 @@ export const FightIdParams = z.object({
 export const StartFightBody = z.object({
   fightType: z.enum(['normal', 'training']).default('normal'),
   opponentId: z.string().regex(ID_REGEX, 'invalid_id').optional(),
+  matchTicket: z.string().regex(ID_REGEX, 'invalid_id').optional(),
 });
 
 // Mirrors `core.LevelUpChoice` (discriminated union: stat | skill | weapon | pet).
@@ -56,15 +58,41 @@ export const startFight: RequestHandler = async (req, res, next) => {
     if (!body.opponentId) {
       // Phase 1: client first calls without opponent → server returns
       // 3 candidates the user picks from.
-      const opponents = await FightService.suggestOpponents(params.id);
+      const opponents = await FightService.suggestOpponents(params.id, req.wallet, body.fightType);
+      await audit({
+        wallet: req.wallet,
+        bruteId: params.id,
+        action: 'opponents_suggested',
+        metadata: { fightType: body.fightType, count: opponents.length },
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+      });
       res.json({ opponents });
       return;
     }
+
+    if (!body.matchTicket) throw new HttpError(400, 'match_ticket_required');
 
     const result = await FightService.runFight({
       playerId: params.id,
       opponentId: body.opponentId,
       fightType: body.fightType,
+      wallet: req.wallet,
+      matchTicket: body.matchTicket,
+    });
+    await audit({
+      wallet: req.wallet,
+      bruteId: params.id,
+      action: 'fight_completed',
+      metadata: {
+        combatId: result.combat.id,
+        opponentId: body.opponentId,
+        fightType: body.fightType,
+        winner: result.combat.winner,
+        rewardEligible: result.combat.reward?.eligible ?? false,
+      },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
     });
     res.status(201).json(result);
   } catch (err) {
@@ -79,6 +107,14 @@ export const applyLevelUp: RequestHandler = async (req, res, next) => {
     if (!req.wallet) throw new HttpError(401, 'auth_required');
     await assertBruteOwner(params.id, req.wallet);
     const brute = await FightService.applyLevelUp(params.id, body.choice);
+    await audit({
+      wallet: req.wallet,
+      bruteId: params.id,
+      action: 'levelup_applied',
+      metadata: { choice: body.choice, newLevel: brute.level },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
     res.json(brute);
   } catch (err) {
     next(err);

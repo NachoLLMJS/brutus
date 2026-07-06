@@ -3,6 +3,7 @@ import { z } from 'zod';
 import * as BruteService from '../services/BruteService.js';
 import { assertBruteOwner } from '../middleware/auth.js';
 import { HttpError } from '../middleware/errorHandler.js';
+import { audit } from '../services/AuditService.js';
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 const NAME_REGEX = /^[a-zA-Z0-9 ]+$/;
@@ -86,6 +87,14 @@ export const createBrute: RequestHandler = async (req, res, next) => {
     if (!req.wallet) throw new HttpError(401, 'auth_required');
     if (body.walletAddress.toLowerCase() !== req.wallet) throw new HttpError(403, 'wallet_body_mismatch');
     const brute = await BruteService.createBrute(body);
+    await audit({
+      wallet: req.wallet,
+      bruteId: brute.id,
+      action: 'brute_created',
+      metadata: { name: brute.name, onChainBruteId: body.onChainBruteId ?? null, paidExtra: Boolean(body.createTxHash) },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
     res.status(201).json(brute);
   } catch (err) {
     next(err);
@@ -140,6 +149,14 @@ export const setPets: RequestHandler = async (req, res, next) => {
     if (!req.wallet) throw new HttpError(401, 'auth_required');
     await assertBruteOwner(params.id, req.wallet);
     const brute = await BruteService.setBrutePets(params.id, body.pets, req.wallet);
+    await audit({
+      wallet: req.wallet,
+      bruteId: params.id,
+      action: 'pets_equipped',
+      metadata: { pets: body.pets },
+      ip: req.ip,
+      userAgent: req.get('user-agent'),
+    });
     res.json(brute);
   } catch (err) {
     next(err);
