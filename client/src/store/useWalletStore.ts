@@ -4,6 +4,7 @@ import {
   getEthereumProvider,
   isMetaMaskProvider,
   isSupportedBnbChain,
+  normalizeChainId,
   switchToBnbTestnet,
 } from '@/lib/web3';
 import { ensureWalletAuth } from '@/lib/walletAuth';
@@ -27,7 +28,7 @@ async function readChainId(): Promise<string | null> {
   const provider = getEthereumProvider();
   if (!provider) return null;
   try {
-    return await provider.request<string>({ method: 'eth_chainId' });
+    return normalizeChainId(await provider.request<string>({ method: 'eth_chainId' }));
   } catch {
     return null;
   }
@@ -57,7 +58,7 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
       return;
     }
     if (!isMetaMaskProvider(provider)) {
-      set({ error: 'Vault Brawl solo acepta MetaMask como provider.' });
+      set({ error: 'Vault Brawl only accepts MetaMask as wallet provider.' });
       return;
     }
 
@@ -65,14 +66,23 @@ export const useWalletStore = create<WalletState>()((set, get) => ({
     try {
       manuallyDisconnected = false;
       const accounts = await provider.request<string[]>({ method: 'eth_requestAccounts' });
-      const chainId = await readChainId();
       const address = accounts[0] ?? null;
-      if (address && !hasAuthForWallet(address)) await ensureWalletAuth(address);
+      let chainId = await readChainId();
+      let switchError: string | null = null;
+      if (address && !isSupportedBnbChain(chainId)) {
+        try {
+          await switchToBnbTestnet(provider);
+          chainId = await readChainId();
+        } catch (error) {
+          switchError = error instanceof Error ? error.message : 'Could not switch to BNB Testnet.';
+        }
+      }
+      if (address && isSupportedBnbChain(chainId) && !hasAuthForWallet(address)) await ensureWalletAuth(address);
       set({
         address,
         chainId,
         connected: Boolean(address),
-        error: address ? null : 'No account was received.',
+        error: address ? switchError : 'No account was received.',
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Could not connect MetaMask.';

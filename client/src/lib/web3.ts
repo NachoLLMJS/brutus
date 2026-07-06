@@ -1,5 +1,8 @@
 export interface EthereumProvider {
   isMetaMask?: boolean;
+  providers?: EthereumProvider[];
+  chainId?: string;
+  selectedAddress?: string | null;
   request: <T = unknown>(args: { method: string; params?: unknown[] | object }) => Promise<T>;
   on?: (event: string, handler: (...args: unknown[]) => void) => void;
   removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
@@ -36,23 +39,39 @@ export const BRUTUS_BNB_TESTNET_CONTRACTS = {
   vaultFactory: '0x404910a02D223FB2e1aD6b8B7C06ee075E274a4d',
 } as const;
 
+export function normalizeChainId(chainId: string | number | null | undefined): string | null {
+  if (chainId === null || chainId === undefined) return null;
+  if (typeof chainId === 'number') return `0x${chainId.toString(16)}`;
+  const trimmed = chainId.trim().toLowerCase();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('0x')) return trimmed;
+  const decimal = Number(trimmed);
+  if (Number.isFinite(decimal)) return `0x${decimal.toString(16)}`;
+  return trimmed;
+}
+
 export function getEthereumProvider(): EthereumProvider | null {
   if (typeof window === 'undefined') return null;
-  return window.ethereum ?? null;
+  const injected = window.ethereum ?? null;
+  if (!injected) return null;
+  const providers = Array.isArray(injected.providers) ? injected.providers : [];
+  const metamask = providers.find((provider) => provider.isMetaMask);
+  return metamask ?? injected;
 }
 
 export function isMetaMaskProvider(provider: EthereumProvider | null): provider is EthereumProvider {
   return Boolean(provider?.isMetaMask);
 }
 
-export function isSupportedBnbChain(chainId: string | null): boolean {
-  if (!chainId) return false;
-  return SUPPORTED_BNB_CHAINS.includes(chainId.toLowerCase() as (typeof SUPPORTED_BNB_CHAINS)[number]);
+export function isSupportedBnbChain(chainId: string | number | null | undefined): boolean {
+  const normalized = normalizeChainId(chainId);
+  if (!normalized) return false;
+  return SUPPORTED_BNB_CHAINS.includes(normalized as (typeof SUPPORTED_BNB_CHAINS)[number]);
 }
 
 async function assertBnbTestnet(provider: EthereumProvider): Promise<void> {
-  const chainId = await provider.request<string>({ method: 'eth_chainId' });
-  if (chainId.toLowerCase() !== BNB_TESTNET.chainId) {
+  const chainId = normalizeChainId(await provider.request<string>({ method: 'eth_chainId' }));
+  if (chainId !== BNB_TESTNET.chainId) {
     throw new Error('wrong_chain_switch_to_bnb_testnet');
   }
 }
@@ -77,7 +96,12 @@ export async function switchToBnbTestnet(provider: EthereumProvider): Promise<vo
       method: 'wallet_addEthereumChain',
       params: [BNB_TESTNET],
     });
+    await provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: BNB_TESTNET.chainId }],
+    });
   }
+  await assertBnbTestnet(provider);
 }
 
 const CREATE_EXTRA_BRUTE_SELECTOR = '0x9b517ea1';
