@@ -30,6 +30,11 @@ const PET_PRICES_BNB: Record<string, string> = {
   tard_dino: '0.0036',
   vita_dino: '0.0069',
   bnb_dino: '0.0138',
+  blue_mega_dino: '0.022',
+  lime_mega_dino: '0.032',
+  dark_mega_dino: '0.046',
+  red_mega_dino: '0.066',
+  yellow_mega_dino: '0.096',
 };
 
 const PET_PRICES_TOKEN: Record<string, string> = {
@@ -38,7 +43,14 @@ const PET_PRICES_TOKEN: Record<string, string> = {
   tard_dino: '3600',
   vita_dino: '6900',
   bnb_dino: '13800',
+  blue_mega_dino: '22000',
+  lime_mega_dino: '32000',
+  dark_mega_dino: '46000',
+  red_mega_dino: '66000',
+  yellow_mega_dino: '96000',
 };
+
+const MEGA_DINO_IDS = new Set(['blue_mega_dino', 'lime_mega_dino', 'dark_mega_dino', 'red_mega_dino', 'yellow_mega_dino']);
 
 function parseUnits18(amount: string): bigint {
   const [whole = '0', fraction = ''] = amount.split('.');
@@ -456,7 +468,7 @@ export function Profile() {
             <Glass num="◇" title="Beasts" meta={`${beasts.length}/3`}>
               <div className="beastsv2 temple-beasts-compact">
                 {beasts.map((b) => (
-                  <BeastV2 key={b.id} name={b.meta.name} asset={b.meta.asset} hp={b.meta.hp} dmg={b.meta.dmg} onClick={() => setPetMarketOpen(true)} />
+                  <BeastV2 key={b.id} petId={b.id} name={b.meta.name} hp={b.meta.hp} dmg={b.meta.dmg} onClick={() => setPetMarketOpen(true)} />
                 ))}
                 {Array.from({ length: beastsEmptyCount }).map((_, i) => (
                   <button key={i} type="button" className="beast-empty" onClick={() => setPetMarketOpen(true)}>Empty stable</button>
@@ -643,14 +655,14 @@ function VaultInfoRow({ label, value }: { label: string; value: string }) {
 }
 
 function BeastV2({
+  petId,
   name,
-  asset,
   hp,
   dmg,
   onClick,
 }: {
+  petId: string;
   name: string;
-  asset: string;
   hp: number;
   dmg: number;
   onClick?: () => void;
@@ -658,7 +670,7 @@ function BeastV2({
   return (
     <button type="button" className="beastv2" onClick={onClick}>
       <div className="beastv2-art">
-        <img src={asset} alt="" aria-hidden />
+        <PetIdleSprite petId={petId} name={name} />
       </div>
       <div>
         <div className="beastv2-name">{name}</div>
@@ -669,9 +681,10 @@ function BeastV2({
 }
 
 function PetIdleSprite({ petId, name, large = false }: { petId: string; name: string; large?: boolean }) {
+  const mega = MEGA_DINO_IDS.has(petId);
   return (
     <span
-      className={clsx('pet-idle-sprite', large && 'large')}
+      className={clsx('pet-idle-sprite', mega && 'mega', large && 'large')}
       style={{ backgroundImage: `url(/assets/pets/dinos/${petId}_idle.png)` }}
       role="img"
       aria-label={name}

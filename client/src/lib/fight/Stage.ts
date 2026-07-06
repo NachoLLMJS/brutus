@@ -410,7 +410,7 @@ export class FightStage {
     holder.addChild(display.container);
     this.stage.addChild(holder);
 
-    // HP bar flotante mini.
+    // Pets no longer show floating HP bars; keep the hidden container only so HP update logic stays shared.
     const hpUi = new PIXI.Container();
     hpUi.x = x;
     hpUi.y = GROUND_Y + PET_HP_OFFSET_Y;
@@ -440,6 +440,8 @@ export class FightStage {
     hpUi.addChild(hpBarFg);
 
     this.stage.addChild(hpUi);
+    hpUi.visible = false;
+    hpUi.renderable = false;
 
     const runtime: FighterRuntime = {
       id: p.id,

@@ -50,7 +50,9 @@ export type AnimationName =
   | 'win' | 'train' | 'train2';
 
 type LegacyModelKey = 'male' | 'female' | 'dog' | 'bear' | 'panther';
-type CustomPetModelKey = 'douxDino' | 'mortDino' | 'tardDino' | 'vitaDino' | 'bnbDino';
+type CustomPetModelKey =
+  | 'douxDino' | 'mortDino' | 'tardDino' | 'vitaDino' | 'bnbDino'
+  | 'blueMegaDino' | 'limeMegaDino' | 'darkMegaDino' | 'redMegaDino' | 'yellowMegaDino';
 type ModelKey = LegacyModelKey | CustomPetModelKey;
 
 const ANIMATIONS: Record<LegacyModelKey, Partial<Record<AnimationName, LaBruteSymbol>>> = {
@@ -263,12 +265,29 @@ const DINO_ANIMS: CustomPetDef['animations'] = {
   trapped: { file: 'crouch', frames: 3, loop: true },
 };
 
+const MEGA_DINO_ANIMS: CustomPetDef['animations'] = {
+  idle: { file: 'idle', frames: 6, loop: true },
+  run: { file: 'run', frames: 6, loop: true },
+  arrive: { file: 'run', frames: 6, loop: true },
+  // This source pack has idle/run/jump but no attack. Use the jump arc as a bite/lunge.
+  attack: { file: 'attack', frames: 6, loop: false, hitFrame: 3 },
+  hit: { file: 'hurt', frames: 2, loop: false },
+  evade: { file: 'jump', frames: 6, loop: false },
+  death: { file: 'death', frames: 6, loop: false, hitFrame: 5 },
+  trapped: { file: 'crouch', frames: 3, loop: true },
+};
+
 const CUSTOM_PET_MODELS: Record<CustomPetModelKey, CustomPetDef> = {
   douxDino: { base: '/assets/pets/dinos/doux_dino', visualScale: 1.96, pixelPerfect: true, animations: DINO_ANIMS },
   mortDino: { base: '/assets/pets/dinos/mort_dino', visualScale: 2.08, pixelPerfect: true, animations: DINO_ANIMS },
   tardDino: { base: '/assets/pets/dinos/tard_dino', visualScale: 2.22, pixelPerfect: true, animations: DINO_ANIMS },
   vitaDino: { base: '/assets/pets/dinos/vita_dino', visualScale: 2.36, pixelPerfect: true, animations: DINO_ANIMS },
   bnbDino: { base: '/assets/pets/dinos/bnb_dino', visualScale: 2.5, pixelPerfect: true, animations: DINO_ANIMS },
+  blueMegaDino: { base: '/assets/pets/dinos/blue_mega_dino', visualScale: 2.7, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
+  limeMegaDino: { base: '/assets/pets/dinos/lime_mega_dino', visualScale: 2.85, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
+  darkMegaDino: { base: '/assets/pets/dinos/dark_mega_dino', visualScale: 3.0, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
+  redMegaDino: { base: '/assets/pets/dinos/red_mega_dino', visualScale: 3.15, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
+  yellowMegaDino: { base: '/assets/pets/dinos/yellow_mega_dino', visualScale: 3.3, pixelPerfect: true, animations: MEGA_DINO_ANIMS },
 };
 
 function isCustomPetModel(model: ModelKey): model is CustomPetModelKey {

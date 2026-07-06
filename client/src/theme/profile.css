@@ -533,13 +533,19 @@
   box-shadow: 0 0 14px rgba(230, 180, 80, 0.18);
 }
 .beastv2-art {
-  height: 70px;
+  height: 74px;
   border: 1px solid var(--border-shadow);
   border-radius: 3px;
   overflow: hidden;
   background: radial-gradient(circle at 50% 68%, #4a2631, var(--paper-dark) 72%);
   display: grid;
   place-items: center;
+}
+.beastv2-art .pet-idle-sprite {
+  transform: translateY(2px) scale(2.05);
+}
+.beastv2-art .pet-idle-sprite.mega {
+  transform: translateY(2px) scale(1.8);
 }
 .beastv2-art img {
   width: 88px;
@@ -1143,10 +1149,10 @@
   gap: 8px;
 }
 .beastv2 {
-  grid-template-columns: 70px 1fr;
+  grid-template-columns: 78px 1fr;
 }
 .beastv2-art {
-  height: 54px;
+  height: 68px;
 }
 .beast-empty {
   padding: 10px 12px;
@@ -1736,6 +1742,16 @@
 .pet-idle-sprite.large {
   transform: scale(3.15);
 }
+.pet-idle-sprite.mega {
+  width: 32px;
+  height: 32px;
+  background-size: 192px 32px;
+  animation: pet-mega-dino-idle 820ms steps(6) infinite;
+  transform: scale(2.1);
+}
+.pet-idle-sprite.mega.large {
+  transform: scale(2.7);
+}
 .pet-market-shop .pet-shop-icon img,
 .pet-market-shop .pet-shop-preview img {
   display: none;
@@ -1743,4 +1759,8 @@
 @keyframes pet-dino-idle {
   from { background-position: 0 0; }
   to { background-position: -96px 0; }
+}
+@keyframes pet-mega-dino-idle {
+  from { background-position: 0 0; }
+  to { background-position: -192px 0; }
 }

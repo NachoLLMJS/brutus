@@ -69,6 +69,11 @@ function petModelFor(petId: string): PetModel {
     tard_dino: 'tardDino',
     vita_dino: 'vitaDino',
     bnb_dino: 'bnbDino',
+    blue_mega_dino: 'blueMegaDino',
+    lime_mega_dino: 'limeMegaDino',
+    dark_mega_dino: 'darkMegaDino',
+    red_mega_dino: 'redMegaDino',
+    yellow_mega_dino: 'yellowMegaDino',
   };
   const custom = modelByPetId[petId];
   if (custom) return custom;
