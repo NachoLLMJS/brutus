@@ -178,6 +178,116 @@
   z-index: 0;
 }
 
+.intro-page .intro-parallax {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #69b9df;
+}
+
+.intro-page .intro-parallax-layer {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 220%;
+  height: 100%;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  background-size: auto 100%;
+  image-rendering: pixelated;
+  will-change: transform;
+  animation-name: introCountryScroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.intro-page .layer-sky {
+  z-index: 0;
+  width: 100%;
+  background-image: url('/images/intro/parallax/rural/ruralparallaxsky.png');
+  background-size: cover;
+  animation: none;
+}
+.intro-page .layer-clouds {
+  z-index: 1;
+  background-image: url('/images/intro/parallax/rural/ruralparallaxclouds.png');
+  animation-duration: 110s;
+  opacity: 0.98;
+}
+.intro-page .layer-mountain-back-2 {
+  z-index: 2;
+  background-image: url('/images/intro/parallax/rural/ruralparallaxmountainback2.png');
+  animation-duration: 96s;
+}
+.intro-page .layer-mountain-back {
+  z-index: 3;
+  background-image: url('/images/intro/parallax/rural/ruralparallaxmountainback.png');
+  animation-duration: 82s;
+}
+.intro-page .layer-mountain {
+  z-index: 4;
+  background-image: url('/images/intro/parallax/rural/ruralparallaxmountain.png');
+  animation-duration: 68s;
+}
+.intro-page .layer-village {
+  z-index: 5;
+  background-image: url('/images/intro/parallax/rural/ruralparallaxvillage.png');
+  animation-duration: 42s;
+}
+.intro-page .layer-river-reflex {
+  z-index: 30;
+  background-image: url('/images/intro/parallax/rural/ruralparallaxriverskyredlex.png');
+  animation-duration: 36s;
+}
+.intro-page .layer-river {
+  z-index: 31;
+  background-image: url('/images/intro/parallax/rural/ruralparallaxriver.png');
+  animation-duration: 31s;
+}
+.intro-page .layer-river-front {
+  z-index: 32;
+  background-image: url('/images/intro/parallax/rural/ruralparallaxriverfront.png');
+  animation-duration: 24s;
+}
+
+@keyframes introCountryScroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+.intro-page.intro-page-country .intro-page-brand {
+  position: absolute;
+  z-index: 5;
+  top: calc(43% - 138px);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(180px, 21vw, 280px);
+  height: clamp(180px, 21vw, 280px);
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(5, 3, 8, 0.58), rgba(5, 3, 8, 0.2) 58%, transparent 72%);
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
+  animation: introBrandFade 1.35s ease-out 2s both;
+}
+
+.intro-page-country .intro-page-brand img {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 0 16px rgba(230, 180, 80, 0.36));
+}
+
+.intro-page-country .intro-page-play {
+  top: 50%;
+}
+
+@keyframes introBrandFade {
+  from { opacity: 0; transform: translate(-50%, -44%) scale(0.9); filter: blur(5px); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55)); }
+}
+
 .intro-page .intro-page-vignette {
   position: absolute;
   inset: 0;
@@ -220,6 +330,13 @@
 @keyframes introPlayFade {
   from { opacity: 0; transform: translate(-50%, -44%) scale(0.92); filter: blur(7px); }
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+}
+
+.intro-page.intro-page-country .intro-page-play {
+  top: 43%;
+  animation-duration: 1.25s;
+  animation-delay: 2s;
+  animation-fill-mode: both;
 }
 
 .intro-page .intro-page-footer-logos {
