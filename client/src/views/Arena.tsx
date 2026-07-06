@@ -332,7 +332,7 @@ function OpponentCard({
   disabled,
   onChallenge,
 }: {
-  op: Brute;
+  op: SuggestedOpponent;
   myLevel: number;
   isTraining: boolean;
   isSubmitting: boolean;
@@ -341,6 +341,10 @@ function OpponentCard({
 }) {
   const flavor = flavorFor(op);
   const advantage = op.level > myLevel ? 'tough' : op.level < myLevel ? 'easy' : 'even';
+  const cooldownMs = useCooldownMs(op.cooldownUntil);
+  const cooldownActive = !isTraining && cooldownMs > 0;
+  const canChallenge = !disabled && !isSubmitting && !cooldownActive;
+  const cooldownText = formatCountdown(cooldownMs);
 
   return (
     <article className="op-card" data-adv={advantage}>
@@ -394,6 +398,16 @@ function OpponentCard({
           <span>{flavor.rumor}</span>
         </p>
 
+        {cooldownActive && (
+          <div className="op-cooldown" title={`Rematch unlocks at ${new Date(op.cooldownUntil!).toLocaleString()}`}>
+            <span className="op-cooldown-icon" aria-hidden>⏳</span>
+            <span className="op-cooldown-copy">
+              <span className="op-cooldown-label">Rematch cooldown</span>
+              <span className="op-cooldown-time">{cooldownText}</span>
+            </span>
+          </div>
+        )}
+
         <div className="op-foot">
           <span className="op-meta">
             <span className="last">Last fight</span>
@@ -401,12 +415,17 @@ function OpponentCard({
           </span>
           <button
             type="button"
-            className={clsx('op-challenge', isTraining && 'training')}
+            className={clsx('op-challenge', isTraining && 'training', cooldownActive && 'cooldown')}
             onClick={onChallenge}
-            disabled={disabled || isSubmitting}
+            disabled={!canChallenge}
           >
             {isSubmitting ? (
               <span>Sending…</span>
+            ) : cooldownActive ? (
+              <>
+                <span aria-hidden>⏳</span>
+                <span>{cooldownText}</span>
+              </>
             ) : isTraining ? (
               <>
                 <span aria-hidden>⛨</span>
@@ -423,6 +442,32 @@ function OpponentCard({
       </div>
     </article>
   );
+}
+
+function useCooldownMs(cooldownUntil?: string): number {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!cooldownUntil) return;
+    const tick = () => setNow(Date.now());
+    tick();
+    const interval = window.setInterval(tick, 1000);
+    return () => window.clearInterval(interval);
+  }, [cooldownUntil]);
+
+  if (!cooldownUntil) return 0;
+  const unlockAt = Date.parse(cooldownUntil);
+  if (!Number.isFinite(unlockAt)) return 0;
+  return Math.max(0, unlockAt - now);
+}
+
+function formatCountdown(ms: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
 function StatusDot({ status, label }: { status: FlavorStatus; label: string }) {

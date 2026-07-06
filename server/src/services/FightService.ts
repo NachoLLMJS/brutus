@@ -81,7 +81,10 @@ const OPPONENT_SUGGESTION_LIMIT = 8;
 const MATCH_TICKET_TTL_MS = 5 * 60 * 1000;
 const NORMAL_REMATCH_COOLDOWN_MS = 6 * 60 * 60 * 1000;
 
-export type SuggestedOpponent = BruteSnapshot & { matchTicket: string };
+export type SuggestedOpponent = BruteSnapshot & {
+  matchTicket: string;
+  cooldownUntil?: string;
+};
 
 function secureFightSeed(playerSeed: number, opponentSeed: number, fightType: FightType): number {
   const digest = createHash('sha256')
@@ -162,6 +165,21 @@ export async function suggestOpponents(playerId: string, wallet: string, fightTy
     return row.ownerWallet.toLowerCase() !== player.ownerWallet.toLowerCase();
   });
   const selected = candidates.slice(0, OPPONENT_SUGGESTION_LIMIT);
+  const selectedCooldowns = fightType === 'normal'
+    ? await Promise.all(selected.map(async (row) => {
+      const recent = await prisma.combat.findFirst({
+        where: {
+          fightType: 'normal',
+          createdAt: { gte: new Date(Date.now() - NORMAL_REMATCH_COOLDOWN_MS) },
+          ...pairWhere(player.id, row.id),
+        },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      });
+      if (!recent) return undefined;
+      return new Date(recent.createdAt.getTime() + NORMAL_REMATCH_COOLDOWN_MS).toISOString();
+    }))
+    : selected.map(() => undefined);
   await prisma.matchTicket.deleteMany({ where: { expiresAt: { lt: new Date() } } });
   const expiresAt = new Date(Date.now() + MATCH_TICKET_TTL_MS);
   const tickets = await Promise.all(selected.map((row) => prisma.matchTicket.create({
@@ -173,7 +191,11 @@ export async function suggestOpponents(playerId: string, wallet: string, fightTy
       expiresAt,
     },
   })));
-  return selected.map((row, index) => ({ ...deserializeBrute(row), matchTicket: tickets[index]!.id }));
+  return selected.map((row, index) => ({
+    ...deserializeBrute(row),
+    matchTicket: tickets[index]!.id,
+    ...(selectedCooldowns[index] ? { cooldownUntil: selectedCooldowns[index] } : {}),
+  }));
 }
 
 export interface FightInput {

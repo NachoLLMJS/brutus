@@ -116,6 +116,7 @@ export interface FightResponse {
 
 export interface SuggestedOpponent extends Brute {
   matchTicket: string;
+  cooldownUntil?: string;
 }
 
 // Shape devuelto por POST /fights sin opponentId.

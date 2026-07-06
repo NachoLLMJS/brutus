@@ -779,6 +779,49 @@
   flex-shrink: 0;
 }
 
+.op-cooldown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -2px 0 14px;
+  padding: 9px 11px;
+  border: 1px solid rgba(230, 180, 80, 0.55);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, rgba(230, 180, 80, 0.12), rgba(168, 85, 247, 0.08)),
+    rgba(13, 10, 20, 0.62);
+  box-shadow: 0 0 16px rgba(230, 180, 80, 0.12) inset;
+}
+.op-cooldown-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-main);
+  border-radius: 50%;
+  background: rgba(5, 3, 8, 0.55);
+  filter: drop-shadow(0 0 6px rgba(230, 180, 80, 0.25));
+}
+.op-cooldown-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.op-cooldown-label {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.op-cooldown-time {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  color: var(--accent-gold);
+  text-shadow: 0 0 12px rgba(230, 180, 80, 0.35);
+}
+
 .op-foot {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -834,6 +877,16 @@
 .op-challenge:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.op-challenge.cooldown:disabled {
+  opacity: 0.88;
+  color: var(--accent-gold);
+  background: linear-gradient(180deg, rgba(42, 31, 36, 0.92), rgba(26, 16, 20, 0.96));
+  border-color: rgba(230, 180, 80, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(230, 180, 80, 0.18) inset,
+    0 3px 0 var(--border-outer),
+    0 0 16px rgba(230, 180, 80, 0.14);
 }
 .op-challenge.training {
   background: var(--btn-arena-bg);
