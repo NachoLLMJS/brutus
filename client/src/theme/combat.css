@@ -684,13 +684,18 @@
 .vs-name {
   position: relative;
   font-family: var(--font-display);
-  font-size: clamp(48px, 9vw, 130px);
-  letter-spacing: 0.05em;
+  font-size: clamp(42px, 7vw, 116px);
+  letter-spacing: 0.045em;
   color: var(--text-strong);
   text-transform: uppercase;
   text-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 20px currentColor, 0 6px 0 rgba(0, 0, 0, 0.8);
   text-align: center;
-  padding: 0 60px;
+  padding: 0 clamp(18px, 3vw, 54px);
+  min-width: 0;
+  max-width: min(38vw, 720px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .vs-name-l {
   color: var(--accent-gold);
@@ -771,13 +776,16 @@
   background: var(--paper);
   border: 3px solid var(--accent-gold);
   border-radius: 6px;
-  padding: 40px 60px;
+  padding: clamp(28px, 4vh, 40px) clamp(28px, 5vw, 60px);
   text-align: center;
   box-shadow:
     0 0 0 1px var(--border-outer) inset,
     0 0 60px rgba(230, 180, 80, 0.4),
     0 30px 80px rgba(0, 0, 0, 0.8);
-  max-width: 460px;
+  width: min(92vw, 520px);
+  max-width: 520px;
+  max-height: 92vh;
+  overflow: hidden;
 }
 .end-card .verdict {
   font-family: var(--font-display);
@@ -789,18 +797,30 @@
 }
 .end-card h1 {
   font-family: var(--font-display);
-  font-size: clamp(40px, 6vw, 64px);
-  letter-spacing: 0.06em;
+  font-size: clamp(34px, 5vw, 58px);
+  letter-spacing: 0.045em;
+  line-height: 0.98;
   color: var(--text-strong);
   text-shadow: 0 0 40px var(--primary), 0 4px 0 rgba(0, 0, 0, 0.8);
-  margin: 0 0 16px;
+  margin: 0 auto 16px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .end-card .summary {
   font-family: var(--font-sans);
   color: var(--text-secondary);
   margin-bottom: 22px;
 }
-.end-card .summary b { color: var(--text-strong); }
+.end-card .summary b {
+  color: var(--text-strong);
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
 .end-rewards {
   display: flex;
   gap: 22px;
@@ -837,7 +857,7 @@
 
 /* ============== COMPACT SHIP-BATTLE PASS ============== */
 .combat-stage {
-  grid-template-rows: 178px minmax(0, 1fr) 86px;
+  grid-template-rows: 150px minmax(0, 1fr) 52px;
   background:
     radial-gradient(ellipse at 50% 22%, rgba(42, 25, 13, 0.55), transparent 46%),
     radial-gradient(ellipse at 50% 70%, #120d18 0%, #050507 76%),
@@ -850,14 +870,14 @@
     radial-gradient(ellipse 45% 90% at 100% 30%, rgba(95, 176, 74, 0.09), transparent 58%);
 }
 .combat-top {
-  gap: 20px;
-  padding: 16px 22px 12px;
+  gap: 16px;
+  padding: 10px 18px 8px;
   background: linear-gradient(180deg, rgba(5, 6, 10, 0.98), rgba(10, 7, 14, 0.72));
   border-bottom: 2px solid rgba(143, 84, 25, 0.55);
 }
 .fighter-card {
-  min-height: 136px;
-  padding: 12px 18px 10px;
+  min-height: 112px;
+  padding: 9px 14px 8px;
   background:
     linear-gradient(180deg, rgba(8, 9, 13, 0.92), rgba(17, 10, 15, 0.92)),
     radial-gradient(circle at 10% 20%, rgba(230,180,80,0.13), transparent 38%);
@@ -869,18 +889,24 @@
 }
 .fighter-card.left { border-left: 4px solid rgba(50, 156, 255, 0.95); }
 .fighter-card.right { border-right: 4px solid rgba(255, 67, 60, 0.92); }
-.fighter-card .fc-row { gap: 14px; }
+.fighter-card .fc-row { gap: 12px; }
 .fc-bust {
-  width: 92px;
-  height: 92px;
+  width: 76px;
+  height: 76px;
   border-width: 3px;
   background: radial-gradient(circle, rgba(37, 22, 37, 0.95), rgba(3, 4, 7, 1));
 }
 .fc-name {
-  font-size: clamp(20px, 2vw, 30px);
+  font-size: clamp(15px, 1.55vw, 26px);
   line-height: 1;
+  min-width: 0;
+  max-width: min(28vw, 420px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.fc-top { margin-bottom: 8px; }
+.fighter-card.right .fc-name { max-width: min(28vw, 420px); }
+.fc-top { margin-bottom: 6px; min-width: 0; }
 .fc-rank {
   color: #9fed63;
   border-color: rgba(159, 237, 99, 0.75);
@@ -889,7 +915,7 @@
 .fighter-card.right .fc-rank { color: #f4c064; border-color: rgba(244, 192, 100, 0.78); }
 .hpbar { position: relative; }
 .hpbar-track {
-  height: 26px;
+  height: 22px;
   border-color: rgba(143, 84, 25, 0.9);
   background: rgba(5, 6, 10, 0.92);
 }
@@ -903,49 +929,49 @@
   place-items: center;
   color: #fff7dc;
   text-shadow: 0 2px 2px #000, 0 0 8px rgba(0,0,0,0.9);
-  font-size: 15px;
+  font-size: 13px;
   z-index: 2;
 }
 .hpbar-cur, .hpbar-sep, .hpbar-max { color: #fff7dc; }
-.fc-skills { margin-top: 9px; gap: 7px; }
-.fc-weapon, .fc-skill { width: 24px; height: 24px; padding: 3px; }
-.combat-top-center { min-width: 310px; padding: 0; }
+.fc-skills { margin-top: 6px; gap: 6px; }
+.fc-weapon, .fc-skill { width: 21px; height: 21px; padding: 2px; }
+.combat-top-center { min-width: 300px; padding: 0; }
 .streak-badge {
   width: 100%;
-  min-height: 122px;
+  min-height: 104px;
   justify-content: center;
-  gap: 5px;
-  padding: 13px 22px;
+  gap: 3px;
+  padding: 10px 20px;
   background:
     linear-gradient(180deg, rgba(9, 10, 13, 0.94), rgba(4, 5, 8, 0.92)),
     radial-gradient(ellipse at 50% 0%, rgba(230, 180, 80, 0.20), transparent 62%);
   border: 2px solid rgba(143, 84, 25, 0.82);
-  border-radius: 18px 18px 48px 48px / 12px 12px 28px 28px;
+  border-radius: 16px 16px 42px 42px / 10px 10px 24px 24px;
   box-shadow: 0 0 0 1px rgba(230,180,80,0.20) inset, 0 8px 26px rgba(0,0,0,0.68);
 }
 .streak-badge .battle-state {
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 10px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--accent-gold);
 }
 .streak-badge .battle-title {
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 26px;
   line-height: 1;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-strong);
   text-shadow: 0 2px 0 #000, 0 0 14px rgba(230,180,80,0.38);
 }
-.streak-badge .label { margin-top: 4px; color: var(--accent-gold); }
-.streak-badge .num { font-size: 22px; }
+.streak-badge .label { margin-top: 2px; color: var(--accent-gold); }
+.streak-badge .num { font-size: 19px; }
 .streak-badge .sub { display: none; }
 .combat-arena {
   grid-template-columns: minmax(0, 1fr) 312px;
   gap: 14px;
-  padding: 12px 18px 10px;
+  padding: 10px 18px 8px;
 }
 .canvas-frame {
   border: 2px solid rgba(143, 84, 25, 0.95);
@@ -957,14 +983,14 @@
     0 12px 36px rgba(0, 0, 0, 0.72);
 }
 .turn-strip {
-  margin-top: 8px;
-  padding: 8px 12px;
+  margin-top: 6px;
+  padding: 6px 10px;
   border-color: rgba(143, 84, 25, 0.72);
   background: linear-gradient(180deg, rgba(10, 10, 13, 0.92), rgba(19, 11, 15, 0.88));
 }
 .tp {
-  height: 10px;
-  flex: 0 1 18px;
+  height: 9px;
+  flex: 0 1 17px;
   transform: rotate(45deg);
   border-color: rgba(143, 84, 25, 0.72);
 }
@@ -976,24 +1002,27 @@
   box-shadow: 0 0 0 1px rgba(230,180,80,0.18) inset, 0 8px 26px rgba(0,0,0,0.55);
 }
 .log-head {
-  padding: 12px 14px;
+  padding: 10px 13px;
   background: linear-gradient(180deg, rgba(12, 12, 16, 0.98), rgba(19, 10, 14, 0.92));
   border-bottom-color: rgba(143, 84, 25, 0.68);
 }
 .log-row { padding: 7px 13px; font-size: 12px; }
 .combat-bottom {
   grid-template-columns: auto 1fr auto;
-  gap: 16px;
-  padding: 10px 18px 16px;
+  gap: 10px;
+  padding: 5px 18px 6px;
+  min-height: 48px;
   background: linear-gradient(0deg, rgba(5, 6, 10, 0.98), rgba(9, 8, 12, 0.62));
   border-top: 2px solid rgba(143, 84, 25, 0.52);
 }
 .cb-btn {
-  min-height: 48px;
-  padding: 10px 24px;
+  min-height: 34px;
+  padding: 6px 15px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
   border-color: rgba(143, 84, 25, 0.88);
   background: linear-gradient(180deg, rgba(26,19,27,0.96), rgba(8,9,13,0.98));
-  box-shadow: 0 0 0 1px rgba(230,180,80,0.18) inset, 0 3px 0 rgba(45,24,12,0.92);
+  box-shadow: 0 0 0 1px rgba(230,180,80,0.18) inset, 0 2px 0 rgba(45,24,12,0.92);
 }
 .cb-btn.gold, .cb-btn:hover:not(:disabled) {
   background: linear-gradient(180deg, #ffe08b, #d39224 48%, #70410e);
@@ -1001,12 +1030,16 @@
   border-color: #ffd47a;
 }
 .cb-rewards {
-  min-width: 160px;
-  padding: 10px 14px;
+  min-width: 118px;
+  padding: 3px 9px 4px;
+  align-self: center;
+  justify-content: center;
   border: 1px solid rgba(143, 84, 25, 0.78);
   border-radius: 5px;
   background: rgba(8, 8, 12, 0.84);
 }
+.cb-rewards .label { font-size: 8px; letter-spacing: 0.22em; line-height: 1.05; }
+.cb-rewards .val { font-size: 14px; line-height: 1.05; }
 @media (max-width: 1200px) {
   .combat-stage { grid-template-rows: auto minmax(0, 1fr) auto; }
   .combat-top { grid-template-columns: 1fr; }
