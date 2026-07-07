@@ -1752,6 +1752,25 @@
 .pet-idle-sprite.mega.large {
   transform: scale(2.7);
 }
+.pet-idle-sprite.butterfly {
+  width: 16px;
+  height: 16px;
+  background-size: 80px 16px;
+  animation: pet-butterfly-idle 700ms steps(5) infinite;
+  transform: scaleX(-1) scale(3.2);
+}
+.pet-idle-sprite.butterfly.large {
+  transform: scaleX(-1) scale(5.2);
+}
+.beastv2-art .pet-idle-sprite.butterfly {
+  transform: translateY(2px) scaleX(-1) scale(3.6);
+}
+.pet-market-shop .pet-shop-icon .pet-idle-sprite.butterfly {
+  transform: scaleX(-1) scale(3.2);
+}
+.pet-market-shop .pet-shop-preview .pet-idle-sprite.butterfly.large {
+  transform: scaleX(-1) scale(5.2);
+}
 .pet-market-shop .pet-shop-icon img,
 .pet-market-shop .pet-shop-preview img {
   display: none;
@@ -1763,4 +1782,8 @@
 @keyframes pet-mega-dino-idle {
   from { background-position: 0 0; }
   to { background-position: -192px 0; }
+}
+@keyframes pet-butterfly-idle {
+  from { background-position: 0 0; }
+  to { background-position: -80px 0; }
 }

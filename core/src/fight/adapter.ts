@@ -74,6 +74,13 @@ function petModelFor(petId: string): PetModel {
     dark_mega_dino: 'darkMegaDino',
     red_mega_dino: 'redMegaDino',
     yellow_mega_dino: 'yellowMegaDino',
+    blue_butterfly: 'blueButterfly',
+    grey_butterfly: 'greyButterfly',
+    pink_butterfly: 'pinkButterfly',
+    purple_butterfly: 'purpleButterfly',
+    red_butterfly: 'redButterfly',
+    white_butterfly: 'whiteButterfly',
+    yellow_butterfly: 'yellowButterfly',
   };
   const custom = modelByPetId[petId];
   if (custom) return custom;

@@ -201,7 +201,8 @@ export interface FightFighter {
 export type PetModel =
   | 'dog' | 'bear' | 'panther'
   | 'douxDino' | 'mortDino' | 'tardDino' | 'vitaDino' | 'bnbDino'
-  | 'blueMegaDino' | 'limeMegaDino' | 'darkMegaDino' | 'redMegaDino' | 'yellowMegaDino';
+  | 'blueMegaDino' | 'limeMegaDino' | 'darkMegaDino' | 'redMegaDino' | 'yellowMegaDino'
+  | 'blueButterfly' | 'greyButterfly' | 'pinkButterfly' | 'purpleButterfly' | 'redButterfly' | 'whiteButterfly' | 'yellowButterfly';
 
 /**
  * Pet visible en la arena. Cada entrada es UN sprite (e.g. una pantera de las 3).

@@ -110,6 +110,10 @@ const FIGHTER_SCALE = 1.8;
 const PET_SCALE = 1.38;
 const PET_OFFSET_X = 88;          // separación lateral del pet respecto to dueño
 const PET_GAP = 52;               // separación entre pets del mismo dueño
+const BUTTERFLY_OFFSET_X = 74;    // butterflies: flying behind the brawler shoulder
+const BUTTERFLY_GAP_X = 26;
+const BUTTERFLY_FLOAT_Y = GROUND_Y - 116;
+const BUTTERFLY_GAP_Y = 18;
 /** Backgrounds disponibles en /images/game/resources/misc/background/ (1.jpg..13.jpg). */
 const BACKGROUND_COUNT = 13;
 
@@ -124,6 +128,10 @@ function hashFightBackgroundSeed(log: FightLog): number {
     hash = Math.imul(hash, 0x01000193) >>> 0;
   }
   return hash || 1;
+}
+
+function isButterflyModel(model: import('core').PetModel): boolean {
+  return model.endsWith('Butterfly');
 }
 
 /** Cualquier id numérico (1, 2 = brutos; 11..23 = pets). */
@@ -142,6 +150,7 @@ interface FighterRuntime {
   /** Container que se mueve por la arena (posición + transformaciones). */
   holder: PIXI.Container;
   homeX: number;
+  homeY: number;
   facing: 'left' | 'right';
   alive: boolean;
   hp: number;
@@ -283,8 +292,12 @@ export class FightStage {
       const facing: 'left' | 'right' = isLeft ? 'right' : 'left';
       // Los pets se ubican detrás del bruto dueño con offset lateral.
       const directionAway = isLeft ? -1 : 1;
-      const x = ownerX + directionAway * (PET_OFFSET_X + slot * PET_GAP);
-      this.spawnPet(pet, x, facing);
+      const isButterfly = isButterflyModel(pet.model);
+      const x = isButterfly
+        ? ownerX + directionAway * (BUTTERFLY_OFFSET_X + slot * BUTTERFLY_GAP_X)
+        : ownerX + directionAway * (PET_OFFSET_X + slot * PET_GAP);
+      const y = isButterfly ? BUTTERFLY_FLOAT_Y - slot * BUTTERFLY_GAP_Y : GROUND_Y;
+      this.spawnPet(pet, x, y, facing);
     }
   }
 
@@ -381,6 +394,7 @@ export class FightStage {
       hpBarH: HP_BAR_H,
       hpOffsetY: HP_BAR_OFFSET_Y,
       homeX: x,
+      homeY: GROUND_Y,
       facing,
       alive: true,
     };
@@ -397,7 +411,7 @@ export class FightStage {
   }
 
   /** Spawn de un pet (lobo/oso/pantera). Versión reducida del spawnFighter. */
-  private spawnPet(p: import('core').FightPet, x: number, facing: 'left' | 'right') {
+  private spawnPet(p: import('core').FightPet, x: number, y: number, facing: 'left' | 'right') {
     const display = new FighterHolder(this.app, {
       model: p.model,
       scale: PET_SCALE,
@@ -406,14 +420,14 @@ export class FightStage {
 
     const holder = new PIXI.Container();
     holder.x = x;
-    holder.y = GROUND_Y;
+    holder.y = y;
     holder.addChild(display.container);
     this.stage.addChild(holder);
 
     // Pets no longer show floating HP bars; keep the hidden container only so HP update logic stays shared.
     const hpUi = new PIXI.Container();
     hpUi.x = x;
-    hpUi.y = GROUND_Y + PET_HP_OFFSET_Y;
+    hpUi.y = y + PET_HP_OFFSET_Y;
     hpUi.zIndex = 49;
 
     // Pets keep the small HP bar, but no floating name label above them.
@@ -459,6 +473,7 @@ export class FightStage {
       hpBarH: PET_HP_BAR_H,
       hpOffsetY: PET_HP_OFFSET_Y,
       homeX: x,
+      homeY: y,
       facing,
       alive: true,
     };
@@ -763,7 +778,7 @@ export class FightStage {
     dustCloud(this.stage, f.holder.x, f.holder.y - 8, { count: 3, spread: 18 });
     await Tweener.add(
       { target: f.holder, duration: 0.25 / this.speed, ease: Easing.easeOutQuad },
-      { x: f.homeX },
+      { x: f.homeX, y: f.homeY },
     );
     if (f.alive) f.display.setAnimation('idle');
   }

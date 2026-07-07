@@ -52,7 +52,8 @@ export type AnimationName =
 type LegacyModelKey = 'male' | 'female' | 'dog' | 'bear' | 'panther';
 type CustomPetModelKey =
   | 'douxDino' | 'mortDino' | 'tardDino' | 'vitaDino' | 'bnbDino'
-  | 'blueMegaDino' | 'limeMegaDino' | 'darkMegaDino' | 'redMegaDino' | 'yellowMegaDino';
+  | 'blueMegaDino' | 'limeMegaDino' | 'darkMegaDino' | 'redMegaDino' | 'yellowMegaDino'
+  | 'blueButterfly' | 'greyButterfly' | 'pinkButterfly' | 'purpleButterfly' | 'redButterfly' | 'whiteButterfly' | 'yellowButterfly';
 type ModelKey = LegacyModelKey | CustomPetModelKey;
 
 const ANIMATIONS: Record<LegacyModelKey, Partial<Record<AnimationName, LaBruteSymbol>>> = {
@@ -253,6 +254,8 @@ interface CustomPetDef {
   /** Default true for pixel pets; false allows finer visual-size tuning. */
   snapScale?: boolean;
   tint?: number;
+  /** Flip source art horizontally before applying team facing. */
+  flipX?: boolean;
   animations: Partial<Record<AnimationName, CustomPetAnimationDef>>;
 }
 
@@ -279,17 +282,35 @@ const MEGA_DINO_ANIMS: CustomPetDef['animations'] = {
   trapped: { file: 'crouch', frames: 3, loop: true },
 };
 
+const BUTTERFLY_ANIMS: CustomPetDef['animations'] = {
+  idle: { file: 'butterfly', frames: 5, loop: true },
+  run: { file: 'butterfly', frames: 5, loop: true },
+  arrive: { file: 'butterfly', frames: 5, loop: true },
+  attack: { file: 'butterfly', frames: 5, loop: false, hitFrame: 2 },
+  hit: { file: 'butterfly', frames: 5, loop: false },
+  evade: { file: 'butterfly', frames: 5, loop: false },
+  death: { file: 'butterfly', frames: 5, loop: false, hitFrame: 4 },
+  trapped: { file: 'butterfly', frames: 5, loop: true },
+};
+
 const CUSTOM_PET_MODELS: Record<CustomPetModelKey, CustomPetDef> = {
   douxDino: { base: '/assets/pets/dinos/doux_dino', visualScale: 1.96, pixelPerfect: true, animations: DINO_ANIMS },
   mortDino: { base: '/assets/pets/dinos/mort_dino', visualScale: 2.08, pixelPerfect: true, animations: DINO_ANIMS },
   tardDino: { base: '/assets/pets/dinos/tard_dino', visualScale: 2.22, pixelPerfect: true, animations: DINO_ANIMS },
   vitaDino: { base: '/assets/pets/dinos/vita_dino', visualScale: 2.36, pixelPerfect: true, animations: DINO_ANIMS },
   bnbDino: { base: '/assets/pets/dinos/bnb_dino', visualScale: 2.5, pixelPerfect: true, animations: DINO_ANIMS },
-  blueMegaDino: { base: '/assets/pets/dinos/blue_mega_dino', visualScale: 2.35, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
-  limeMegaDino: { base: '/assets/pets/dinos/lime_mega_dino', visualScale: 2.45, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
-  darkMegaDino: { base: '/assets/pets/dinos/dark_mega_dino', visualScale: 2.55, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
-  redMegaDino: { base: '/assets/pets/dinos/red_mega_dino', visualScale: 2.65, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
-  yellowMegaDino: { base: '/assets/pets/dinos/yellow_mega_dino', visualScale: 2.75, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  blueMegaDino: { base: '/assets/pets/dinos/blue_mega_dino', visualScale: 1.85, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  limeMegaDino: { base: '/assets/pets/dinos/lime_mega_dino', visualScale: 1.92, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  darkMegaDino: { base: '/assets/pets/dinos/dark_mega_dino', visualScale: 2.0, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  redMegaDino: { base: '/assets/pets/dinos/red_mega_dino', visualScale: 2.08, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  yellowMegaDino: { base: '/assets/pets/dinos/yellow_mega_dino', visualScale: 2.15, pixelPerfect: true, snapScale: false, animations: MEGA_DINO_ANIMS },
+  blueButterfly: { base: '/assets/pets/butterflies/blue', visualScale: 2.8, pixelPerfect: true, snapScale: false, flipX: true, animations: BUTTERFLY_ANIMS },
+  greyButterfly: { base: '/assets/pets/butterflies/grey', visualScale: 2.8, pixelPerfect: true, snapScale: false, flipX: true, animations: BUTTERFLY_ANIMS },
+  pinkButterfly: { base: '/assets/pets/butterflies/pink', visualScale: 2.8, pixelPerfect: true, snapScale: false, flipX: true, animations: BUTTERFLY_ANIMS },
+  purpleButterfly: { base: '/assets/pets/butterflies/purple', visualScale: 2.8, pixelPerfect: true, snapScale: false, flipX: true, animations: BUTTERFLY_ANIMS },
+  redButterfly: { base: '/assets/pets/butterflies/red', visualScale: 2.8, pixelPerfect: true, snapScale: false, flipX: true, animations: BUTTERFLY_ANIMS },
+  whiteButterfly: { base: '/assets/pets/butterflies/white', visualScale: 2.8, pixelPerfect: true, snapScale: false, flipX: true, animations: BUTTERFLY_ANIMS },
+  yellowButterfly: { base: '/assets/pets/butterflies/yellow', visualScale: 2.8, pixelPerfect: true, snapScale: false, flipX: true, animations: BUTTERFLY_ANIMS },
 };
 
 function isCustomPetModel(model: ModelKey): model is CustomPetModelKey {
@@ -665,7 +686,7 @@ export default class FighterHolder {
     this.#customSprite.tint = petDef.tint ?? 0xffffff;
     const rawScale = this.#scale * petDef.visualScale * 1.1;
     const scale = petDef.pixelPerfect && petDef.snapScale !== false ? Math.max(1, Math.round(rawScale)) : rawScale;
-    this.#customSprite.scale.set(scale, scale);
+    this.#customSprite.scale.set(petDef.flipX ? -scale : scale, scale);
   }
 
   // ──────────────────────────── Public API ────────────────────────────

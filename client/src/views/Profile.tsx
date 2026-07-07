@@ -35,6 +35,13 @@ const PET_PRICES_BNB: Record<string, string> = {
   dark_mega_dino: '0.046',
   red_mega_dino: '0.066',
   yellow_mega_dino: '0.096',
+  blue_butterfly: '0.11',
+  grey_butterfly: '0.125',
+  pink_butterfly: '0.145',
+  white_butterfly: '0.165',
+  red_butterfly: '0.19',
+  yellow_butterfly: '0.22',
+  purple_butterfly: '0.26',
 };
 
 const PET_PRICES_TOKEN: Record<string, string> = {
@@ -48,9 +55,17 @@ const PET_PRICES_TOKEN: Record<string, string> = {
   dark_mega_dino: '46000',
   red_mega_dino: '66000',
   yellow_mega_dino: '96000',
+  blue_butterfly: '110000',
+  grey_butterfly: '125000',
+  pink_butterfly: '145000',
+  white_butterfly: '165000',
+  red_butterfly: '190000',
+  yellow_butterfly: '220000',
+  purple_butterfly: '260000',
 };
 
 const MEGA_DINO_IDS = new Set(['blue_mega_dino', 'lime_mega_dino', 'dark_mega_dino', 'red_mega_dino', 'yellow_mega_dino']);
+const BUTTERFLY_PET_IDS = new Set(['blue_butterfly', 'grey_butterfly', 'pink_butterfly', 'white_butterfly', 'red_butterfly', 'yellow_butterfly', 'purple_butterfly']);
 
 function parseUnits18(amount: string): bigint {
   const [whole = '0', fraction = ''] = amount.split('.');
@@ -682,10 +697,12 @@ function BeastV2({
 
 function PetIdleSprite({ petId, name, large = false }: { petId: string; name: string; large?: boolean }) {
   const mega = MEGA_DINO_IDS.has(petId);
+  const butterfly = BUTTERFLY_PET_IDS.has(petId);
+  const image = butterfly ? `/assets/pets/butterflies/${petId}.png` : `/assets/pets/dinos/${petId}_idle.png`;
   return (
     <span
-      className={clsx('pet-idle-sprite', mega && 'mega', large && 'large')}
-      style={{ backgroundImage: `url(/assets/pets/dinos/${petId}_idle.png)` }}
+      className={clsx('pet-idle-sprite', mega && 'mega', butterfly && 'butterfly', large && 'large')}
+      style={{ backgroundImage: `url(${image})` }}
       role="img"
       aria-label={name}
     />
@@ -720,13 +737,14 @@ function PetMarketplaceModal({
   const selectedPet = PETS.find((pet) => pet.id === selectedPetId) ?? PETS[0];
   const selectedOwned = selectedPet ? ownedPetIds.has(selectedPet.id) : false;
   const selectedWalletOwned = selectedPet ? walletOwnedPetIds.has(selectedPet.id) : false;
+  const selectedButterfly = selectedPet ? BUTTERFLY_PET_IDS.has(selectedPet.id) : false;
   const selectedDisabled = !selectedPet || saving || ownershipLoading || (selectedWalletOwned && !selectedOwned && ownedPetIds.size >= 3);
 
   return (
     <div className="pet-market-backdrop" role="presentation" onMouseDown={onClose}>
-      <section className="pet-market-modal pet-market-shop" role="dialog" aria-modal="true" aria-label="Dino pet marketplace" onMouseDown={(e) => e.stopPropagation()}>
+      <section className="pet-market-modal pet-market-shop" role="dialog" aria-modal="true" aria-label="Pet marketplace" onMouseDown={(e) => e.stopPropagation()}>
         <div className="pet-shop-topbar">
-          <div className="pet-shop-search">Search dino pets...</div>
+          <div className="pet-shop-search">Search beasts...</div>
           <div className="pet-shop-pill">Filter ▾</div>
           <div className="pet-shop-pill wide">Sort: Price · Low to High</div>
           <div className="pet-shop-balance">0.0009 BNB</div>
@@ -771,7 +789,7 @@ function PetMarketplaceModal({
 
               <div className="pet-shop-tags">
                 <span>{selectedPet.weight <= 2 ? 'legendary' : selectedPet.weight <= 5 ? 'rare' : 'common'}</span>
-                <span>dino pet</span>
+                <span>{selectedButterfly ? 'butterfly pet' : 'dino pet'}</span>
                 <button type="button" className={clsx('pet-pay-toggle', !payWithToken && 'active')} onClick={() => onPayWithTokenChange(false)}>BNB</button>
                 <button type="button" className={clsx('pet-pay-toggle', payWithToken && 'active')} onClick={() => onPayWithTokenChange(true)}>{tokenSymbol}</button>
               </div>
