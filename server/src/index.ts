@@ -20,7 +20,7 @@ const bnbTestnetRpcOrigin = new URL(env.BNB_TESTNET_RPC_URL).origin;
 
 app.disable('x-powered-by');
 // Touch server bundle when client-only deploys need Railway to rebuild the served UI.
-// Wallet provider/chain UX cleanup ships with the served client bundle.
+// Butterfly pet bundle ships with the served client assets.
 if (env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
