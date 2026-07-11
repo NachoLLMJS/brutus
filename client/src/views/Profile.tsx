@@ -358,164 +358,183 @@ export function Profile() {
     navigate(`/brute/${brute.id}/arena`);
   };
 
-  // Split del nombre para acentuar la última letra (estilo "VORG[A]TH").
-  const nameParts = brute.name.length > 1
-    ? [brute.name.slice(0, -1), brute.name.slice(-1)]
-    : [brute.name, ''];
-  const warriorNameLength = Array.from(brute.name).length;
-  const warriorNameFontSize = Math.max(22, Math.min(54, Math.floor(500 / Math.max(9, warriorNameLength))));
-
   return (
-    <div className="profile-v2-shell">
-      <BgPortrait glowing={portraitGlow} />
+    <div className="temple-wrap anim-fade-up">
+      <div className="ghost temple-ghost" aria-hidden>Temple</div>
 
-      <main className="profile-v2 anim-fade-up">
-        {hasPendingLevelUp && (
-          <button
-            type="button"
-            onClick={() => navigate(`/brute/${brute.id}/levelup`)}
-            className="levelup-banner block w-full"
-          >
-            ★ You have a pending level! Choose your upgrade ★
-          </button>
-        )}
+      {hasPendingLevelUp && (
+        <button
+          type="button"
+          onClick={() => navigate(`/brute/${brute.id}/levelup`)}
+          className="temple-levelup-banner"
+        >
+          ★ You have a pending level! Choose your upgrade ★
+        </button>
+      )}
 
-        <section className="temple-rpg-layout">
-          <aside className="temple-warrior-card">
-            <div className="temple-card-kicker">◇ Vault Brawler Profile ◇</div>
-            <DailyFightsBadge remaining={fightsRemaining} total={fightsTotal} />
-            <div className="temple-avatar-stage" aria-label={`Vault Brawler ${brute.name}`}>
-              <BruteAvatar brute={brute} size="sm" />
+      <div className="temple-hero vb-fu vb-fu1">
+        <div className="ringwrap">
+          <div className="ring glow" aria-hidden />
+          <div className="ring r1" aria-hidden />
+          <div className="ring r2" aria-hidden />
+          <div className="temple-portrait" aria-label={`Vault Brawler ${brute.name}`}>
+            <BruteAvatar brute={brute} size="sm" />
+          </div>
+        </div>
+        <div className="temple-id">
+          <div className="eyebrow">◇ Vault Brawler Profile ◇</div>
+          <h1>{brute.name}</h1>
+          <div className="temple-meta">
+            <span className="rank-badge">{rankName(brute.rank)}</span>
+            <span>Level {brute.level} · {xpPct}% to Level {brute.level + 1}</span>
+          </div>
+          <div className="hero-actions">
+            <button type="button" className="btn-rune btn-hero" onClick={goTrain}>Train</button>
+            <button type="button" className="btn-epic btn-hero primary" onClick={goFight} disabled={noNormalFights}>⚔ Fight</button>
+            <div className="fights-pill">
+              <span>Fights today {fightsRemaining}/{fightsTotal}</span>
+              <span className="pips" aria-hidden>
+                {Array.from({ length: fightsTotal }).map((_, i) => (
+                  <span key={i} className={clsx('pip', i < fightsRemaining && 'on')} />
+                ))}
+              </span>
             </div>
-            <h1
-              className="temple-warrior-name"
-              style={{
-                fontSize: warriorNameFontSize,
-                letterSpacing: warriorNameLength > 11 ? '0.01em' : '0.035em',
-              }}
-            >
-              {nameParts[0]}
-              <span>{nameParts[1]}</span>
-            </h1>
-            <div className="temple-rank-row">
-              <span>{rankName(brute.rank)}</span>
-              <b>Level {brute.level}</b>
+          </div>
+        </div>
+      </div>
+
+      <div className="bigstats vb-fu vb-fu2">
+        <BigStat icon="/assets/stats/hp.webp" label="Vitality" value={effectiveStats.hp} max={Math.max(MAX_HP, effectiveStats.hp)} color="var(--success)" sub={statSub('hp', `+${Math.max(1, Math.floor(effectiveStats.hp / 12))} to level up`)} />
+        <BigStat icon="/assets/stats/strength.webp" label="Strength" value={effectiveStats.strength} max={Math.max(MAX_STAT, effectiveStats.strength)} color="var(--purple-glow)" sub={statSub('strength', `Base damage ${Math.floor(effectiveStats.strength * 0.4) + 4}`)} />
+        <BigStat icon="/assets/stats/agility.webp" label="Agility" value={effectiveStats.agility} max={Math.max(MAX_STAT, effectiveStats.agility)} color="var(--gold)" sub={statSub('agility', `Dodge ${Math.min(50, Math.floor(effectiveStats.agility * 0.3))}%`)} />
+        <BigStat icon="/assets/stats/speed.webp" label="Speed" value={effectiveStats.speed} max={Math.max(MAX_STAT, effectiveStats.speed)} color="var(--text-strong)" sub={statSub('speed', effectiveStats.speed > 50 ? 'Acts first' : 'Average initiative')} />
+      </div>
+
+      <div className="dual vb-fu vb-fu3">
+        <div className="dual-left">
+          <div className="glass rough cut-a">
+            <span className="rivet tl" aria-hidden /><span className="rivet tr" aria-hidden />
+            <span className="rivet bl" aria-hidden /><span className="rivet br" aria-hidden />
+            <div className="glass-head">
+              <span className="title"><span className="d" />Active Skills</span>
+              <span className="meta">{ownedSkills.size}/{allSkillIds.length} learned</span>
             </div>
-            <div className="temple-xp-label">{xpPct}% to level {brute.level + 1}</div>
-            <div className="temple-xp-bar"><span style={{ width: `${xpPct}%` }} /></div>
-
-            <div className="temple-card-stats">
-              <BigStat label="Vitality" value={effectiveStats.hp} max={Math.max(MAX_HP, effectiveStats.hp)} color="#5fb04a" sub={statSub('hp', `+${Math.max(1, Math.floor(effectiveStats.hp / 12))} to level up`)} />
-              <BigStat label="Strength" value={effectiveStats.strength} max={Math.max(MAX_STAT, effectiveStats.strength)} color="#a855f7" sub={statSub('strength', `Base damage ${Math.floor(effectiveStats.strength * 0.4) + 4}`)} />
-              <BigStat label="Agility" value={effectiveStats.agility} max={Math.max(MAX_STAT, effectiveStats.agility)} color="#e6b450" sub={statSub('agility', `Dodge ${Math.min(50, Math.floor(effectiveStats.agility * 0.3))}%`)} />
-              <BigStat label="Speed" value={effectiveStats.speed} max={Math.max(MAX_STAT, effectiveStats.speed)} color="#9b5cc9" sub={statSub('speed', effectiveStats.speed > 50 ? 'Acts first' : 'Average initiative')} />
+            <div className="grid-icons">
+              {allSkillIds.map((sid) => {
+                const owned = ownedSkills.has(sid);
+                return (
+                  <button
+                    type="button"
+                    key={sid}
+                    className={clsx('sticker', !owned && 'locked', owned && selSkillId === sid && 'active')}
+                    onClick={() => owned && setSelSkillId(sid)}
+                    title={getSkill(sid)?.name ?? sid}
+                    disabled={!owned}
+                  >
+                    <img className="sticker-icon" src={skillAsset(sid)} alt={getSkill(sid)?.name ?? sid} />
+                    {owned && <span className="sticker-pin" aria-hidden>★</span>}
+                  </button>
+                );
+              })}
             </div>
-
-            <div className="temple-action-row">
-              <button type="button" className="btn-hero gold" onClick={goTrain}>Train</button>
-              <button type="button" className="btn-hero primary" onClick={goFight} disabled={noNormalFights}>Fight</button>
-            </div>
-            <div className="temple-card-footer single">
-              <span>Defeats {brute.defeatsToday}/3</span>
-              <Link to="/">Change Brawler</Link>
-            </div>
-          </aside>
-
-          <section className="temple-main-stack">
-            <Glass num="◇" title="Active Skills" meta={`${ownedSkills.size}/${allSkillIds.length} learned`}>
-              <div className="invv2 temple-skills-grid">
-                {allSkillIds.map((sid) => {
-                  const owned = ownedSkills.has(sid);
-                  const active = selSkillId === sid;
-                  return (
-                    <button
-                      type="button"
-                      key={sid}
-                      className={clsx('slotv2', !owned && 'locked', active && 'active', owned && 'equipped')}
-                      onClick={() => owned && setSelSkillId(sid)}
-                      title={getSkill(sid)?.name ?? sid}
-                      disabled={!owned}
-                    >
-                      <img src={skillAsset(sid)} alt={getSkill(sid)?.name ?? sid} />
-                      {owned && <span className="slotv2-pin">★</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </Glass>
-
-            <Glass num="◇" title="Weapons" meta={`${ownedWeapons.size}/${allWeaponIds.length} forged`}>
-              <div className="invv2 temple-weapons-grid">
-                {allWeaponIds.map((wid) => {
-                  const owned = ownedWeapons.has(wid);
-                  const active = selWeaponId === wid;
-                  return (
-                    <button
-                      type="button"
-                      key={wid}
-                      className={clsx('slotv2', !owned && 'locked', active && 'active', owned && 'equipped')}
-                      onClick={() => owned && setSelWeaponId(wid)}
-                      title={getWeapon(wid)?.name ?? wid}
-                      disabled={!owned}
-                    >
-                      <img src={weaponAsset(wid)} alt={getWeapon(wid)?.name ?? wid} />
-                      {owned && <span className="slotv2-pin">★</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </Glass>
-
             {skill && (
-              <Glass num="◇" title="Active Upgrade">
-                <div className="detail-strip temple-active-detail">
-                  <div className="icon"><img src={skillAsset(skill.id)} alt={skill.name} /></div>
-                  <div>
-                    <div className="name">{skill.name} · active</div>
-                    <div className="desc">{skill.description}</div>
-                  </div>
+              <div className="upgrade-box">
+                <img src={skillAsset(skill.id)} alt={skill.name} />
+                <div>
+                  <div className="upgrade-name">{skill.name} · Active</div>
+                  <div className="upgrade-desc">{skill.description}</div>
                 </div>
-              </Glass>
+              </div>
             )}
-          </section>
+          </div>
 
-          <aside className="temple-side-stack">
-            <Glass num="◇" title="Beasts" meta={`${beasts.length}/3`}>
-              <div className="beastsv2 temple-beasts-compact">
-                {beasts.map((b) => (
-                  <BeastV2 key={b.id} petId={b.id} name={b.meta.name} hp={b.meta.hp} dmg={b.meta.dmg} onClick={() => setPetMarketOpen(true)} />
-                ))}
-                {Array.from({ length: beastsEmptyCount }).map((_, i) => (
-                  <button key={i} type="button" className="beast-empty" onClick={() => setPetMarketOpen(true)}>Empty stable</button>
-                ))}
-                {beasts.length >= 3 && (
-                  <button type="button" className="beast-market-link" onClick={() => setPetMarketOpen(true)}>Open pet marketplace</button>
-                )}
-              </div>
-            </Glass>
+          <div className="glass rough cut-c">
+            <span className="rivet tl" aria-hidden /><span className="rivet tr" aria-hidden />
+            <span className="rivet bl" aria-hidden /><span className="rivet br" aria-hidden />
+            <div className="glass-head">
+              <span className="title"><span className="d" />Weapons</span>
+              <span className="meta">{ownedWeapons.size}/{allWeaponIds.length} forged</span>
+            </div>
+            <div className="grid-icons">
+              {allWeaponIds.map((wid) => {
+                const owned = ownedWeapons.has(wid);
+                return (
+                  <button
+                    type="button"
+                    key={wid}
+                    className={clsx('sticker', !owned && 'locked', owned && selWeaponId === wid && 'active')}
+                    onClick={() => owned && setSelWeaponId(wid)}
+                    title={getWeapon(wid)?.name ?? wid}
+                    disabled={!owned}
+                  >
+                    <img className="sticker-icon" src={weaponAsset(wid)} alt={getWeapon(wid)?.name ?? wid} />
+                    {owned && <span className="sticker-pin" aria-hidden>★</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
-            <Glass num="◇" title="Vault Info" meta="on-chain">
-              <VaultInfoPanel info={vaultInfo} loading={vaultInfoLoading} error={vaultInfoError} />
-            </Glass>
-          </aside>
-        </section>
+        <div className="dual-right">
+          <div className="glass rough cut-b">
+            <span className="rivet tl" aria-hidden /><span className="rivet br" aria-hidden />
+            <div className="glass-head">
+              <span className="title"><span className="d" />Beasts</span>
+              <span className="meta">{beasts.length}/3</span>
+            </div>
+            <div className="beast-stack">
+              {beasts.map((b) => (
+                <button key={b.id} type="button" className="beast-filled" onClick={() => setPetMarketOpen(true)}>
+                  <PetIdleSprite petId={b.id} name={b.meta.name} />
+                  <span>
+                    <span className="beast-name">{b.meta.name}</span>
+                    <br />
+                    <span className="beast-meta">HP {b.meta.hp} · DMG {b.meta.dmg}</span>
+                  </span>
+                </button>
+              ))}
+              {Array.from({ length: beastsEmptyCount }).map((_, i) => (
+                <button key={i} type="button" className="beast-slot" onClick={() => setPetMarketOpen(true)}>Empty stable</button>
+              ))}
+              {beasts.length >= 3 && (
+                <button type="button" className="beast-market-link" onClick={() => setPetMarketOpen(true)}>Open pet marketplace</button>
+              )}
+            </div>
+          </div>
 
-        {showLineage && (
-          <p className="temple-bottom-lineage">{lineage}</p>
-        )}
+          <div className="glass rough cut-a">
+            <span className="rivet tl" aria-hidden /><span className="rivet br" aria-hidden />
+            <div className="glass-head">
+              <span className="title"><span className="d" />Vault Info</span>
+              <span className="meta">On-chain</span>
+            </div>
+            <VaultInfoPanel info={vaultInfo} loading={vaultInfoLoading} error={vaultInfoError} />
+          </div>
+        </div>
+      </div>
 
-        {pupils.length > 0 && (
-          <section className="mt-8">
-            <Glass num="— VII" title="Linked Vault Brawlers" meta={`${pupils.length} created`}>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {pupils.map((p) => (
-                  <BruteCard key={p.id} brute={p} onClick={() => navigate(`/brute/${p.id}`)} />
-                ))}
-              </div>
-            </Glass>
-          </section>
-        )}
-      </main>
+      {showLineage && <p className="temple-lineage">{lineage}</p>}
+
+      <div className="temple-footer-row">
+        <span>Defeats {brute.defeatsToday}/3</span>
+        <Link to="/">Change Brawler</Link>
+      </div>
+
+      {pupils.length > 0 && (
+        <div className="glass rough cut-b" style={{ marginTop: 32 }}>
+          <span className="rivet tl" aria-hidden /><span className="rivet br" aria-hidden />
+          <div className="glass-head">
+            <span className="title"><span className="d" />Linked Vault Brawlers</span>
+            <span className="meta">{pupils.length} created</span>
+          </div>
+          <div className="pupils-grid">
+            {pupils.map((p) => (
+              <BruteCard key={p.id} brute={p} onClick={() => navigate(`/brute/${p.id}`)} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {petMarketOpen && (
         <PetMarketplaceModal
@@ -538,52 +557,15 @@ export function Profile() {
 
 /* ─── Sub-components ─── */
 
-function DailyFightsBadge({ remaining, total }: { remaining: number; total: number }) {
-  const safeTotal = Math.max(1, total);
-  const safeRemaining = Math.max(0, Math.min(safeTotal, remaining));
-  return (
-    <div className="temple-fights-today-card" aria-label={`${safeRemaining} fights remaining today`}>
-      <div className="temple-fights-label">Fights today</div>
-      <div className="temple-fights-value">{safeRemaining}/{safeTotal}</div>
-      <div className="temple-fights-pips" aria-hidden>
-        {Array.from({ length: safeTotal }).map((_, index) => (
-          <span key={index} className={clsx('pip', index < safeRemaining && 'on')} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Glass({
-  num,
-  title,
-  meta,
-  children,
-}: {
-  num: string;
-  title: string;
-  meta?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="profile-glass">
-      <div className="profile-glass-head">
-        <span className="num">{num}</span>
-        <span className="title">{title}</span>
-        {meta && <span className="meta">{meta}</span>}
-      </div>
-      {children}
-    </div>
-  );
-}
-
 function BigStat({
+  icon,
   label,
   value,
   max,
   color,
   sub,
 }: {
+  icon: string;
   label: string;
   value: number;
   max: number;
@@ -592,8 +574,13 @@ function BigStat({
 }) {
   const pct = Math.min(100, Math.round((value / max) * 100));
   return (
-    <div className="bigstat">
-      <div className="bigstat-label">{label}</div>
+    <div className="bigstat rough cut-b">
+      <span className="rivet tl" aria-hidden />
+      <span className="rivet br" aria-hidden />
+      <div className="bigstat-label">
+        <span className="icon-img bigstat-icon" style={{ backgroundImage: `url(${icon})` }} aria-hidden />
+        {label}
+      </div>
       <div className="bigstat-value" style={{ color }}>
         {value}
         <span className="bigstat-max">/{max}</span>
@@ -601,7 +588,7 @@ function BigStat({
       <div className="bigstat-bar">
         <div
           className="bigstat-bar-fill"
-          style={{ width: `${pct}%`, ['--c' as string]: color } as React.CSSProperties}
+          style={{ width: `${pct}%`, background: color, color } as React.CSSProperties}
         />
       </div>
       {sub && <div className="bigstat-sub">{sub}</div>}
@@ -629,69 +616,41 @@ function VaultInfoPanel({
   error: string | null;
 }) {
   if (loading && !info) {
-    return <div className="vaultinfo-empty">Reading vault on-chain…</div>;
+    return <div className="vault-note">Reading vault on-chain…</div>;
   }
   if (error && !info) {
-    return <div className="vaultinfo-empty">Vault RPC unavailable</div>;
+    return <div className="vault-note">Vault RPC unavailable</div>;
   }
   if (!info) {
-    return <div className="vaultinfo-empty">Vault info unavailable</div>;
+    return <div className="vault-note">Vault info unavailable</div>;
   }
   return (
-    <div className="vaultinfo">
-      <div className="vaultinfo-hero">
-        <span>Vault balance</span>
-        <strong>{formatBnbWei(info.vaultBalance)} BNB</strong>
-        <small>{info.chainName}</small>
+    <div>
+      <div className="vault-balance">
+        <div className="lbl">Vault Balance</div>
+        <div className="val">{formatBnbWei(info.vaultBalance)} BNB</div>
+        <div className="lbl">{info.chainName}</div>
       </div>
-      <div className="vaultinfo-grid">
-        <VaultInfoRow label="Extra brawlers on-chain" value={info.totalOnChainBrawlers.toString()} />
-        <VaultInfoRow label="Extra brawler price" value={vaultMetric(info.extraBrutePrice)} />
-        <VaultInfoRow label="Tax received" value={vaultMetric(info.totalTaxRewardsReceived)} />
-        <VaultInfoRow label="Reward pool" value={vaultMetric(info.combatRewardsBalance)} />
-        <VaultInfoRow label="Claim per win" value={vaultMetric(info.combatClaimAmount)} />
-        <VaultInfoRow label="Claimed so far" value={vaultMetric(info.combatTotalClaimed)} />
-        <VaultInfoRow label="Hold required" value={tokenMetric(info.combatMinimumHold, info.tokenSymbol)} />
-        <VaultInfoRow label="Token supply" value={tokenMetric(info.tokenTotalSupply, info.tokenSymbol)} />
-        <VaultInfoRow label="Your token hold" value={info.walletTokenBalance === null ? 'Connect wallet' : tokenMetric(info.walletTokenBalance, info.tokenSymbol)} />
-      </div>
-      {loading && <div className="vaultinfo-refresh">Refreshing…</div>}
+      <VaultInfoRow label="Extra Brawlers On-Chain" value={info.totalOnChainBrawlers.toString()} />
+      <VaultInfoRow label="Extra Brawler Price" value={vaultMetric(info.extraBrutePrice)} />
+      <VaultInfoRow label="Tax Received" value={vaultMetric(info.totalTaxRewardsReceived)} />
+      <VaultInfoRow label="Reward Pool" value={vaultMetric(info.combatRewardsBalance)} />
+      <VaultInfoRow label="Claim Per Win" value={vaultMetric(info.combatClaimAmount)} />
+      <VaultInfoRow label="Claimed So Far" value={vaultMetric(info.combatTotalClaimed)} />
+      <VaultInfoRow label="Hold Required" value={tokenMetric(info.combatMinimumHold, info.tokenSymbol)} />
+      <VaultInfoRow label="Token Supply" value={tokenMetric(info.tokenTotalSupply, info.tokenSymbol)} />
+      <VaultInfoRow label="Your Token Hold" value={info.walletTokenBalance === null ? 'Connect wallet' : tokenMetric(info.walletTokenBalance, info.tokenSymbol)} />
+      {loading && <div className="vault-note">Refreshing…</div>}
     </div>
   );
 }
 
 function VaultInfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="vaultinfo-row">
-      <span>{label}</span>
-      <b>{value}</b>
+    <div className="vault-row">
+      <span className="l">{label}</span>
+      <b className="v">{value}</b>
     </div>
-  );
-}
-
-function BeastV2({
-  petId,
-  name,
-  hp,
-  dmg,
-  onClick,
-}: {
-  petId: string;
-  name: string;
-  hp: number;
-  dmg: number;
-  onClick?: () => void;
-}) {
-  return (
-    <button type="button" className="beastv2" onClick={onClick}>
-      <div className="beastv2-art">
-        <PetIdleSprite petId={petId} name={name} />
-      </div>
-      <div>
-        <div className="beastv2-name">{name}</div>
-        <div className="beastv2-meta">HP {hp} · DMG {dmg}</div>
-      </div>
-    </button>
   );
 }
 

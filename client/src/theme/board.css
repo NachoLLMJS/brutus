@@ -1,0 +1,503 @@
+/* Vault Brawl v2 — Board (Arena / "The Pit").
+ * Rediseño "Dark Fantasy Rústico" del handoff Claude Design (Jul 2026).
+ * Todo scopeado bajo .board-wrap. Usa las primitivas de rough.css.
+ */
+
+.board-wrap {
+  position: relative;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 48px 32px 92px;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 34px;
+  font-family: var(--font-s);
+  color: var(--text);
+}
+@media (max-width: 900px) {
+  .board-wrap { grid-template-columns: 1fr; }
+}
+.board-wrap.no-sidebar { grid-template-columns: 1fr; }
+.board-wrap .board-ghost {
+  font-size: clamp(170px, 24vw, 360px);
+  top: 20px;
+  right: -60px;
+  transform: rotate(6deg);
+}
+
+/* ---------- HEADER BANNER ---------- */
+.board-wrap .board-header {
+  grid-column: 1 / -1;
+  position: relative;
+  text-align: center;
+  padding: 44px 20px 38px;
+  margin-bottom: 4px;
+  isolation: isolate;
+  overflow: hidden;
+}
+.board-wrap .board-title {
+  font-family: var(--font-hero);
+  font-weight: 900;
+  font-size: clamp(46px, 7vw, 92px);
+  text-transform: uppercase;
+  text-shadow: 0 0 50px rgba(168, 85, 247, 0.55), 0 5px 0 rgba(0, 0, 0, 0.85);
+}
+.board-wrap .board-title .acc { color: var(--purple-glow); }
+.board-wrap .board-sub {
+  font-family: var(--font-d);
+  font-size: 12px;
+  letter-spacing: 0.34em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+/* ---------- SIDE ---------- */
+.board-wrap .side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.board-wrap .your-brawler { text-align: center; }
+.board-wrap .your-bust { display: flex; justify-content: center; }
+.board-wrap .your-name {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 22px;
+  text-transform: uppercase;
+  margin-top: 12px;
+  text-shadow: 0 0 18px rgba(168, 85, 247, 0.5);
+}
+.board-wrap .your-rank {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 10px;
+  font-family: var(--font-d);
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  background: rgba(7, 5, 16, 0.8);
+  border: 1px solid rgba(236, 197, 122, 0.35);
+  text-transform: uppercase;
+}
+.board-wrap .your-lvl {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.board-wrap .xp-bar {
+  margin-top: 8px;
+  height: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+.board-wrap .xp-bar > div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--purple), var(--purple-glow));
+  box-shadow: 0 0 8px var(--purple-glow);
+}
+.board-wrap .your-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 16px;
+}
+.board-wrap .ys-cell {
+  background: rgba(7, 5, 16, 0.8);
+  border: 1px solid var(--line-soft);
+  padding: 9px;
+  text-align: left;
+  clip-path: polygon(4% 0, 96% 5%, 100% 35%, 97% 95%, 4% 100%, 0 60%);
+}
+.board-wrap .ys-cell .l {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.board-wrap .ys-cell .v {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 18px;
+}
+.board-wrap .ys-cell.hp .v { color: var(--success); }
+.board-wrap .ys-cell.str .v { color: var(--purple-glow); }
+.board-wrap .ys-cell.agi .v { color: var(--gold); }
+.board-wrap .side-link {
+  display: block;
+  margin-top: 16px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(236, 197, 122, 0.4);
+  padding-bottom: 2px;
+  display: inline-block;
+}
+.board-wrap .side-link:hover { color: var(--gold-soft); }
+
+/* ---------- TRAINING LEVER ---------- */
+.board-wrap .training .t-head {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--text-strong);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.board-wrap .training .t-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.board-wrap .lever {
+  position: relative;
+  width: 100%;
+  height: 76px;
+  background: linear-gradient(180deg, rgba(7, 5, 16, 0.9) 0%, #030208 100%);
+  border: 1px solid rgba(236, 197, 122, 0.3);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.3s;
+  clip-path: polygon(2% 0, 98% 2%, 100% 20%, 99% 96%, 97% 100%, 3% 98%, 0 78%, 1% 18%);
+  appearance: none;
+  padding: 0;
+}
+.board-wrap .lever.on {
+  background: linear-gradient(180deg, #2a3520 0%, #0d150a 100%);
+}
+.board-wrap .lever .handle {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 8px;
+  height: 28px;
+  background: linear-gradient(180deg, #8a6038, #6a4528 50%, #3d2718);
+  border: 1px solid var(--gold);
+  transition: transform 0.3s cubic-bezier(0.5, 1.4, 0.6, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 2;
+  clip-path: polygon(3% 0, 97% 6%, 100% 45%, 98% 94%, 3% 100%, 0 55%);
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--gold-soft);
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
+}
+.board-wrap .lever .handle {
+  /* Neutraliza el layout viejo (unscoped) de lobby.css: ese .lever .handle
+     centra con left:50%+width:56px+transform:translateX(-50%), lo que
+     desplaza y angosta este handle. Forzamos el modelo left/right nuestro. */
+  width: auto;
+  transform: none;
+}
+.board-wrap .lever.on .handle { transform: translateY(30px); }
+.board-wrap .lever .knob { display: none; }
+.board-wrap .lever .label {
+  position: absolute;
+  left: 14px;
+  font-family: var(--font-d);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  text-shadow: none;
+}
+.board-wrap .lever .label.top { top: 10px; }
+.board-wrap .lever .label.bot { bottom: 10px; }
+/* lobby.css tiene .lever.on .label.top / .lever:not(.on) .label.bot con
+   colores propios (v1) que ganan por especificidad en algunos casos —
+   los neutralizamos explícitamente para que el handle tallado quede
+   siempre por encima visualmente y el label restante se vea tenue. */
+.board-wrap .lever.on .label.top,
+.board-wrap .lever:not(.on) .label.bot {
+  color: var(--text-dim);
+  text-shadow: none;
+}
+.board-wrap .t-state {
+  margin-top: 10px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ---------- FILTERS + FIGHTS COUNTER ---------- */
+.board-wrap .lobby-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 28px;
+  padding: 14px 16px;
+  background: rgba(20, 12, 28, 0.65);
+  border: 1px solid rgba(236, 197, 122, 0.18);
+}
+.board-wrap .lobby-filters .lbl {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.board-wrap .chip {
+  appearance: none;
+  cursor: pointer;
+  background: rgba(7, 5, 16, 0.8);
+  color: var(--text-dim);
+  border: 1px solid var(--line-soft);
+  padding: 7px 15px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  clip-path: polygon(5% 0, 95% 8%, 100% 45%, 96% 92%, 5% 100%, 0 55%);
+}
+.board-wrap .chip:hover { color: var(--text-strong); border-color: var(--gold-dim); }
+.board-wrap .chip.active {
+  background: var(--gold);
+  color: #140c06;
+  border-color: var(--gold);
+  font-weight: 700;
+  box-shadow: 0 0 14px rgba(236, 197, 122, 0.45);
+}
+.board-wrap .lobby-filters .spacer { flex: 1; }
+.board-wrap .lobby-filters .reroll {
+  appearance: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.board-wrap .lobby-filters .reroll:hover { color: var(--gold-soft); }
+.board-wrap .fights-counter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  padding: 9px 16px;
+  background: rgba(7, 5, 16, 0.85);
+  border: 1px solid var(--gold);
+  clip-path: polygon(3% 0, 97% 3%, 100% 30%, 98% 95%, 95% 100%, 3% 97%, 0 68%, 2% 25%);
+}
+.board-wrap .fights-counter .lbl {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.board-wrap .fights-counter .val {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--gold);
+}
+.board-wrap .fights-counter .pips { display: inline-flex; gap: 4px; }
+.board-wrap .fights-counter .p {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--void2);
+  border: 1px solid var(--line-soft);
+}
+.board-wrap .fights-counter .p.on {
+  background: var(--purple);
+  border-color: var(--purple);
+  box-shadow: 0 0 6px var(--purple);
+}
+
+/* ---------- OPPONENT GRID ---------- */
+.board-wrap .op-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
+  gap: 26px;
+}
+.board-wrap .op-card {
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.board-wrap .op-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7) inset, 0 26px 56px rgba(0, 0, 0, 0.72), 0 0 36px rgba(168, 85, 247, 0.22);
+  z-index: 5;
+}
+.board-wrap .op-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(236, 197, 122, 0.2);
+}
+.board-wrap .op-card[data-adv='tough'] .op-head { background: linear-gradient(90deg, rgba(168, 85, 247, 0.22), transparent); }
+.board-wrap .op-card[data-adv='easy'] .op-head { background: linear-gradient(90deg, rgba(108, 194, 74, 0.18), transparent); }
+.board-wrap .op-card[data-adv='even'] .op-head { background: linear-gradient(90deg, rgba(236, 197, 122, 0.16), transparent); }
+.board-wrap .op-bust {
+  position: relative;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border: 1.5px solid rgba(236, 197, 122, 0.45);
+  clip-path: polygon(4% 0, 96% 2%, 100% 10%, 98% 92%, 94% 100%, 5% 97%, 0 90%, 2% 8%);
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 30%, var(--surface-hi) 0%, var(--surface2) 72%);
+}
+.board-wrap .op-lvl {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-family: var(--font-d);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--gold);
+  background: rgba(7, 5, 16, 0.85);
+  padding: 1px 4px;
+}
+.board-wrap .op-id { min-width: 0; flex: 1; }
+.board-wrap .op-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.board-wrap .op-name {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 20px;
+  text-transform: uppercase;
+  color: var(--text-strong);
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+.board-wrap .op-rank {
+  font-family: var(--font-d);
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 2px 7px;
+  background: rgba(7, 5, 16, 0.8);
+  border: 1px solid rgba(236, 197, 122, 0.35);
+}
+.board-wrap .status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.board-wrap .status-dot .dot { width: 7px; height: 7px; border-radius: 50%; }
+.board-wrap .op-build {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.board-wrap .op-build-slot { width: 16px; height: 16px; flex-shrink: 0; }
+.board-wrap .op-build-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.board-wrap .op-body { padding: 16px 20px 18px; }
+.board-wrap .op-stats { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.board-wrap .wl { flex: 1; }
+.board-wrap .wl-track {
+  height: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+.board-wrap .wl-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--success), var(--gold));
+  box-shadow: 0 0 6px var(--success);
+}
+.board-wrap .wl-num {
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+.board-wrap .wl-w { color: var(--success); font-weight: 600; }
+.board-wrap .streak { font-size: 11px; letter-spacing: 0.06em; white-space: nowrap; }
+.board-wrap .streak.win { color: var(--success); }
+.board-wrap .streak.loss { color: var(--danger); }
+.board-wrap .op-rumor {
+  margin: 2px 0 12px;
+  padding: 9px 12px;
+  background: rgba(4, 2, 8, 0.5);
+  border-left: 2px solid var(--gold);
+  font-style: italic;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.board-wrap .op-rumor .quill { color: var(--gold); margin-right: 4px; }
+.board-wrap .op-cooldown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: rgba(4, 2, 8, 0.5);
+  border: 1px dashed rgba(236, 197, 122, 0.3);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.board-wrap .op-cooldown-label { display: block; text-transform: uppercase; letter-spacing: 0.08em; font-size: 9px; }
+.board-wrap .op-cooldown-time { color: var(--gold); font-family: var(--font-d); font-weight: 600; }
+.board-wrap .op-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.board-wrap .op-meta {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  line-height: 1.6;
+}
+.board-wrap .op-meta .last-when { display: block; color: var(--text-strong); font-size: 11px; }
+.board-wrap .op-challenge {
+  padding: 11px 22px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.board-wrap .op-challenge.cooldown { opacity: 0.5; cursor: not-allowed; }
+.board-wrap .op-challenge.training { background: linear-gradient(180deg, #4a3a2a 0%, #2a1f18 55%, #1a1008 100%); }
+
+.board-wrap .board-empty {
+  text-align: center;
+  padding: 58px 16px;
+  border: 1px dashed rgba(236, 197, 122, 0.3);
+  background: rgba(10, 6, 18, 0.45);
+  font-family: var(--font-d);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+}

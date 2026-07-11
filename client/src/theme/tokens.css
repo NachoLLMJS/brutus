@@ -3,7 +3,7 @@
  * Tipografía: MedievalSharp (display) + Inter (body sans). Fallbacks: las
  * fuentes locales LaBrute/AcmeSa siguen disponibles para retrocompat.
  */
-@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
 
 @font-face {
   font-family: 'LaBrute';
@@ -78,4 +78,31 @@
   --font-display: 'MedievalSharp', 'LaBrute', 'AcmeSa', Georgia, serif;
   --font-serif: 'MedievalSharp', 'AcmeSa', 'LaBrute', Georgia, serif;
   --font-sans: 'Inter', 'AcmeSa', system-ui, -apple-system, sans-serif;
+
+  /* ====== Vault Brawl v2 — Sistema de Diseño (rediseño Jul 2026) ======
+   * Tokens del nuevo lenguaje visual "Dark Fantasy Rústico". Coexisten con
+   * los tokens legacy de arriba mientras se migra pantalla por pantalla
+   * (empezando por Landing). Ver theme/rough.css para las clases que los
+   * consumen. */
+  --void: #070510;
+  --void2: #0e0918;
+  --surface: #191022;
+  --surface2: #120b1a;
+  --surface-hi: #251731;
+  --line: #4a3550;
+  --line-soft: #312438;
+  --gold: #ecc57a;
+  --gold-dim: #c79a4f;
+  --gold-soft: #f7e6c0;
+  --purple: #a855f7;
+  --purple-deep: #4c1d95;
+  --purple-glow: #c084fc;
+  --text: #ece0cf;
+  --text-dim: #9c8b7a;
+  --text-strong: #f8ecd4;
+  --success: #6cc24a;
+  --danger: #ff5d46;
+  --font-hero: 'Cinzel Decorative', Georgia, serif;
+  --font-d: 'Cinzel', Georgia, serif;
+  --font-s: 'Inter', system-ui, sans-serif;
 }

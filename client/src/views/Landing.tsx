@@ -69,14 +69,41 @@ export function Landing() {
 
   return (
     <div className="landing-shell" style={glowVars}>
-      <Forge
-        onForge={({ name, gender }) => {
-          setToast(`${name} enters the Vault…`);
-          window.setTimeout(() => setToast(null), 1800);
-          // Pre-populate name + gender in CharacterCreator via URL params.
-          navigate(`/create?name=${encodeURIComponent(name)}&gender=${gender === 'M' ? 'male' : 'female'}`);
-        }}
-      />
+      <div className="vb-embers" aria-hidden>
+        <div className="vb-ember" />
+        <div className="vb-ember" />
+        <div className="vb-ember" />
+        <div className="vb-ember" />
+        <div className="vb-ember" />
+        <div className="vb-ember" />
+        <div className="vb-ember" />
+      </div>
+
+      <div className="hero-scene">
+        <div className="hero-art" aria-hidden />
+        <div className="hero-scrim" aria-hidden />
+        <div className="ghost hero-ghost" aria-hidden>VB</div>
+        <div className="hero-left">
+          <div className="eyebrow vb-fu vb-fu1">Forged in the Vault · MMXXVI</div>
+          <h1 className="hero-title vb-fu vb-fu2">
+            Vault <em>Brawl</em>
+          </h1>
+          <div className="hero-sub vb-fu vb-fu3">Blood · Steel · Destiny</div>
+          <p className="hero-claim vb-fu vb-fu4">
+            Every Vault Brawler that leaves the Vault is <strong>unique</strong>. Its name summons a destiny forged in
+            blood and steel. What happens in the arena is carved into its flesh.
+          </p>
+        </div>
+
+        <Forge
+          onForge={({ name, gender }) => {
+            setToast(`${name} enters the Vault…`);
+            window.setTimeout(() => setToast(null), 1800);
+            // Pre-populate name + gender in CharacterCreator via URL params.
+            navigate(`/create?name=${encodeURIComponent(name)}&gender=${gender === 'M' ? 'male' : 'female'}`);
+          }}
+        />
+      </div>
 
       <RecentWarriorsSection
         brutes={visibleBrutes}
@@ -125,48 +152,40 @@ function Forge({ onForge }: { onForge: (data: { name: string; gender: 'M' }) => 
   };
 
   return (
-    <section id="forge" className="forge">
-      <aside className="forge-aside">
-        <div>
-          <h2>
-            Create your first <em>Vault Brawler</em>
-          </h2>
-          <p>
-            Every Vault Brawler that leaves the Vault is <strong>unique</strong>. Its name summons a destiny forged in blood and steel. What happens in the arena is carved into its flesh.
-          </p>
+    <form id="forge" className="plaque rough cut-b vb-fu vb-fu4" onSubmit={submit} noValidate>
+      <div className="plaque-hang" aria-hidden />
+      <span className="rough-edge" aria-hidden />
+      <span className="rivet tl" aria-hidden />
+      <span className="rivet tr" aria-hidden />
+      <span className="rivet bl" aria-hidden />
+      <span className="rivet br" aria-hidden />
+
+      <div>
+        <div className="field-label">
+          <span>Name your first Vault Brawler</span>
+          {error && <span className="err">{error}</span>}
         </div>
-        <div className="forge-orb-rule" aria-hidden />
-        <div className="splatter splatter-bl" aria-hidden />
-      </aside>
+        <input
+          className="vb-input"
+          placeholder="Vorgath, Sanguineus, Mörgar…"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (error) setError('');
+          }}
+          maxLength={20}
+          spellCheck={false}
+          autoComplete="off"
+        />
+      </div>
 
-      <form className="forge-form" onSubmit={submit} noValidate>
-        <div>
-          <div className="field-label">
-            <span>Vault Brawler name</span>
-            {error && <span className="err">{error}</span>}
-          </div>
-          <input
-            className="landing-input"
-            placeholder="Vorgath, Sanguineus, Mörgar…"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              if (error) setError('');
-            }}
-            maxLength={20}
-            spellCheck={false}
-            autoComplete="off"
-          />
-        </div>
+      <button type="submit" className="btn-epic" disabled={!name.trim()}>
+        <span>Create Vault Brawler</span>
+        <span className="arrow">›</span>
+      </button>
 
-        <button type="submit" className="btn-forge" disabled={!name.trim()}>
-          <span>Create Vault Brawler</span>
-          <span className="arrow">›</span>
-        </button>
-
-        <div className="fine">Cada Vault Brawler es unique e irrepetible</div>
-      </form>
-    </section>
+      <div className="fine">Cada Vault Brawler es unique e irrepetible</div>
+    </form>
   );
 }
 
@@ -185,10 +204,14 @@ function RecentWarriorsSection({
 }) {
   return (
     <section>
-      <div className="section-head">
-        <span className="num">— II</span>
-        <span className="title">Recent Vault Brawlers</span>
-        <span className="rule" />
+      <div className="orn-head">
+        <div className="rule" />
+        <div className="title">
+          <span className="d" />
+          Recent Vault Brawlers
+          <span className="d" />
+        </div>
+        <div className="rule rev" />
       </div>
       <div className="warriors-grid">
         {brutes.length === 0 ? (
@@ -236,7 +259,7 @@ function WarriorCard({
 
   return (
     <div
-      className="warrior"
+      className="warrior rough cut-a"
       role="button"
       tabIndex={0}
       onClick={onSelect}
@@ -247,6 +270,8 @@ function WarriorCard({
         }
       }}
     >
+      <span className="rivet tl" aria-hidden />
+      <span className="rivet br" aria-hidden />
       <button
         type="button"
         className="warrior-forget"
@@ -264,12 +289,8 @@ function WarriorCard({
           {full ? (
             <BruteAvatar brute={full} size="sm" />
           ) : (
-            <span style={{ fontFamily: 'var(--font-display)', color: 'var(--text-secondary)', fontSize: 24 }}>?</span>
+            <span style={{ fontFamily: 'var(--font-hero)', color: 'var(--text-dim)', fontSize: 24 }}>?</span>
           )}
-          <span className="pin tl" />
-          <span className="pin tr" />
-          <span className="pin bl" />
-          <span className="pin br" />
         </div>
       </div>
       <div className="warrior-info">

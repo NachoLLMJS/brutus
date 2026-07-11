@@ -1,0 +1,248 @@
+/* Vault Brawl v2 — sistema de diseño "Dark Fantasy Rústico".
+ * Primitivas compartidas del rediseño (handoff Claude Design, Jul 2026):
+ * contenedores tallados, remaches, inclinaciones, marcas fantasma, botones
+ * épicos/rúnicos, anillos de avatar, brasas y entrada escalonada.
+ * Usa los tokens --void/--surface/--gold/--purple/--font-hero/--font-d
+ * definidos en tokens.css. Consumido primero por Landing; el resto de
+ * vistas se migra en fases posteriores.
+ */
+
+@keyframes vb-rise {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: .4; }
+  100% { transform: translateY(-104vh) scale(.4); opacity: 0; }
+}
+@keyframes vb-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes vb-spin { to { transform: rotate(360deg); } }
+@keyframes vb-spin-r { to { transform: rotate(-360deg); } }
+@keyframes vb-pulse-glow { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@keyframes vb-sway { 0%, 100% { transform: rotate(-1.6deg); } 50% { transform: rotate(-0.6deg); } }
+
+.vb-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .55;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.22 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+.vb-embers {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.vb-ember {
+  position: absolute;
+  bottom: -10px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--purple-glow);
+  box-shadow: 0 0 8px 2px rgba(192, 132, 252, .7);
+  animation: vb-rise linear infinite;
+}
+.vb-ember:nth-child(1) { left: 8%; animation-duration: 14s; background: var(--gold); box-shadow: 0 0 8px 2px rgba(236, 197, 122, .7); }
+.vb-ember:nth-child(2) { left: 22%; animation-duration: 18s; animation-delay: 2s; }
+.vb-ember:nth-child(3) { left: 38%; animation-duration: 12s; animation-delay: 5s; background: var(--gold); box-shadow: 0 0 8px 2px rgba(236, 197, 122, .7); }
+.vb-ember:nth-child(4) { left: 55%; animation-duration: 20s; animation-delay: 1s; }
+.vb-ember:nth-child(5) { left: 68%; animation-duration: 15s; animation-delay: 7s; }
+.vb-ember:nth-child(6) { left: 81%; animation-duration: 17s; animation-delay: 3s; background: var(--gold); box-shadow: 0 0 8px 2px rgba(236, 197, 122, .7); }
+.vb-ember:nth-child(7) { left: 92%; animation-duration: 13s; animation-delay: 6s; }
+
+.vb-fu { animation: vb-fade-up .55s cubic-bezier(.2,.8,.2,1) both; }
+.vb-fu1 { animation-delay: .03s; }
+.vb-fu2 { animation-delay: .1s; }
+.vb-fu3 { animation-delay: .17s; }
+.vb-fu4 { animation-delay: .24s; }
+.vb-fu5 { animation-delay: .31s; }
+
+/* ---------- Contenedores tallados ---------- */
+.rough {
+  position: relative;
+  background:
+    linear-gradient(160deg, rgba(41,26,52,.94), rgba(13,8,22,.97) 60%),
+    radial-gradient(circle at 20% 10%, rgba(168,85,247,.14), transparent 50%);
+  border: 1px solid rgba(236,197,122,.38);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.75) inset, 0 26px 60px rgba(0,0,0,.65);
+}
+.rough.cut-a { clip-path: polygon(2.2% 0,31% 1.4%,68% .3%,97.8% 1.8%,100% 12%,99% 46%,100% 83%,98.2% 100%,64% 98.8%,30% 100%,1.4% 98.4%,0 68%,1.2% 34%,0 9%); }
+.rough.cut-b { clip-path: polygon(0 3%,28% 0,71% 1.8%,100% 0,98.6% 30%,100% 66%,99% 97%,70% 100%,34% 98.6%,0 100%,1.6% 62%,0 31%); }
+.rough.cut-c { clip-path: polygon(1.2% 1.5%,36% 0,70% 2%,99% .5%,100% 38%,98.4% 70%,100% 98.5%,63% 100%,29% 98.2%,.8% 99.5%,0 64%,1.8% 30%); }
+.rough-edge { position: absolute; inset: 6px; border: 1px dashed rgba(236,197,122,.18); pointer-events: none; }
+.rivet {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #f0d9a5, #8a6038 55%, #241505);
+  box-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 6px rgba(236,197,122,.35);
+  z-index: 3;
+}
+.rivet.tl { top: 10px; left: 10px; }
+.rivet.tr { top: 10px; right: 10px; }
+.rivet.bl { bottom: 10px; left: 10px; }
+.rivet.br { bottom: 10px; right: 10px; }
+.tilt-l { transform: rotate(-1.4deg); }
+.tilt-r { transform: rotate(1.1deg); }
+.tilt-l2 { transform: rotate(-2.2deg); }
+.tilt-r2 { transform: rotate(2deg); }
+.ghost {
+  position: absolute;
+  font-family: var(--font-hero);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(236,197,122,.13);
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+  z-index: 0;
+  white-space: nowrap;
+}
+.side-word {
+  position: fixed;
+  right: -8px;
+  top: 50%;
+  transform: rotate(90deg) translateX(-50%);
+  transform-origin: right top;
+  font-family: var(--font-d);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .6em;
+  text-transform: uppercase;
+  color: rgba(236,197,122,.35);
+  z-index: 3;
+  pointer-events: none;
+}
+.orn-head { display: flex; align-items: center; gap: 18px; margin: 70px 0 34px; transform: rotate(-.8deg); }
+.orn-head .rule { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(236,197,122,.5)); }
+.orn-head .rule.rev { background: linear-gradient(90deg, rgba(236,197,122,.5), transparent); }
+.orn-head .title {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--text-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+.orn-head .d { display: inline-block; width: 7px; height: 7px; background: var(--gold); transform: rotate(45deg); box-shadow: 0 0 8px rgba(236,197,122,.7); }
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-d);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .42em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.eyebrow::before, .eyebrow::after {
+  content: '';
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+
+/* ---------- Botones ---------- */
+.btn-epic {
+  position: relative;
+  overflow: hidden;
+  appearance: none;
+  border: 1px solid rgba(236,197,122,.75);
+  background: linear-gradient(180deg, #9333ea 0%, #6d28d9 55%, #3b0764 100%);
+  color: #fff5e0;
+  font-family: var(--font-d);
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: polygon(3% 0,97% 2%,100% 22%,99% 78%,97% 100%,4% 98%,0 74%,1% 20%);
+  box-shadow: 0 0 30px rgba(168,85,247,.4);
+  transition: box-shadow .2s, filter .2s, transform .2s;
+}
+.btn-epic::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: -80%;
+  width: 50%;
+  background: linear-gradient(105deg, transparent, rgba(255,245,220,.35), transparent);
+  transform: skewX(-20deg);
+  transition: left .45s ease;
+}
+.btn-epic:hover:not(:disabled) { filter: brightness(1.12); box-shadow: 0 0 46px rgba(168,85,247,.75); transform: rotate(-.6deg) scale(1.015); }
+.btn-epic:hover:not(:disabled)::after { left: 130%; }
+.btn-epic:disabled { opacity: .42; cursor: not-allowed; }
+
+.btn-rune {
+  appearance: none;
+  border: 1px solid rgba(236,197,122,.4);
+  background: rgba(14,9,24,.8);
+  color: var(--gold);
+  font-family: var(--font-d);
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  clip-path: polygon(4% 0,96% 3%,100% 30%,98% 96%,94% 100%,5% 97%,0 70%,2% 22%);
+  transition: all .18s;
+}
+.btn-rune:hover { background: rgba(236,197,122,.14); color: var(--gold-soft); box-shadow: 0 0 18px rgba(236,197,122,.25); transform: rotate(.5deg); }
+
+/* ---------- Campos ---------- */
+.vb-field-label {
+  font-size: 10px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 7px;
+  display: block;
+  font-weight: 600;
+}
+.vb-input {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(7,5,16,.85);
+  border: 1px solid var(--line-soft);
+  color: var(--text-strong);
+  font-family: var(--font-d);
+  font-size: 18px;
+  letter-spacing: .03em;
+  transition: border-color .2s, box-shadow .2s;
+  clip-path: polygon(1.5% 0,98.5% 3%,100% 30%,99% 96%,97% 100%,2% 97%,0 72%,1% 18%);
+}
+.vb-input::placeholder { color: var(--text-dim); opacity: .65; }
+.vb-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 16px rgba(236,197,122,.3); }
+.vb-select {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(7,5,16,.85);
+  border: 1px solid var(--line-soft);
+  color: var(--text-strong);
+  font-family: var(--font-s);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s;
+  clip-path: polygon(1.5% 0,98.5% 3%,100% 30%,99% 96%,97% 100%,2% 97%,0 72%,1% 18%);
+}
+.vb-select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 16px rgba(236,197,122,.3); }
+
+/* ---------- Anillos de avatar ---------- */
+.ringwrap { position: relative; display: grid; place-items: center; }
+.ring { position: absolute; border-radius: 50%; pointer-events: none; }
+.ring.r1 { inset: -26px; border: 1px dashed rgba(236,197,122,.4); animation: vb-spin 60s linear infinite; }
+.ring.r2 { inset: -12px; border: 1px solid rgba(168,85,247,.35); box-shadow: 0 0 30px rgba(168,85,247,.25) inset; animation: vb-spin-r 45s linear infinite; }
+.ring.r2::before, .ring.r2::after { content: ''; position: absolute; width: 7px; height: 7px; background: var(--purple-glow); border-radius: 50%; box-shadow: 0 0 10px var(--purple-glow); }
+.ring.r2::before { top: -4px; left: 50%; }
+.ring.r2::after { bottom: -4px; left: 50%; }
+.ring.glow { inset: -40px; background: radial-gradient(circle, rgba(168,85,247,.22), transparent 65%); animation: vb-pulse-glow 4s ease-in-out infinite; }

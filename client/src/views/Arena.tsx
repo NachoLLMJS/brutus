@@ -125,17 +125,31 @@ export function Arena() {
 
   return (
     <>
-      <div className="lobby-bg" />
+      <div className={clsx('board-wrap', !showSidebar && 'no-sidebar')}>
+        <div className="ghost board-ghost" aria-hidden>The Pit</div>
 
-      <main className={clsx('lobby anim-fade-up', !showSidebar && 'no-sidebar')}>
+        <div className="board-header rough cut-b vb-fu vb-fu1">
+          <span className="rivet tl" aria-hidden /><span className="rivet tr" aria-hidden />
+          <span className="rivet bl" aria-hidden /><span className="rivet br" aria-hidden />
+          <div className="eyebrow" style={{ justifyContent: 'center' }}>Choose your opponent</div>
+          <div className="board-title">The <span className="acc">Pit</span></div>
+          <div className="board-sub">Only one leaves standing</div>
+        </div>
+
         {showSidebar && (
-          <aside className="lobby-side">
+          <aside className="side vb-fu vb-fu2">
             {brute && <YourBrawlerCard brute={brute} />}
-            <TrainingLever value={trainingMode} onChange={setTrainingMode} />
+            <div className="glass rough cut-c training-box">
+              <span className="rivet tl" aria-hidden /><span className="rivet br" aria-hidden />
+              <div className="glass-head">
+                <span className="title"><span className="d" />Training Mode</span>
+              </div>
+              <TrainingLever value={trainingMode} onChange={setTrainingMode} />
+            </div>
           </aside>
         )}
 
-        <section style={{ minWidth: 0 }}>
+        <div className="vb-fu vb-fu3" style={{ minWidth: 0 }}>
           <LobbyFilters
             current={filter}
             onChange={setFilter}
@@ -143,32 +157,16 @@ export function Arena() {
               setRefreshNonce((n) => n + 1);
               showToast('Board refreshed · rivals updated');
             }}
+            fightsLabel={fightsLabel}
+            fightsDisplay={fightsDisplay}
+            fightsRemaining={fightsRemaining}
+            fightsTotal={fightsTotal}
           />
 
           {loading ? (
-            <div
-              className="text-center py-16 font-display uppercase"
-              style={{
-                color: 'var(--text-secondary)',
-                letterSpacing: '0.2em',
-                border: '1px dashed var(--border-shadow)',
-                borderRadius: 4,
-              }}
-            >
-              Searching for rivals in the pit…
-            </div>
+            <div className="board-empty">Searching for rivals in the pit…</div>
           ) : filtered.length === 0 ? (
-            <div
-              className="text-center py-16 font-display uppercase"
-              style={{
-                color: 'var(--text-secondary)',
-                letterSpacing: '0.2em',
-                border: '1px dashed var(--border-shadow)',
-                borderRadius: 4,
-              }}
-            >
-              No one matches that filter today
-            </div>
+            <div className="board-empty">No one matches that filter today</div>
           ) : (
             <div className="op-grid">
               {filtered.map((op) => (
@@ -184,52 +182,25 @@ export function Arena() {
               ))}
             </div>
           )}
-        </section>
-      </main>
+        </div>
+      </div>
 
-      <BoardHeader fightsDisplay={fightsDisplay} fightsRemaining={fightsRemaining} fightsTotal={fightsTotal} fightsLabel={fightsLabel} />
-
-      {localToast && <div className="lobby-toast">{localToast}</div>}
+      {localToast && <div className="toast">{localToast}</div>}
     </>
   );
 }
 
 /* ──────────────────── Sub-componentes ──────────────────── */
 
-function BoardHeader({
-  fightsDisplay,
-  fightsRemaining,
-  fightsTotal,
-  fightsLabel,
-}: {
-  fightsDisplay: string;
-  fightsRemaining: number;
-  fightsTotal: number;
-  fightsLabel: string;
-}) {
-  return (
-    <section className="board-header board-header-compact">
-      <div className="fights-counter">
-        <span className="lbl">{fightsLabel}</span>
-        <span className="val">{fightsDisplay}</span>
-        <span className="pips">
-          {Array.from({ length: fightsTotal }).map((_, i) => (
-            <span key={i} className={clsx('p', i < fightsRemaining && 'on')} />
-          ))}
-        </span>
-      </div>
-    </section>
-  );
-}
-
 function YourBrawlerCard({ brute }: { brute: Brute }) {
   const xpPct = Math.min(100, Math.floor((brute.xp / Math.max(1, brute.xp + 100)) * 100));
   const flavor = flavorFor(brute);
   return (
-    <div className="glass your-brawler">
+    <div className="glass rough cut-a your-brawler">
+      <span className="rivet tl" aria-hidden /><span className="rivet tr" aria-hidden />
+      <span className="rivet bl" aria-hidden /><span className="rivet br" aria-hidden />
       <div className="glass-head">
-        <span className="num">— I</span>
-        <span className="title">Your Vault Brawler</span>
+        <span className="title"><span className="d" />Your Vault Brawler</span>
       </div>
       <div className="your-bust">
         <BruteAvatar brute={brute} size="md" />
@@ -271,8 +242,7 @@ function YourBrawlerCard({ brute }: { brute: Brute }) {
 
 function TrainingLever({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div className={clsx('training', value && 'on')}>
-      <div className="t-head">Training mode</div>
+    <div className="training">
       <div className="t-sub">Does not consume fights. No gold rewards or streaks.</div>
       <button
         type="button"
@@ -281,10 +251,7 @@ function TrainingLever({ value, onChange }: { value: boolean; onChange: (v: bool
         aria-pressed={value}
       >
         <span className="label top">Sparring</span>
-        <span className="slot" />
-        <span className="handle">
-          <span className="knob" />
-        </span>
+        <span className="handle">{value ? 'Real Blood' : 'Sparring'}</span>
         <span className="label bot">Real blood</span>
       </button>
       <div className="t-state">
@@ -298,10 +265,18 @@ function LobbyFilters({
   current,
   onChange,
   onReroll,
+  fightsLabel,
+  fightsDisplay,
+  fightsRemaining,
+  fightsTotal,
 }: {
   current: LobbyFilter;
   onChange: (f: LobbyFilter) => void;
   onReroll: () => void;
+  fightsLabel: string;
+  fightsDisplay: string;
+  fightsRemaining: number;
+  fightsTotal: number;
 }) {
   return (
     <div className="lobby-filters">
@@ -316,10 +291,18 @@ function LobbyFilters({
           {f.label}
         </button>
       ))}
-      <span className="spacer" />
       <button type="button" className="reroll" onClick={onReroll}>
         ↻ Re-roll
       </button>
+      <div className="fights-counter">
+        <span className="lbl">{fightsLabel}</span>
+        <span className="val">{fightsDisplay}</span>
+        <span className="pips">
+          {Array.from({ length: fightsTotal }).map((_, i) => (
+            <span key={i} className={clsx('p', i < fightsRemaining && 'on')} />
+          ))}
+        </span>
+      </div>
     </div>
   );
 }
@@ -347,41 +330,37 @@ function OpponentCard({
   const cooldownText = formatCountdown(cooldownMs);
 
   return (
-    <article className="op-card" data-adv={advantage}>
-      <div className="op-frame">
-        <div className="op-corner tl" />
-        <div className="op-corner tr" />
-        <div className="op-corner bl" />
-        <div className="op-corner br" />
-
-        <div className="op-head">
-          <div className="op-bust">
-            <BruteAvatar brute={op} size="sm" />
-            <span className="op-lvl">N{op.level}</span>
+    <article className="op-card rough cut-a" data-adv={advantage}>
+      <span className="rivet tl" aria-hidden /><span className="rivet tr" aria-hidden />
+      <div className="op-head">
+        <div className="op-bust">
+          <BruteAvatar brute={op} size="sm" />
+          <span className="op-lvl">N{op.level}</span>
+        </div>
+        <div className="op-id">
+          <div className="op-name-row">
+            <h3 className="op-name">{op.name}</h3>
+            <span className={`op-rank rank-${flavor.rankTier}`}>{flavor.rankName}</span>
           </div>
-          <div className="op-id">
-            <div className="op-name-row">
-              <h3 className="op-name">{op.name}</h3>
-              <span className={`op-rank rank-${flavor.rankTier}`}>{flavor.rankName}</span>
-            </div>
-            <StatusDot status={flavor.status} label={flavor.statusLabel} />
-            <div className="op-build">
-              <span className="op-build-slot" title={flavor.weapon.name}>
-                <MiniGlyph kind={flavor.weapon.icon} color={flavor.color} />
+          <StatusDot status={flavor.status} label={flavor.statusLabel} />
+          <div className="op-build">
+            <span className="op-build-slot" title={flavor.weapon.name}>
+              <MiniGlyph kind={flavor.weapon.icon} color={flavor.color} />
+            </span>
+            {flavor.beast && (
+              <span className="op-build-slot" title={flavor.beast.name}>
+                <BeastGlyph kind={flavor.beast.icon} color={flavor.color} />
               </span>
-              {flavor.beast && (
-                <span className="op-build-slot" title={flavor.beast.name}>
-                  <BeastGlyph kind={flavor.beast.icon} color={flavor.color} />
-                </span>
-              )}
-              <span className="op-build-text">
-                {flavor.weapon.name}
-                {flavor.beast ? ` · ${flavor.beast.name}` : ''}
-              </span>
-            </div>
+            )}
+            <span className="op-build-text">
+              {flavor.weapon.name}
+              {flavor.beast ? ` · ${flavor.beast.name}` : ''}
+            </span>
           </div>
         </div>
+      </div>
 
+      <div className="op-body">
         <div className="op-stats">
           <WLBar wins={op.victories} losses={op.defeats} />
           <div className="op-streak">
@@ -400,8 +379,8 @@ function OpponentCard({
 
         {cooldownActive && (
           <div className="op-cooldown" title={`Rematch unlocks at ${new Date(op.cooldownUntil!).toLocaleString()}`}>
-            <span className="op-cooldown-icon" aria-hidden>⏳</span>
-            <span className="op-cooldown-copy">
+            <span aria-hidden>⏳</span>
+            <span>
               <span className="op-cooldown-label">Rematch cooldown</span>
               <span className="op-cooldown-time">{cooldownText}</span>
             </span>
@@ -410,12 +389,12 @@ function OpponentCard({
 
         <div className="op-foot">
           <span className="op-meta">
-            <span className="last">Last fight</span>
+            <span>Last fight</span>
             <span className="last-when">{flavor.lastFight}</span>
           </span>
           <button
             type="button"
-            className={clsx('op-challenge', isTraining && 'training', cooldownActive && 'cooldown')}
+            className={clsx('btn-epic op-challenge', isTraining && 'training', cooldownActive && 'cooldown')}
             onClick={onChallenge}
             disabled={!canChallenge}
           >
@@ -472,9 +451,9 @@ function formatCountdown(ms: number): string {
 
 function StatusDot({ status, label }: { status: FlavorStatus; label: string }) {
   const colorMap: Record<FlavorStatus, string> = {
-    online: 'var(--hp-full)',
-    recent: 'var(--accent-gold)',
-    cold: 'var(--text-secondary)',
+    online: 'var(--success)',
+    recent: 'var(--gold)',
+    cold: 'var(--text-dim)',
   };
   const color = colorMap[status];
   return (

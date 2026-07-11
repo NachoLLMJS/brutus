@@ -1,0 +1,524 @@
+/* Vault Brawl v2 — Temple (Profile).
+ * Rediseño "Dark Fantasy Rústico" del handoff Claude Design (Jul 2026).
+ * Todo scopeado bajo .temple-wrap para convivir con el CSS legacy de
+ * profile.css mientras el resto de vistas migra. Usa las primitivas de
+ * rough.css (.rough, .rivet, .ringwrap, .btn-epic, .btn-rune, .ghost).
+ */
+
+.temple-wrap {
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 36px 32px 80px;
+  font-family: var(--font-s);
+  color: var(--text);
+}
+.temple-wrap .temple-ghost {
+  font-size: clamp(150px, 20vw, 300px);
+  top: -10px;
+  left: -30px;
+  transform: rotate(-90deg) translateX(-100%);
+  transform-origin: top left;
+}
+
+/* ---------- HERO ---------- */
+.temple-wrap .temple-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 36px;
+  align-items: center;
+  margin-bottom: 34px;
+  z-index: 2;
+}
+@media (max-width: 860px) {
+  .temple-wrap .temple-hero {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 28px;
+  }
+}
+.temple-wrap .temple-portrait {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 2.5px solid var(--gold);
+  box-shadow:
+    0 0 0 6px rgba(7, 5, 16, 0.9),
+    0 0 0 7px rgba(236, 197, 122, 0.3),
+    0 0 50px rgba(236, 197, 122, 0.3);
+  background: radial-gradient(ellipse at 50% 30%, var(--surface-hi) 0%, var(--surface2) 72%);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.temple-wrap .temple-portrait > * {
+  overflow: hidden;
+}
+.temple-wrap .temple-id h1 {
+  font-family: var(--font-hero);
+  font-weight: 900;
+  font-size: clamp(38px, 5vw, 68px);
+  text-transform: uppercase;
+  line-height: 0.95;
+  color: var(--text-strong);
+  text-shadow: 0 0 60px rgba(168, 85, 247, 0.5), 0 4px 0 rgba(0, 0, 0, 0.85);
+  margin: 10px 0 0;
+  overflow-wrap: anywhere;
+}
+.temple-wrap .temple-meta {
+  margin-top: 10px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-family: var(--font-d);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  color: var(--text-strong);
+  text-transform: uppercase;
+  flex-wrap: wrap;
+}
+@media (max-width: 860px) {
+  .temple-wrap .temple-meta { justify-content: center; }
+}
+.temple-wrap .rank-badge {
+  padding: 5px 14px;
+  color: var(--gold);
+  background: rgba(7, 5, 16, 0.75);
+  border: 1px solid var(--gold);
+  clip-path: polygon(4% 0, 96% 6%, 100% 45%, 97% 94%, 4% 100%, 0 52%);
+  box-shadow: 0 0 16px rgba(236, 197, 122, 0.25);
+}
+.temple-wrap .hero-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+@media (max-width: 860px) {
+  .temple-wrap .hero-actions { justify-content: center; }
+}
+.temple-wrap .btn-hero {
+  padding: 15px 30px;
+  font-size: 15px;
+}
+.temple-wrap .btn-hero.primary {
+  padding: 16px 44px;
+  font-size: 19px;
+}
+.temple-wrap .fights-pill {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 16px;
+  background: rgba(7, 5, 16, 0.78);
+  border: 1px solid var(--line-soft);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  transform: rotate(1.4deg);
+  clip-path: polygon(2% 0, 98% 4%, 100% 40%, 98% 96%, 2% 100%, 0 50%);
+}
+.temple-wrap .fights-pill .pips { display: inline-flex; gap: 4px; }
+.temple-wrap .fights-pill .pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--void2);
+  border: 1px solid var(--line-soft);
+}
+.temple-wrap .fights-pill .pip.on {
+  background: var(--purple);
+  border-color: var(--purple);
+  box-shadow: 0 0 6px var(--purple);
+}
+.temple-wrap .temple-levelup-banner {
+  display: block;
+  width: 100%;
+  margin-bottom: 28px;
+  padding: 14px;
+  appearance: none;
+  cursor: pointer;
+  background: linear-gradient(180deg, rgba(147, 51, 234, 0.35), rgba(59, 7, 100, 0.45));
+  border: 1px solid var(--gold);
+  color: var(--gold-soft);
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  clip-path: polygon(1% 0, 99% 2%, 100% 30%, 99% 96%, 98% 100%, 1% 98%, 0 70%, 0.5% 20%);
+  box-shadow: 0 0 26px rgba(168, 85, 247, 0.35);
+  transition: filter 0.15s;
+}
+.temple-wrap .temple-levelup-banner:hover { filter: brightness(1.15); }
+
+/* ---------- BIG STATS ---------- */
+.temple-wrap .bigstats {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  z-index: 2;
+}
+@media (max-width: 900px) {
+  .temple-wrap .bigstats { grid-template-columns: repeat(2, 1fr); }
+}
+.temple-wrap .bigstat {
+  padding: 15px 18px 13px;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.temple-wrap .bigstat:hover { transform: translateY(-3px); }
+.temple-wrap .icon-img {
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+.temple-wrap .bigstat-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: -5px;
+  margin-right: 7px;
+}
+.temple-wrap .bigstat-label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.temple-wrap .bigstat-value {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: clamp(26px, 2.4vw, 36px);
+  line-height: 1;
+}
+.temple-wrap .bigstat-max {
+  font-size: 16px;
+  color: var(--text-dim);
+}
+.temple-wrap .bigstat-bar {
+  margin-top: 9px;
+  height: 5px;
+  background: rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+.temple-wrap .bigstat-bar-fill {
+  height: 100%;
+  box-shadow: 0 0 10px currentColor;
+}
+.temple-wrap .bigstat-sub {
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ---------- DUAL COLUMNS + GLASS ---------- */
+.temple-wrap .dual {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .temple-wrap .dual { grid-template-columns: 1fr; }
+}
+.temple-wrap .dual-left,
+.temple-wrap .dual-right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.temple-wrap .dual-right { margin-top: 0; }
+.temple-wrap .glass { padding: 22px; }
+.temple-wrap .glass-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(236, 197, 122, 0.2);
+}
+.temple-wrap .glass-head .title {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.18em;
+  color: var(--text-strong);
+  text-transform: uppercase;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.temple-wrap .glass-head .title .d {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  transform: rotate(45deg);
+}
+.temple-wrap .glass-head .meta {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ---------- STICKER GRIDS (skills / weapons) ---------- */
+.temple-wrap .grid-icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  gap: 10px;
+}
+.temple-wrap .grid-icons .sticker {
+  position: relative;
+  aspect-ratio: 1;
+  width: auto;
+  height: auto;
+  appearance: none;
+  background: linear-gradient(180deg, rgba(48, 30, 64, 0.95), rgba(12, 7, 20, 0.96));
+  border: 1px solid rgba(236, 197, 122, 0.3);
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.14s, box-shadow 0.14s, border-color 0.14s;
+  clip-path: polygon(8% 0, 92% 4%, 100% 12%, 97% 90%, 90% 100%, 8% 96%, 0 88%, 3% 10%);
+}
+.temple-wrap .grid-icons .sticker.active {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(120, 80, 30, 0.5), rgba(30, 18, 8, 0.9));
+  box-shadow: 0 0 18px rgba(236, 197, 122, 0.55);
+}
+.temple-wrap .grid-icons .sticker:hover {
+  transform: scale(1.12);
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(236, 197, 122, 0.35);
+  z-index: 4;
+}
+.temple-wrap .grid-icons .sticker img,
+.temple-wrap .grid-icons .sticker-icon {
+  width: 34px;
+  height: 34px;
+  max-width: 72%;
+  max-height: 72%;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+}
+/* Bloqueado: visible pero apagado — el catálogo completo invita a crear
+ * nuevos brawlers para desbloquear lo que falta. */
+.temple-wrap .grid-icons .sticker.locked {
+  cursor: default;
+  border-color: rgba(236, 197, 122, 0.12);
+  background: linear-gradient(180deg, rgba(28, 18, 38, 0.9), rgba(8, 5, 14, 0.95));
+}
+.temple-wrap .grid-icons .sticker.locked img {
+  opacity: 0.28;
+  filter: grayscale(0.85) brightness(0.7) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+}
+.temple-wrap .grid-icons .sticker.locked:hover {
+  transform: none;
+  border-color: rgba(236, 197, 122, 0.3);
+  box-shadow: none;
+  z-index: 1;
+}
+.temple-wrap .grid-icons .sticker.locked:hover img { opacity: 0.5; }
+.temple-wrap .sticker-pin {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 9px;
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(236, 197, 122, 0.8);
+  pointer-events: none;
+}
+
+/* ---------- UPGRADE BOX (skill detail) ---------- */
+.temple-wrap .upgrade-box {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: rgba(7, 5, 16, 0.8);
+  border: 1px solid rgba(236, 197, 122, 0.25);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  clip-path: polygon(1% 0, 99% 3%, 100% 30%, 99% 95%, 97% 100%, 2% 98%, 0 70%, 1% 25%);
+}
+.temple-wrap .upgrade-box img { width: 38px; height: 38px; }
+.temple-wrap .upgrade-name {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+.temple-wrap .upgrade-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ---------- BEASTS ---------- */
+.temple-wrap .beast-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.temple-wrap .beast-slot {
+  appearance: none;
+  width: 100%;
+  padding: 16px;
+  text-align: center;
+  font-family: var(--font-d);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  background: rgba(10, 6, 18, 0.4);
+  border: 1px dashed rgba(236, 197, 122, 0.25);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.temple-wrap .beast-slot:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.temple-wrap .beast-filled {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  padding: 10px 14px;
+  background: rgba(10, 6, 18, 0.55);
+  border: 1px solid rgba(236, 197, 122, 0.3);
+  cursor: pointer;
+  clip-path: polygon(2% 0, 98% 3%, 100% 30%, 99% 95%, 97% 100%, 2% 98%, 0 70%, 1% 25%);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.temple-wrap .beast-filled:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(236, 197, 122, 0.25);
+}
+.temple-wrap .beast-filled .beast-name {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--text-strong);
+  text-transform: uppercase;
+}
+.temple-wrap .beast-filled .beast-meta {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.temple-wrap .beast-market-link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 6px 0 0;
+  cursor: pointer;
+  font-family: var(--font-s);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: underline dashed rgba(236, 197, 122, 0.5);
+  text-underline-offset: 3px;
+}
+
+/* ---------- VAULT INFO ---------- */
+.temple-wrap .vault-balance {
+  text-align: center;
+  padding: 16px;
+  background: rgba(7, 5, 16, 0.85);
+  border: 1px solid rgba(236, 197, 122, 0.3);
+  margin-bottom: 14px;
+  clip-path: polygon(2% 0, 98% 2%, 100% 25%, 99% 96%, 96% 100%, 3% 98%, 0 75%, 1% 20%);
+}
+.temple-wrap .vault-balance .lbl {
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+.temple-wrap .vault-balance .val {
+  font-family: var(--font-d);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--gold);
+  margin: 6px 0;
+  text-shadow: 0 0 20px rgba(236, 197, 122, 0.4);
+}
+.temple-wrap .vault-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(236, 197, 122, 0.1);
+}
+.temple-wrap .vault-row:last-child { border-bottom: none; }
+.temple-wrap .vault-row .l { color: var(--text-dim); letter-spacing: 0.04em; }
+.temple-wrap .vault-row .v {
+  color: var(--text-strong);
+  font-family: var(--font-d);
+  font-weight: 600;
+  text-align: right;
+}
+.temple-wrap .vault-note {
+  padding: 12px 0 0;
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* ---------- FOOTER EXTRAS ---------- */
+.temple-wrap .temple-lineage {
+  margin-top: 48px;
+  text-align: center;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+.temple-wrap .temple-footer-row {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.temple-wrap .temple-footer-row a {
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(236, 197, 122, 0.4);
+  padding-bottom: 1px;
+}
+.temple-wrap .temple-footer-row a:hover { color: var(--gold-soft); }
+.temple-wrap .pupils-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}

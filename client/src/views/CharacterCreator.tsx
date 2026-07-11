@@ -134,6 +134,25 @@ export function CharacterCreator() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const pickRandom = <T,>(options: ReadonlyArray<{ key: T }>): T =>
+    options[Math.floor(Math.random() * options.length)]!.key;
+
+  const randomizeLook = () => {
+    setLpcHair(pickRandom(LPC_HAIR_OPTIONS));
+    setLpcWings(pickRandom(LPC_WINGS_OPTIONS));
+    setLpcHeadwear(pickRandom(LPC_HEADWEAR_OPTIONS));
+    setLpcArmorColor(pickRandom(LPC_ARMOR_COLOR_OPTIONS));
+    setLpcArmsArmor(pickRandom(LPC_ARMS_ARMOR_OPTIONS));
+    setLpcTorsoArmor(pickRandom(LPC_TORSO_ARMOR_OPTIONS));
+    setLpcLegsArmor(pickRandom(LPC_LEGS_ARMOR_OPTIONS));
+    setLpcFeetArmor(pickRandom(LPC_FEET_ARMOR_OPTIONS));
+  };
+
+  const randomizeName = () => {
+    const names = ['Vorgath', 'Sanguineus', 'Mörgar', 'Comodoro', 'Grimfang', 'Ashkarr', 'Blackmaw', 'Ironclaw'];
+    setName(names[Math.floor(Math.random() * names.length)]!);
+  };
+
   const nameValid = isValidName(name);
   const walletReady = Boolean(walletAddress && isSupportedBnbChain(chainId));
   const forgeDisabled = !nameValid || submitting || !walletReady;
@@ -258,11 +277,11 @@ export function CharacterCreator() {
   };
 
   return (
-    <div className="creator-shell anim-fade-up">
-      <header className="creator-hero">
-        <div className="eyebrow">
-          <span>Forge your destiny</span>
-        </div>
+    <div className="creator-wrap anim-fade-up">
+      <div className="ghost forge-ghost" aria-hidden>Forge</div>
+
+      <header className="creator-hero vb-fu vb-fu1">
+        <div className="eyebrow">Forge your destiny</div>
         <h1>
           Create <em>Vault Brawler</em>
         </h1>
@@ -275,11 +294,17 @@ export function CharacterCreator() {
         </div>
       )}
 
-      <section className="creator-panel">
-        <div className="creator-grid">
-          {/* Preview izquierdo */}
-          <div className="creator-preview">
-            <div className="creator-preview-frame">
+      <div className="creator-grid vb-fu vb-fu2">
+        {/* Altar izquierdo */}
+        <div className="altar rough cut-c tilt-l">
+          <span className="rough-edge" aria-hidden />
+          <span className="rivet tl" aria-hidden /><span className="rivet tr" aria-hidden />
+          <span className="rivet bl" aria-hidden /><span className="rivet br" aria-hidden />
+          <div className="ringwrap">
+            <div className="ring glow" aria-hidden />
+            <div className="ring r1" aria-hidden />
+            <div className="ring r2" aria-hidden />
+            <div className="altar-frame">
               <LpcAvatarPreview
                 hair={effectiveLpcHair}
                 wings={lpcWings}
@@ -290,110 +315,101 @@ export function CharacterCreator() {
                 feetArmor={lpcFeetArmor}
                 armorColor={lpcArmorColor}
                 weapon="none"
-                scale={3}
+                scale={4}
                 compact
               />
-              <span className="pin tl" />
-              <span className="pin tr" />
-              <span className="pin bl" />
-              <span className="pin br" />
-            </div>
-            <div className={clsx('creator-preview-name', !name && 'empty')}>
-              {name || 'No name'}
-            </div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginTop: 10 }}>
-              Editable equipment for creation and combat.
             </div>
           </div>
-
-          {/* Form derecho */}
-          <div className="creator-form">
-            <div>
-              <div className="creator-field-label">
-                <span>Vault Brawler name</span>
-                {name.length > 0 && !nameValid && <span className="err">3-20 alphanumeric</span>}
-              </div>
-              <input
-                className="creator-name-input"
-                placeholder="Vorgath, Sanguineus, Mörgar…"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={20}
-                spellCheck={false}
-                autoComplete="off"
-                aria-invalid={!nameValid && name.length > 0}
-              />
-            </div>
-
-            <div className="creator-select-grid">
-              <LpcSelect label="Hair" value={lpcHair} options={LPC_HAIR_OPTIONS} onChange={(value) => setLpcHair(value as LpcHairKey)} />
-              <LpcSelect label="Wings" value={lpcWings} options={LPC_WINGS_OPTIONS} onChange={(value) => setLpcWings(value as LpcWingsKey)} />
-              <LpcSelect label="Headwear / helmet" value={lpcHeadwear} options={LPC_HEADWEAR_OPTIONS} onChange={(value) => setLpcHeadwear(value as LpcHeadwearKey)} />
-              <LpcSelect label="Color" value={lpcArmorColor} options={LPC_ARMOR_COLOR_OPTIONS} onChange={(value) => setLpcArmorColor(value as LpcArmorColorKey)} />
-              <LpcSelect label="Arms armour" value={lpcArmsArmor} options={LPC_ARMS_ARMOR_OPTIONS} onChange={(value) => setLpcArmsArmor(value as LpcArmsArmorKey)} />
-              <LpcSelect label="Jacket / armour" value={lpcTorsoArmor} options={LPC_TORSO_ARMOR_OPTIONS} onChange={(value) => setLpcTorsoArmor(value as LpcTorsoArmorKey)} />
-              <LpcSelect label="Legs armour" value={lpcLegsArmor} options={LPC_LEGS_ARMOR_OPTIONS} onChange={(value) => setLpcLegsArmor(value as LpcLegsArmorKey)} />
-              <LpcSelect label="Feet armour" value={lpcFeetArmor} options={LPC_FEET_ARMOR_OPTIONS} onChange={(value) => setLpcFeetArmor(value as LpcFeetArmorKey)} />
-            </div>
-
-            <button
-              type="button"
-              className="creator-cta"
-              onClick={submit}
-              disabled={forgeDisabled}
-            >
-              <span>{submitting ? 'Creating…' : walletReady ? 'Create Vault Brawler' : 'Wallet required'}</span>
-              {!submitting && <span className="arrow">›</span>}
-            </button>
-            {paidForgeNeeded && walletReady && (
-              <div
-                style={{
-                  display: 'grid',
-                  gap: 8,
-                  marginTop: 10,
-                  padding: 12,
-                  border: '1px solid rgba(230,180,80,0.45)',
-                  background: 'rgba(230,180,80,0.08)',
-                }}
-              >
-                <b>You already have 3 base Vault Brawlers.</b>
-                <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-                  You can create this extra Vault Brawler by paying {paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}
-                  {paidForgeTokenPrice ? ` or ${formatTokenUnits(paidForgeTokenPrice)} ${gameTokenSymbol}` : ` or ${gameTokenSymbol}`}.
-                  BNB goes to the vault; {gameTokenSymbol} goes to the dev wallet.
-                </span>
-                <button
-                  type="button"
-                  className="creator-cta"
-                  onClick={() => void submitPaidExtra('bnb')}
-                  disabled={paidForgeBusy || !nameValid}
-                >
-                  <span>{paidForgeBusy ? 'Waiting for MetaMask…' : `Pay ${paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}`}</span>
-                  {!paidForgeBusy && <span className="arrow">›</span>}
-                </button>
-                <button
-                  type="button"
-                  className="creator-cta"
-                  onClick={() => void submitPaidExtra('token')}
-                  disabled={paidForgeBusy || !nameValid}
-                >
-                  <span>{paidForgeBusy ? 'Waiting for MetaMask…' : `Pay ${paidForgeTokenPrice ? `${formatTokenUnits(paidForgeTokenPrice)} ${gameTokenSymbol}` : gameTokenSymbol}`}</span>
-                  {!paidForgeBusy && <span className="arrow">›</span>}
-                </button>
-              </div>
-            )}
-            <div className={clsx('creator-fine', (!walletReady || (!nameValid && name.length > 0)) && 'error')}>
-              {!walletReady
-                ? 'First connect MetaMask on BNB Chain/Testnet'
-                : name.length === 0
-                  ? 'Each Vault Brawler will be linked to your BNB wallet'
-                  : nameValid
-                    ? 'Ready to create'
-                    : 'Name must be 3 to 20 alphanumeric characters'}
-            </div>
+          <div className={clsx('preview-name', !name && 'empty')}>
+            {name || 'No name'}
+          </div>
+          <div className="randomizers">
+            <button type="button" className="btn-rune rnd-btn" onClick={randomizeLook}>⟲ Randomize look</button>
+            <button type="button" className="btn-rune rnd-btn" onClick={randomizeName}>✦ Random name</button>
           </div>
         </div>
-      </section>
+
+        {/* Form derecho */}
+        <div className="creator-form rough cut-a tilt-r">
+          <span className="rough-edge" aria-hidden />
+          <span className="rivet tl" aria-hidden /><span className="rivet tr" aria-hidden />
+          <span className="rivet bl" aria-hidden /><span className="rivet br" aria-hidden />
+          <div>
+            <div className="field-label">
+              <span>Vault Brawler Name</span>
+              {name.length > 0 && !nameValid && <span className="err">3-20 alphanumeric</span>}
+            </div>
+            <input
+              className="vb-input"
+              placeholder="Vorgath, Sanguineus, Mörgar…"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={20}
+              spellCheck={false}
+              autoComplete="off"
+              aria-invalid={!nameValid && name.length > 0}
+            />
+          </div>
+
+          <div className="select-grid">
+            <LpcSelect label="Hair" value={lpcHair} options={LPC_HAIR_OPTIONS} onChange={(value) => setLpcHair(value as LpcHairKey)} />
+            <LpcSelect label="Wings" value={lpcWings} options={LPC_WINGS_OPTIONS} onChange={(value) => setLpcWings(value as LpcWingsKey)} />
+            <LpcSelect label="Headwear / Helmet" value={lpcHeadwear} options={LPC_HEADWEAR_OPTIONS} onChange={(value) => setLpcHeadwear(value as LpcHeadwearKey)} />
+            <LpcSelect label="Color" value={lpcArmorColor} options={LPC_ARMOR_COLOR_OPTIONS} onChange={(value) => setLpcArmorColor(value as LpcArmorColorKey)} />
+            <LpcSelect label="Arms Armour" value={lpcArmsArmor} options={LPC_ARMS_ARMOR_OPTIONS} onChange={(value) => setLpcArmsArmor(value as LpcArmsArmorKey)} />
+            <LpcSelect label="Jacket / Armour" value={lpcTorsoArmor} options={LPC_TORSO_ARMOR_OPTIONS} onChange={(value) => setLpcTorsoArmor(value as LpcTorsoArmorKey)} />
+            <LpcSelect label="Legs Armour" value={lpcLegsArmor} options={LPC_LEGS_ARMOR_OPTIONS} onChange={(value) => setLpcLegsArmor(value as LpcLegsArmorKey)} />
+            <LpcSelect label="Feet Armour" value={lpcFeetArmor} options={LPC_FEET_ARMOR_OPTIONS} onChange={(value) => setLpcFeetArmor(value as LpcFeetArmorKey)} />
+          </div>
+
+          <button
+            type="button"
+            className="btn-epic big-cta"
+            onClick={submit}
+            disabled={forgeDisabled}
+          >
+            <span>{submitting ? 'Creating…' : walletReady ? 'Create Vault Brawler' : 'Wallet Required'}</span>
+            {!submitting && <span className="arrow">›</span>}
+          </button>
+          {paidForgeNeeded && walletReady && (
+            <div className="paid-forge-box">
+              <b>You already have 3 base Vault Brawlers.</b>
+              <span className="desc">
+                You can create this extra Vault Brawler by paying {paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}
+                {paidForgeTokenPrice ? ` or ${formatTokenUnits(paidForgeTokenPrice)} ${gameTokenSymbol}` : ` or ${gameTokenSymbol}`}.
+                BNB goes to the vault; {gameTokenSymbol} goes to the dev wallet.
+              </span>
+              <button
+                type="button"
+                className="btn-epic big-cta"
+                onClick={() => void submitPaidExtra('bnb')}
+                disabled={paidForgeBusy || !nameValid}
+              >
+                <span>{paidForgeBusy ? 'Waiting for MetaMask…' : `Pay ${paidForgePrice ? `${formatBnbWei(paidForgePrice)} BNB` : 'BNB'}`}</span>
+                {!paidForgeBusy && <span className="arrow">›</span>}
+              </button>
+              <button
+                type="button"
+                className="btn-rune big-cta"
+                onClick={() => void submitPaidExtra('token')}
+                disabled={paidForgeBusy || !nameValid}
+              >
+                <span>{paidForgeBusy ? 'Waiting for MetaMask…' : `Pay ${paidForgeTokenPrice ? `${formatTokenUnits(paidForgeTokenPrice)} ${gameTokenSymbol}` : gameTokenSymbol}`}</span>
+                {!paidForgeBusy && <span className="arrow">›</span>}
+              </button>
+            </div>
+          )}
+          <div className={clsx('creator-fine', (!walletReady || (!nameValid && name.length > 0)) && 'error')}>
+            {!walletReady
+              ? 'First connect MetaMask on BNB Chain/Testnet'
+              : name.length === 0
+                ? 'Each Vault Brawler will be linked to your BNB wallet'
+                : nameValid
+                  ? 'Ready to create'
+                  : 'Name must be 3 to 20 alphanumeric characters'}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -415,12 +431,12 @@ function LpcSelect({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="creator-lpc-select">
-      <span className="creator-field-label creator-lpc-label">
+    <label style={{ display: 'block' }}>
+      <span className="field-label" style={{ marginBottom: 7 }}>
         <span>{label}</span>
       </span>
       <select
-        className="creator-name-input creator-lpc-control"
+        className="vb-select"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
