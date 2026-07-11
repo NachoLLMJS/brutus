@@ -348,6 +348,9 @@ export function LpcAvatarPreview({
   const [direction, setDirection] = useState<DirectionKey>('down');
   const [frame, setFrame] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  // Cache de imágenes cargadas, indexado por src. Cargar es lo caro (red +
+  // decode); dibujar el frame de animación no debe re-descargar nada.
+  const [images, setImages] = useState<Map<string, HTMLImageElement>>(new Map());
   const paths = useMemo(
     () => layerPaths({ head, hair, wings, headwear, armsArmor, torsoArmor, legsArmor, feetArmor, armorColor, weapon }),
     [head, hair, wings, headwear, armsArmor, torsoArmor, legsArmor, feetArmor, armorColor, weapon],
@@ -358,29 +361,43 @@ export function LpcAvatarPreview({
     return () => window.clearInterval(timer);
   }, []);
 
+  // Cargar sólo cuando cambian las capas (equipo). Antes esto corría en cada
+  // tick de animación (~2/s) recreando ~10 `new Image()` por vez; bajo esa
+  // carga concurrente el navegador aborta cargas de forma intermitente y
+  // disparaba el error "No se pudo cargar" (típicamente el sprite más pesado).
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
         setError(null);
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        const images = await Promise.all(paths.map((layer) => loadImage(layer.src)));
+        const uniqueSrcs = Array.from(new Set(paths.map((layer) => layer.src)));
+        const loaded = await Promise.all(uniqueSrcs.map((src) => loadImage(src)));
         if (cancelled) return;
-        const row = DIRECTIONS.find((d) => d.key === direction)?.row ?? 2;
-        canvas.width = FRAME * scale;
-        canvas.height = FRAME * scale;
-        ctx.imageSmoothingEnabled = false;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        images.forEach((img, i) => drawLayer(ctx, img, paths[i]!, frame, row, scale));
+        const next = new Map<string, HTMLImageElement>();
+        uniqueSrcs.forEach((src, i) => next.set(src, loaded[i]!));
+        setImages(next);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'No se pudo renderizar LPC');
       }
     })();
     return () => { cancelled = true; };
-  }, [direction, frame, paths, scale]);
+  }, [paths]);
+
+  // Dibujar: sin red, sólo compone las capas ya cacheadas. Se re-ejecuta en
+  // cada frame/dirección sin coste de descarga.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    if (!paths.every((layer) => images.has(layer.src))) return;
+    const row = DIRECTIONS.find((d) => d.key === direction)?.row ?? 2;
+    canvas.width = FRAME * scale;
+    canvas.height = FRAME * scale;
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    paths.forEach((layer) => drawLayer(ctx, images.get(layer.src)!, layer, frame, row, scale));
+  }, [images, direction, frame, paths, scale]);
 
   if (compact) {
     return (
