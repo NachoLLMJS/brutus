@@ -1,6 +1,9 @@
 @import './tokens.css';
+@import './rough.css';
 @import './lobby.css';
 @import './profile.css';
+@import './temple.css';
+@import './board.css';
 @import './combat.css';
 @import './landing.css';
 @import './creator.css';

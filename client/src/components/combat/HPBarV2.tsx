@@ -10,7 +10,7 @@ interface HPBarV2Props {
 export function HPBarV2({ value, max, side }: HPBarV2Props) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   const color =
-    pct > 60 ? 'var(--hp-full)' : pct > 30 ? 'var(--hp-mid)' : 'var(--hp-low)';
+    pct > 60 ? 'var(--success)' : pct > 30 ? 'var(--gold)' : 'var(--danger)';
   const ticks = [25, 50, 75];
   return (
     <div className={`hpbar ${side}`}>

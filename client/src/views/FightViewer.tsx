@@ -490,9 +490,9 @@ function stepToBanner(step: FightStep): string | null {
 function CornerSVG() {
   return (
     <svg viewBox="0 0 36 36" aria-hidden>
-      <path d="M0 0 L36 0 L36 4 L8 4 Q4 4 4 8 L4 36 L0 36 Z" fill="#e6b450" />
-      <path d="M4 4 L36 4 L36 8 L8 8 L8 36 L4 36 Z" fill="#3d2530" />
-      <circle cx="6" cy="6" r="1.5" fill="#0d0a14" />
+      <path d="M0 0 L36 0 L36 4 L8 4 Q4 4 4 8 L4 36 L0 36 Z" fill="#ecc57a" />
+      <path d="M4 4 L36 4 L36 8 L8 8 L8 36 L4 36 Z" fill="#191022" />
+      <circle cx="6" cy="6" r="1.5" fill="#070510" />
     </svg>
   );
 }
